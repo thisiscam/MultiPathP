@@ -1,0 +1,21 @@
+typeMap ::= [
+    "$int$": "int",
+    "$bool$": "bool",
+    "$null$": "IPType",
+    "$event$": "Event",
+    "$machine$": "PMachine",
+    "default": key
+]
+
+typeDefaultValueMap ::= [
+    "$int$": "0",
+    "$bool$": "false",
+    "$null$": "NULL",
+    "$event$": "0",
+    "$machine$": "NULL",
+    "default": "NULL"
+]
+
+type(t) ::= "<typeMap.(t.name)>"
+typeDefaultValue(t) ::= "<typeDefaultValueMap.(t.name)>"
+machineName(machine) ::= "Machine<machine.name>"

@@ -1,0 +1,18 @@
+import "common.stg"
+
+MachineImplementationFileName(machine) ::= "<machineName(machine)>.cpp"
+
+MachineImplementationFile(machine, program) ::= <<
+#include "header.h"
+
+namespace <program.name> {
+const bool <machineName(machine)>::_DeferedSet[][] = {<program.eventDecls.values:
+                                                        {e | {<machine.stateDecls.values:
+                                                            {state | <if(state.deferedEvents.(e.name))>true<else>false<endif>}; separator=",">\}};
+                                                    separator=",">};
+const bool <machineName(machine)>::_IgnoredSet[][] = {<program.eventDecls.values:
+                                                        {e | {<machine.stateDecls.values:
+                                                            {state | <if(state.ignoredEvents.(e.name))>true<else>false<endif>}; separator=",">\}};
+                                                    separator=",">};
+}
+>>

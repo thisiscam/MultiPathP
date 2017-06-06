@@ -1,0 +1,26 @@
+import "common.stg"
+
+HeaderFile(program) ::= <<
+#include "basic_cpp_runtime.h"
+
+using namespace basic_cpp;
+
+namespace <program.name> {
+
+enum Event {
+    <program.eventDecls.values:{e | <e.name> = <i>;}; separator="\n">
+};
+
+<program.machines:MachineDeceleration(program); separator="\n\n">
+
+};
+>>
+
+MachineDeceleration(machine, program) ::= <<
+class <machineName(machine)> : public <if(machine.isSpec)>MonitorPMachine<else>PMachine<endif> {
+private:
+    static const bool _DeferedSet[][];
+    static const bool _IgnoredSet[][];
+    <machine.varDecls.keys:{varName | <type(machine.varDecls.(varName))> <varName> = <typeDefaultValue(machine.varDecls.(varName))>;}; separator="\n">
+};
+>>

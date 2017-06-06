@@ -1,0 +1,24 @@
+main(tree) ::= "<_render(tree, false)>"
+
+LeafNode(tree, copy) ::= "terminal"
+
+XNode(tree, copy) ::= <<
+    (x
+        <render(tree.a)>
+        <render(tree.b)>
+    )
+>>
+
+YNode(tree, copy) ::= <<
+    (y
+        <tree.treeNodes:render_copy(); separator="\n">
+    )
+>>
+
+render_copy(tree) ::= "<_render(tree, true)>"
+
+render(tree) ::= "<_render(tree, copy)>"
+
+_render(tree, copy) ::= <<
+    <(tree:{t | <t.class.simpleName>})(tree, copy)><if(copy)>.copy()<endif>
+>>
