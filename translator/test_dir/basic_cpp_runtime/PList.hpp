@@ -4,43 +4,45 @@
 #include <vector>
 #include <stdexcept>
 
-#include "IPType.hpp"
+#include "PTypePtr.h"
 #include "DefaultArray.hpp"
 
 using namespace std;
 
 namespace basic_cpp_runtime {
 
-template<typename T> class PList;
-template<typename T> using PListPtr = unique_ptr<PList<T>>;
-
 template<typename T>
-class PList final : public IPType
+class PList final : public PTypePtr
 {
-	using TPtr = unique_ptr<T>;
-private:
-	struct PListKind {
-		const char* tag = "PListKind";
-		PListKind():t(T::kind()) {}
-		const IPType::Kind* t;
-	};
-	const static PListKind _kind;
-
 public:
-	static constexpr const PListKind* kind() {
-		return &_kind;
+
+	PList() = default;
+
+	PList(const PList& other):size(other.size) {
+		for(int i=0; i < other.size; i++) {
+			data[i] = other.data[i];
+		}
 	}
 
-	void add(TPtr item) {
-		data[size] = std::move(item);
+	const PList& operator=(const PList& other)
+    {
+        for(int i=0; i < other.size; i++) {
+			data[i] = other.data[i];
+		}
+		size = other.size;
+		return *this;
+    }
+
+	void add(const T& item) {
+		data[size] = item;
 		size++;
 	}
 
-	void insert(int idx, TPtr item) {
+	void insert(int idx, const T& item) {
 		for(int i = size; i > idx; i--) {
 			data[i] = data[i - 1];
 		}
-		data[idx] = std::move(item);
+		data[idx] = item;
 		size++;
 	}
 
@@ -65,76 +67,25 @@ public:
 		size = start;
 	}
 
-	TPtr get(int idx) {
+	T get(const int idx) const {
 		if(idx >= size) {
 			throw out_of_range("PList::get");
 		}
-		return data[idx]->copy();
+		return data[idx];
 	}
 
-	void set(int idx, TPtr val) {
+	void set(const int idx, const T& value) {
 		if(idx >= size) {
-			throw out_of_range("PList::set");
+			throw out_of_range("PList::get");
 		}
-		data[idx] = std::move(val);
+		data[idx] = value;
 	}
 
-	IPTypePtr dynamicCopy() override {
-		return std::move(copy());
-	}
-
-	PListPtr<T> copy() {
-		PListPtr<T> ret(new PList<T>());
-		for(int i=0; i < size; i++) {
-			ret->add(get(i));
-		}
-		return ret;
-	}
-
-	bool equals(const IPType* other) const override {
-		const PList<T>* o1 = dynamic_cast<const PList<T>*>(other);
-		if(o1 != NULL) {
-			for(int i=0; i < size; i++) {
-				if(!data[i].equals(o1->data[i].get())) {
-					return false;
-				}
-			}
-		} else {
-			const PList<IPType>* o2 = dynamic_cast<const PList<IPType>*>(other);
-			if(o2 != NULL) {
-				for(int i=0; i < size; i++) {
-					if(!data[i].equals(o2->data[i].get())) {
-						return false;
-					}
-				}
-			} else {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	void checkType(const IPType::Kind* targetKind) override {
-		if(targetKind != (IPType::Kind*)kind() && targetKind != IPType::kind()) { // list<T> or any
-			if(targetKind->tag != _kind.tag) {
-				throw new bad_cast();
-			}
-			PListKind* targetListKind = (PListKind*)targetKind;
-			if(targetListKind->t != IPType::kind()) { // list<any> 
-				for(int i=0; i < size; i++) {
-					data[i]->checkType(targetListKind->t);
-				}
-			}
-		}
-	}
+	int size = 0;
 
 private:
-	int size = 0;
-	DefaultArray<TPtr> data;
+	DefaultArray<T> data;
 };
-
-template<typename T>
-const typename PList<T>::PListKind PList<T>::_kind = PList<T>::PListKind();
 
 };
 

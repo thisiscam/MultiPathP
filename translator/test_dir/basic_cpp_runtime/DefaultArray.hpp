@@ -11,10 +11,28 @@ template<typename T>
 class DefaultArray 
 {
 public:
-	T& operator[] (const int idx) {
+	struct Indexer {
+		const int idx;
+		DefaultArray& array;
+		Indexer(DefaultArray& array, const int idx):array(array),idx(idx) {}
+		Indexer& operator= (const T& value) {
+			array.data[idx] = value;
+			return *this;
+		}
+		operator T() {
+			return array.data[idx];
+		}
+	};
+
+	Indexer operator[] (const int idx) {
 		resizeIfNeeded(idx + 1);
-		return data[idx];
+		return Indexer(*this, idx);
 	}
+
+	T operator[] (const int index) const
+    {
+        return data[index];
+    }
 
 private:
 	vector<T> data;

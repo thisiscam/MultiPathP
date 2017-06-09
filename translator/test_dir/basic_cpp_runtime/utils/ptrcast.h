@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef PTRCAST_H
+#define PTRCAST_H
 
 #include <memory>
 

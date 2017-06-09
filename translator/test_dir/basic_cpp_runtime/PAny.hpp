@@ -1,0 +1,87 @@
+#ifndef PANY_HPP
+#define PANY_HPP
+
+#include <memory>
+#include <stdexcept>
+#include <typeinfo>
+#include <unordered_map>
+
+#include "PTypePtr.h"
+
+using namespace std;
+
+namespace basic_cpp_runtime {
+
+class PMachine;
+
+struct PAny final {
+	PAny(const type_info& type, int i, bool b, PMachine* m, PTypePtr* ptr):
+		type(&type),
+		i(i),b(b),m(m),ptr(ptr) 
+	{ }
+
+	// template<typename T>
+	// T cast() {
+	// 	if(&typeid(T) == type) {
+	// 		return *static_cast<T*>(ptr);
+	// 	}
+	// 	throw new bad_cast();
+	// }
+
+	const type_info* type;
+	int i;
+	bool b;
+	PMachine* m;
+	shared_ptr<PTypePtr> ptr;
+};
+
+// template<> inline
+// int 
+// PAny::cast<int>() {
+// 	if(&typeid(int) == type) {
+// 		return i;
+// 	}
+// 	throw new bad_cast();
+// }
+
+// template<> inline
+// bool 
+// PAny::cast<bool>() {
+// 	if(&typeid(bool) == type) {
+// 		return i;
+// 	}
+// 	throw new bad_cast();
+// }
+
+// template<> inline
+// PMachine* 
+// PAny::cast<PMachine*>() {
+// 	if(&typeid(PMachine*) == type) {
+// 		return m;
+// 	}
+// 	throw new bad_cast();
+// }
+
+template<typename T> inline 
+PAny any(const T& v) {
+	return PAny(typeid(T), 0, false, NULL, new T(v));
+}
+
+template<> inline
+PAny any(const int& v) {
+	return PAny(typeid(int), v, false, NULL, NULL);
+}
+
+template<> inline
+PAny any(const bool& v) {
+	return PAny(typeid(bool), 0, v, NULL, NULL);
+}
+
+template<> inline
+PAny any(PMachine* const & v) {
+	return PAny(typeid(bool), 0, false, v, NULL);
+}
+
+};
+
+#endif

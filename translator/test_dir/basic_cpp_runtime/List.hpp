@@ -4,7 +4,6 @@
 #include <vector>
 #include <stdexcept>
 
-#include "IPType.hpp"
 #include "DefaultArray.hpp"
 
 using namespace std;

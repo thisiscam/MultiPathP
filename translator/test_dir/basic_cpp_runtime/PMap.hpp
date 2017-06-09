@@ -1,104 +1,88 @@
-#ifndef PLIST_HPP
-#define PLIST_HPP
+#ifndef PMAP_HPP
+#define PMAP_HPP
 
 #include <vector>
 #include <stdexcept>
 
-#include "IPType.hpp"
+#include "PTypePtr.h"
 #include "DefaultArray.hpp"
 
 using namespace std;
 
 namespace basic_cpp_runtime {
 
-template<typename T> class PMap;
-template<typename T> using PMapPtr = unique_ptr<PMap<T>>;
-
 template<typename K, typename V>
-class PMap final : public IPType
+class PMap final : public PTypePtr
 {
-	using KPtr = unique_ptr<K>;
-	using VPtr = unique_ptr<V>;
-private:
-	struct PMapKind {
-		const char* tag = "PMapKind";
-		PMapKind():k(K::kind()),v(V::kind()) {}
-		const IPType::Kind* k;
-		const IPType::Kind* v;
-	};
-	const static PMapKind _kind;
 
 public:
-	static constexpr const PMapKind* kind() {
-		return &_kind;
-	}
 
 	int size() {
 		return data.size();
 	}
 
-	void insert(const K* k, VPtr v) {
+	void insert(const K& k, const V& v) {
 		for (int i=0; i < data.size(); i++) {
-			if (k->equals(data.get(i)->item1.get())) {
-				throw exception("Reinsertion of key into PMap");
+			if (k.equals(data[i].v0)) {
+				throw runtime_error("Reinsertion of key into PMap");
 			}
 		}
-		data.add(new PTuple<K, V>(k->copy(), std::move(v)));
+		data.add(PTuple<K, V>(k, v));
 	}
 
-	VPtr get(const K* k) {
+	bool containsKey(const K& k) {
 		for (int i=0; i < data.size(); i++) {
-			if (k->equals(data.get(i)->item1())) {
-				return data[i].Item2;
+			if (k.equals(data[i].v0)) {
+				return true;
 			}
 		}
-		throw exception("Key does not exist in dictionary");
+		return false;
 	}
 
-	void set(const K* k, VPtr v) {
+	V get(const K& k) {
 		for (int i=0; i < data.size(); i++) {
-			if (k->equals(data.get(i)->item<1>)) {
-				data[i].Item2 = v;
+			if (k.equals(data[i].v0)) {
+				return data[i].v1;
+			}
+		}
+		throw runtime_error("Key does not exist in dictionary");
+	}
+
+	void set(const K& k, const V& v) {
+		for (int i=0; i < data.size(); i++) {
+			if (k.equals(data[i].v0)) {
+				data[i].v1 = v;
 				return;
 			}
 		}
-		Insert(k, v);
+		insert(k, v);
 	}
 
-	IPTypePtr dynamicCopy() override {
-		return std::move(copy());
-	}
+	// bool equals(const PAny& other) {
+	// 	return other.equals(*this);
+	// }
 
-	PMapPtr<T> copy() {
-		PMapPtr<T> ret(new PMap<T>());
-		for(int i=0; i < size; i++) {
-			ret->add(get(i));
-		}
-		return ret;
-	}
-
-	bool equals(const IPType* other) const override {
-		
-	}
-
-	void checkType(const IPType::Kind* targetKind) override {
-		if(targetKind != (IPType::Kind*)kind() && targetKind != IPType::kind()) { // map<K, V> or any
-			if(targetKind->tag != _kind.tag) {
-				throw new bad_cast();
-			}
-			PMapKind* targetMapKind = (PMapKind*)targetKind;
-			if(targetMapKind->k != IPType::kind()) { // list<any> 
-				
+	bool equals(const PMap& other) {
+		for(int i=0; i < size(); i++) {
+			if(containsEntry(data[i].v0, data[i].v1)) {
+				return true;
 			}
 		}
+		return false;
 	}
 
 private:
+	bool containsEntry(const K& k, const V& v) {
+		for(int i=0; i < size(); i++) {
+			if (k.equals(data[i].v0)) {
+				return v.equals(data[i].v1);
+			}
+		}
+		return false;
+	}
+
 	PList<PTuple<K, V>> data;
 };
-
-template<typename K, typename V>
-const typename PMap<K, V>::PMapKind PMap<K, V>::_kind = PMap<K, V>::PMapKind();
 
 };
 
