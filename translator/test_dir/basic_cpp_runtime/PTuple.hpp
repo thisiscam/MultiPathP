@@ -12,6 +12,7 @@ template <typename T0, typename T1>
 class PTuple<T0, T1> final : public PTypePtr {
 
 public:
+	PTuple() = default;
 	PTuple(const T0& v0, const T1& v1):v0(v0),v1(v1) { }
 
 	T0 v0;

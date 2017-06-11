@@ -19,6 +19,8 @@ struct PAny final {
 		type(&type),
 		i(i),b(b),m(m),ptr(ptr) 
 	{ }
+	
+	PAny():PAny(typeid(int), 0, false, NULL, NULL) { };
 
 	// template<typename T>
 	// T cast() {
@@ -34,33 +36,6 @@ struct PAny final {
 	PMachine* m;
 	shared_ptr<PTypePtr> ptr;
 };
-
-// template<> inline
-// int 
-// PAny::cast<int>() {
-// 	if(&typeid(int) == type) {
-// 		return i;
-// 	}
-// 	throw new bad_cast();
-// }
-
-// template<> inline
-// bool 
-// PAny::cast<bool>() {
-// 	if(&typeid(bool) == type) {
-// 		return i;
-// 	}
-// 	throw new bad_cast();
-// }
-
-// template<> inline
-// PMachine* 
-// PAny::cast<PMachine*>() {
-// 	if(&typeid(PMachine*) == type) {
-// 		return m;
-// 	}
-// 	throw new bad_cast();
-// }
 
 template<typename T> inline 
 PAny any(const T& v) {

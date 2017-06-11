@@ -58,18 +58,18 @@ public:
 		insert(k, v);
 	}
 
-	// bool equals(const PAny& other) {
-	// 	return other.equals(*this);
-	// }
+	// // bool equals(const PAny& other) {
+	// // 	return other.equals(*this);
+	// // }
 
-	bool equals(const PMap& other) {
-		for(int i=0; i < size(); i++) {
-			if(containsEntry(data[i].v0, data[i].v1)) {
-				return true;
-			}
-		}
-		return false;
-	}
+	// bool equals(const PMap<K, V>& other) {
+	// 	for(int i=0; i < size(); i++) {
+	// 		if(other.containsEntry(data[i].v0, data[i].v1)) {
+	// 			return true;
+	// 		}
+	// 	}
+	// 	return false;
+	// }
 
 private:
 	bool containsEntry(const K& k, const V& v) {
