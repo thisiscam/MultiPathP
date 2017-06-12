@@ -129,8 +129,13 @@ TO cast(const FROM& from) {
 }
 
 template<typename A, typename B>
-bool equals(const A& a, const B& from) { 
+bool equals(const A& a, std::enable_if<!std::is_same<A, B>::value, const B&>::type from) { 
 	return equals(cast<B>(a), b);
+}
+
+template<>
+bool equals<int, int>(const int& a, const int& b) {
+	return a == b;
 }
 
 };

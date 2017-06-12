@@ -22,14 +22,6 @@ struct PAny final {
 	
 	PAny():PAny(typeid(int), 0, false, NULL, NULL) { };
 
-	// template<typename T>
-	// T cast() {
-	// 	if(&typeid(T) == type) {
-	// 		return *static_cast<T*>(ptr);
-	// 	}
-	// 	throw new bad_cast();
-	// }
-
 	const type_info* type;
 	int i;
 	bool b;
