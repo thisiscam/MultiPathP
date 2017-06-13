@@ -18,6 +18,8 @@ public:
 
 	PList() = default;
 
+  	PList(PList&&) = default;
+
 	PList(const PList& other):size(other.size) {
 		for(int i=0; i < other.size; i++) {
 			data[i] = other.data[i];
@@ -32,6 +34,16 @@ public:
 		size = other.size;
 		return *this;
     }
+
+    template<typename U>
+    operator PList<U>() {
+    	PList<U> ret;
+    	for(int i = 0; i < size; i++) {
+    		ret.add(static_cast<U>(get(i)));
+    	}
+    	return ret;
+    }
+
 
 	void add(const T& item) {
 		data[size] = item;
@@ -79,6 +91,23 @@ public:
 			throw out_of_range("PList::get");
 		}
 		data[idx] = value;
+	}
+
+	bool operator == (const PList<T>& other) {
+		if(size == other.size) {
+			for(int i=0; i < size; i++) {
+				if(data[i].operator T() != other.data[i]) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	bool operator != (const PList<T>& other) {
+		return !(*this == other);
 	}
 
 	int size = 0;

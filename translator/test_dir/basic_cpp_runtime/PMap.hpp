@@ -17,6 +17,11 @@ class PMap final : public PTypePtr
 
 public:
 
+    template<typename Kp, typename Vp>
+    operator PMap<Kp, Vp>() {
+    	return PMap<Kp, Vp>(static_cast<PList<PTuple<Kp, Vp>>>(data));
+    }
+
 	int size() {
 		return data.size();
 	}
@@ -72,6 +77,8 @@ public:
 	// }
 
 private:
+	PMap(const PList<PTuple<K, V>> data):data(data) { }
+
 	bool containsEntry(const K& k, const V& v) {
 		for(int i=0; i < size(); i++) {
 			if (k.equals(data[i].v0)) {
