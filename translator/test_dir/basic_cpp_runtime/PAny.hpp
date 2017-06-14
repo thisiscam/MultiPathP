@@ -8,10 +8,6 @@
 #include <iostream>
 
 #include "PTypePtr.h"
-#include "PMachine.hpp"
-#include "PList.hpp"
-#include "PTuple.hpp"
-#include "PMap.hpp"
 #include "utils/crossproduct.hpp"
 
 using namespace std;
@@ -159,12 +155,12 @@ public:
 		}
 	};
 
-	bool operator == (const PAny& other) {
+	bool operator == (const PAny& other) const {
 		return EqJumpTable<product<List, DECL_TYPES, DECL_TYPES>::type>::table().at(make_tuple(type, other.type))(*this, other);
 		return false;
 	}
 
-	bool operator != (const PAny& other) {
+	bool operator != (const PAny& other) const {
 		return !(*this == other);
 	}
 
@@ -173,20 +169,6 @@ public:
 	bool b;
 	PMachine* m;
 	shared_ptr<PTypePtr> ptr;
-};
-
-template<typename A, typename B>
-struct PAny::EqHelperFunctor<A, B, typename std::enable_if<IsCastable<A, B>::value && !IsSimpleType<A>::value>::type> {
-	static bool impl(const PAny& a, const PAny& b) {
-		return *(A*)a.ptr.get() == static_cast<A>(*(B*)b.ptr.get());
-	}
-};
-
-template<typename A, typename B> 
-struct PAny::EqHelperFunctor<A, B, typename std::enable_if<!IsCastable<A, B>::value>::type> {
-	static bool impl(const PAny& a, const PAny& b) {
-		return false;
-	}
 };
 
 template<> 
@@ -207,6 +189,20 @@ template<>
 struct PAny::EqHelperFunctor<PMachine*, PMachine*> {
 	static bool impl(const PAny& a, const PAny& b) {
 	return a.m == b.m;
+	}
+};
+
+template<typename A, typename B> 
+struct PAny::EqHelperFunctor<A, B, typename std::enable_if<!IsCastable<A, B>::value>::type> {
+	static bool impl(const PAny& a, const PAny& b) {
+		return false;
+	}
+};
+
+template<typename A, typename B>
+struct PAny::EqHelperFunctor<A, B, typename std::enable_if<IsCastable<A, B>::value && !IsSimpleType<A>::value>::type> {
+	static bool impl(const PAny& a, const PAny& b) {
+		return *(A*)a.ptr.get() == static_cast<A>(*(B*)b.ptr.get());
 	}
 };
 

@@ -29,7 +29,7 @@ public:
 	virtual void start(const PAny& payload) = 0;
 
 	int canServeEvent(int e) {
-		for(int i=states.size-1; i >= 0; i--) {
+		for(int i=states.size() - 1; i >= 0; i--) {
             int state = states.get(i);
             if(isDefered(state, e)) {
                 return -1;
@@ -43,7 +43,7 @@ public:
 	void step(int stateIndex, int e, const PAny& payload) {
 		int state = states.get(stateIndex);
         if(isGotoTransition(state, e)) {
-            for(int i=states.size - 1; i > stateIndex; i--)
+            for(int i=states.size() - 1; i > stateIndex; i--)
             {
                 popState();
             }
@@ -55,16 +55,16 @@ public:
 
 protected:
 	void send(PMachine* other, int e, const PAny& payload) {
-		// sendQueue.add(PTuple<PMachine*, int, PAny>(other, e, payload));
+		sendQueue.add(PTuple<PMachine*, int, PAny>(other, e, payload));
 	}
 
 	template<typename M>
 	void create(const PAny& payload) {
-		// sendQueue.add(PTuple<PMachine*, int, PAny>(NULL, EVENT_NEW_MACHINE, payload));
+		sendQueue.add(PTuple<PMachine*, int, PAny>(NULL, EVENT_NEW_MACHINE, payload));
 	}
 
 	void raiseEvent(int e, const PAny& payload) {
-		for(int i=states.size-1; i >= 0; i--) {
+		for(int i=states.size() - 1; i >= 0; i--) {
             int state = states.get(i);
             TransitionFunction f = getTransition(state, e);
             if(f != NULL) {
@@ -74,11 +74,11 @@ protected:
                 popState();
             }
         }
-        throw runtime_error(string("Unhandled event"));
+        throw runtime_error("Unhandled event");
 	}
 
 	void popState() {
-        int last = states.size - 1;
+        int last = states.size() - 1;
         int current_state = states.get(last);
         states.removeRange(last);
         ExitFunction eF = getExitFunction(current_state);

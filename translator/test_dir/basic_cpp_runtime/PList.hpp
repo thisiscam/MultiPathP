@@ -20,83 +20,94 @@ public:
 
   	PList(PList&&) = default;
 
-	PList(const PList& other):size(other.size) {
-		for(int i=0; i < other.size; i++) {
-			data[i] = other.data[i];
+	PList(const PList& other):_size(other.size()) {
+		for(int i=0; i < other.size(); i++) {
+			data.set(i, other.data.get(i));
 		}
+	}
+
+	int size() const {
+		return _size;
 	}
 
 	const PList& operator=(const PList& other)
     {
-        for(int i=0; i < other.size; i++) {
-			data[i] = other.data[i];
+        for(int i=0; i < other.size(); i++) {
+			data.set(i, other.data.get(i));
 		}
-		size = other.size;
+		_size = other.size();
 		return *this;
     }
 
     template<typename U>
-    operator PList<U>() {
+    operator PList<U>() const {
     	PList<U> ret;
-    	for(int i = 0; i < size; i++) {
-    		ret.add(static_cast<U>(get(i)));
+    	for(int i = 0; i < size(); i++) {
+    		ret.add(static_cast<U>(data.get(i)));
     	}
     	return ret;
     }
 
 
 	void add(const T& item) {
-		data[size] = item;
-		size++;
+		data.set(size(), item);
+		_size++;
 	}
 
 	void insert(int idx, const T& item) {
-		for(int i = size; i > idx; i--) {
-			data[i] = data[i - 1];
+		for(int i = size(); i > idx; i--) {
+			data.set(i, data.get(i - 1));
 		}
-		data[idx] = item;
-		size++;
+		data.set(idx, item);
+		_size++;
 	}
 
 	void removeAt(int idx) {
-		for(int i = idx + 1; i < size; i++) {
-			data[i - 1] = data[i];
+		for(int i = idx + 1; i < size(); i++) {
+			data.get(i - 1, data.get(i));
 		}
-		size--;
+		_size--;
 	}
 
 	void removeRange(int start, int count) {
-		for (int i = start + count; i < size; i++) {
-			data[i - count] = data[i];
+		for (int i = start + count; i < size(); i++) {
+			data.set(i - count, data.get(i));
 		}
-		size = size - count;
+		_size = _size - count;
 	}
 
 	void removeRange(int start) {
-		if(size < start) {
+		if(size() < start) {
 			throw new out_of_range("PList::removeRange");
 		}
-		size = start;
+		_size = start;
 	}
 
-	T get(const int idx) const {
-		if(idx >= size) {
+	const T& get(const int idx) const {
+		if(idx >= size()) {
 			throw out_of_range("PList::get");
 		}
-		return data[idx];
+		return data.get(idx);
+	}
+
+	T& get(const int idx) {
+		if(idx >= size()) {
+			throw out_of_range("PList::get");
+		}
+		return data.get(idx);
 	}
 
 	void set(const int idx, const T& value) {
-		if(idx >= size) {
+		if(idx >= size()) {
 			throw out_of_range("PList::get");
 		}
-		data[idx] = value;
+		data.set(idx, value);
 	}
 
-	bool operator == (const PList<T>& other) {
-		if(size == other.size) {
-			for(int i=0; i < size; i++) {
-				if(data[i].operator T() != other.data[i]) {
+	bool operator == (const PList<T>& other) const {
+		if(size() == other.size()) {
+			for(int i=0; i < size(); i++) {
+				if(data.get(i) != other.data.get(i)) {
 					return false;
 				}
 			}
@@ -106,13 +117,12 @@ public:
 		}
 	}
 
-	bool operator != (const PList<T>& other) {
+	bool operator != (const PList<T>& other) const {
 		return !(*this == other);
 	}
 
-	int size = 0;
-
 private:
+	int _size = 0;
 	DefaultArray<T> data;
 };
 

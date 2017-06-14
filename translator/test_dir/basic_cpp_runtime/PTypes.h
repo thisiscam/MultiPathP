@@ -17,9 +17,9 @@ template<typename ...> struct List { };
 };
 
 #include "PAny.hpp"
-#include "PMachine.hpp"
 #include "PList.hpp"
-#include "PMap.hpp"
 #include "PTuple.hpp"
+#include "PMap.hpp"
+#include "PMachine.hpp"
 
 #endif
