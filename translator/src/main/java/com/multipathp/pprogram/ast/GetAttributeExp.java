@@ -1,5 +1,6 @@
 package com.multipathp.pprogram.ast;
 
+import com.google.common.base.Preconditions;
 import com.multipathp.pprogram.types.PType;
 import com.multipathp.pprogram.types.PTypeNamedTuple;
 import org.inferred.freebuilder.FreeBuilder;
@@ -11,6 +12,12 @@ import org.inferred.freebuilder.FreeBuilder;
 public abstract class GetAttributeExp extends Exp {
     public abstract Exp getTargetExpression();
     public abstract String getAttributeName();
+
+    public int getIndex() {
+        PTypeNamedTuple nmdType =  (PTypeNamedTuple) getTargetExpression().getExpressionType();
+        Preconditions.checkState(nmdType != null);
+        return nmdType.getIndexByAttribute(getAttributeName());
+    }
 
     @Override
     public PType getExpressionType() {

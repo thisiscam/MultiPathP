@@ -2,6 +2,7 @@ package com.multipathp.pprogram.ast;
 
 import org.inferred.freebuilder.FreeBuilder;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 /**
@@ -11,11 +12,12 @@ import java.util.Optional;
 public abstract class ConditionalStmt extends Stmt {
     public abstract Exp getCondition();
     public abstract Stmt getThenBranch();
-    public abstract Optional<Stmt> getElseBranch();
+    @Nullable
+    public abstract Stmt getElseBranch();
 
     @Override
     public int getChildrenCount() {
-        return 2 + (getElseBranch().isPresent() ? 1 : 0);
+        return 2 + (getElseBranch() != null ? 1 : 0);
     }
 
     @Override
@@ -24,8 +26,8 @@ public abstract class ConditionalStmt extends Stmt {
             case 0: return getCondition();
             case 1: return getThenBranch();
             case 2: {
-                if(getElseBranch().isPresent()) {
-                    return getElseBranch().get();
+                if(getElseBranch() != null) {
+                    return getElseBranch();
                 }
             }
             default: throw new IndexOutOfBoundsException();

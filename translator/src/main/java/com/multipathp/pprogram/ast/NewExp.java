@@ -3,6 +3,7 @@ package com.multipathp.pprogram.ast;
 import com.multipathp.pprogram.types.PType;
 import org.inferred.freebuilder.FreeBuilder;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -11,7 +12,8 @@ import java.util.List;
 @FreeBuilder
 public abstract class NewExp extends Exp {
     public abstract String getMachineIdentifier();
-    public abstract List<Exp> getArguments();
+    @Nullable
+    public abstract Exp getPayloadExpression();
 
     @Override
     public PType getExpressionType() {
@@ -20,12 +22,16 @@ public abstract class NewExp extends Exp {
 
     @Override
     public int getChildrenCount() {
-        return getArguments().size();
+        return getPayloadExpression() == null ? 0 : 1;
     }
 
     @Override
     public PASTNode getChild(int i) {
-        return getArguments().get(i);
+        if(i == 0) {
+            return getPayloadExpression();
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
     }
 
     @Override

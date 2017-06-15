@@ -4,14 +4,32 @@ import com.google.common.base.Preconditions;
 import com.multipathp.pprogram.PEvent;
 import org.inferred.freebuilder.FreeBuilder;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 @FreeBuilder
 public abstract class PTransition extends PASTNode {
-    public abstract Optional<String> getFunctionName();
+    @Nullable
+    public abstract String getFunctionName();
     public abstract PEvent getOnE();
+    @Nullable
     public abstract String getToStateName();
     public abstract boolean isPush();
+
+    @Nullable
+    PFunction function;
+    public PFunction getFunction() {
+        if(getFunctionName() != null && function == null) {
+            throw new IllegalStateException("function must be set first");
+        }
+        return function;
+    }
+    public void setFunction(PFunction function) {
+        if(this.function != null) {
+            throw new IllegalStateException("function cannot be re-set");
+        }
+        this.function = function;
+    }
 
     @Override
     public int getChildrenCount() {
@@ -32,7 +50,7 @@ public abstract class PTransition extends PASTNode {
         @Override
         public PTransition build() {
             PTransition ret = super.build();
-            Preconditions.checkState(ret.getFunctionName().isPresent() ^ isPush());
+            Preconditions.checkState((ret.getFunctionName() != null) || !isPush());
             return ret;
         }
     }

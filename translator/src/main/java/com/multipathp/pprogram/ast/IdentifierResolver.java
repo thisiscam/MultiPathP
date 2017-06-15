@@ -1,16 +1,46 @@
 package com.multipathp.pprogram.ast;
 
 
-import com.multipathp.pprogram.ErrorReporter;
 import com.multipathp.pprogram.types.PType;
-
-import java.util.ArrayList;
 
 /**
  * Created by jianqiaoyang on 6/2/17.
  */
 public class IdentifierResolver extends SimpleScopedPASTVisitor<Void> {
     private boolean isGlobalFunction;
+
+    private PFunction getCallee(String name) {
+        if(name == null) {
+            return null;
+        }
+        if(!isGlobalFunction) {
+            if(machine.getFunDecls().containsKey(name)) {
+                return machine.getFunDecls().get(name);
+
+            }
+        }
+        if(program.getGlobalFunctionDecls().containsKey(name)) {
+            return program.getGlobalFunctionDecls().get(name);
+        }
+        //TODO: better error reporting mechanism
+        System.out.printf("Cannot find identifier %s", name);
+        System.exit(-1);
+        return null;
+    }
+
+    @Override
+    public Void visit(PMachineState pMachineState) {
+        pMachineState.setEntryFunction(getCallee(pMachineState.getEntryFunctionName()));
+        pMachineState.setExitFunction(getCallee(pMachineState.getExitFunctionName()));
+        return super.visit(pMachineState);
+    }
+
+    @Override
+    public Void visit(PTransition pTransition) {
+        pTransition.setFunction(getCallee(pTransition.getFunctionName()));
+        return super.visit(pTransition);
+    }
+
     @Override
     public Void visit(PFunction pFunction) {
         isGlobalFunction = program.getGlobalFunctionDecls().get(pFunction.getName()) == pFunction;
@@ -19,16 +49,7 @@ public class IdentifierResolver extends SimpleScopedPASTVisitor<Void> {
 
     @Override
     public Void visit(CallExp callExp) {
-        if(!isGlobalFunction) {
-            if(machine.getFunDecls().containsKey(callExp.getFunctionName())) {
-                PFunction callee = machine.getFunDecls().get(callExp.getFunctionName());
-                callExp.setCallee(callee);
-            }
-        }
-        if(program.getGlobalFunctionDecls().containsKey(callExp.getFunctionName())) {
-            PFunction callee = program.getGlobalFunctionDecls().get(callExp.getFunctionName());
-            callExp.setCallee(callee);
-        }
+        callExp.setCallee(getCallee(callExp.getFunctionName()));
         return super.visit(callExp);
     }
 

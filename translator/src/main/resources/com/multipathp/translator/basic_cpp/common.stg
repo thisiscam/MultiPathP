@@ -1,9 +1,10 @@
 typeMap ::= [
     "$int$": "int",
     "$bool$": "bool",
-    "$null$": "IPType",
+    "$null$": "PAny",
     "$event$": "Event",
-    "$machine$": "PMachine",
+    "$machine$": "PMachine*",
+    "$void$": "void",
     "default": key
 ]
 
@@ -19,3 +20,205 @@ typeDefaultValueMap ::= [
 type(t) ::= "<typeMap.(t.name)>"
 typeDefaultValue(t) ::= "<typeDefaultValueMap.(t.name)>"
 machineName(machine) ::= "Machine<machine.name>"
+cast(t, exp) ::= "static_cast\<<type(t)>\>(<exp>)"
+
+Render(node) ::= "<(node:{t | <t.class.superclass.simpleName>})(node)>"
+
+FunctionParams(params) ::= <<
+<params.keys: {id | <type(params.(id))> <id>}; separator=", ">
+>>
+
+FunctionImplementation(function) ::= <<
+inline <type(function.retType)> <function.name>(<FunctionParams(function.params)>) {
+    <Render(function.stmtBlock)>
+}
+>>
+
+StmtBlock(node) ::= <<
+<node.localVarDecls.keys: {id | <type(node.localVarDecls.values.(id))> <id>;}><\\>
+<Render(node.stmtList)>
+>>
+
+AnnounceStmt(node) ::= <<
+MachineController.announce(<[node.eventExpression, node.payloadExpression]:Render(); separator=", ">);
+>>
+
+AssertStmt(node) ::= <<
+assert(<Render(node.exp)>, "<node.message>");
+>>
+
+AssignStmt(node) ::= <<
+<Render(node.target)> = <Render(node.expression)>;
+>>
+
+ConditionalStmt(node) ::= <<
+if(<Render(node.condition)>) {
+    <Render(node.thenBranch)>
+}<if(node.elseBranch)> else {
+    <Render(node.elseBranch)>
+}<endif>
+>>
+
+ExpStmt(node) ::= <<
+<Render(node.expression)>;
+>>
+
+InsertStmt(node) ::= <<
+<Render(node.target)>.insert(<Render(node.expression)>);
+>>
+
+PrintStmt(node) ::= <<
+print("<node.string>");
+>>
+
+RaiseStmt(node) ::= <<
+raise(<[node.eventExpression, node.payloadExpression]:Render(); separator=", ">);
+>>
+
+RemoveStmt(node) ::= <<
+<Render(node.target)>.removeAt(<Render(node.expression)>);
+>>
+
+ReturnStmt(node) ::= <<
+return<if(node.expression)> <Render(node.expression)><endif>;
+>>
+
+SendStmt(node) ::= <<
+send(<[node.targetExpression, node.eventExpression, node.payloadExpression]:Render(); separator=", ">);
+>>
+
+SetAttributeStmt(node) ::= <<
+<Render(node.target)> = <Render(node.expression)>;
+>>
+
+SetIndexStmt(node) ::= <<
+<Render(node.target)> = (<Render(node.expression)>);
+>>
+
+SetItemStmt(node) ::= <<
+<Render(node.target.targetExpression)>.set(<Render(node.target.indexerExpression)>, <Render(node.expression)>);
+>>
+
+StmtListStmt(node) ::= <<
+<node.stmts:Render(); separator="\n">
+>>
+
+WhileStmt(node) ::= <<
+while(<Render(node.condition)>) {
+    <Render(node.stmt)>
+}
+>>
+
+BinaryExp(node, operatorMap) ::= <<
+>>
+
+ArithmeticExpKindMap ::= [
+    "ADD": "+",
+    "SUB": "-",
+    "MUL": "*",
+    "DIV": "/"
+]
+ArithmeticExp(node) ::= <<
+<Render(node.left)> <ArithmeticExpKindMap.(node.kind)> <Render(node.right)>
+>>
+
+BinaryLogicExpKindMap ::= [
+    "OR": "|",
+    "AND": "&"
+]
+BinaryLogicExp(node) ::= <<
+<Render(node.left)> <BinaryLogicExpKindMap.(node.kind)> <Render(node.right)>
+>>
+
+BoolLiteralExpKindMap ::= [
+    "TRUE": "true",
+    "FALSE": "false"
+]
+BoolLiteralExp(node) ::= "<BoolLiteralExpKindMap.(node.kind)>"
+
+CallExp(node) ::= <<
+<node.functionName>(<node.arguments:Render(); separator=", ">)
+>>
+
+CastExp(node) ::= "<cast(node.castToType, Render(node.expression))>"
+
+
+ComparisonExpKindMap ::= [
+    "LT": "<",
+    "LE": "<=",
+    "GT": ">",
+    "GE": ">=",
+    "NE": "!=",
+    "EQ": "=="
+]
+ComparisonExp(node) ::= <<
+<Render(node.left)> <BinaryLogicExpKindMap.(node.kind)> <Render(node.right)>
+>>
+
+DefaultExp(node) ::= "<typeDefaultValue(node.typeForDefault)>"
+
+GetAttributeExp(node) ::= <<
+<Render(node.targetExpression)>.v<node.index>
+>>
+
+GetIndexExp(node) ::= <<
+<Render(node.targetExpression)>.v<node.index>
+>>
+
+GetItemExp(node) ::= <<
+<Render(node.targetExpression)>.get(<Render(node.indexerExpression)>)
+>>
+
+GroupExo(node) ::= <<
+(<Render(node.expression)>)
+>>
+
+HaltExp(node) ::= <<
+#error halt not supported
+>>
+
+IdExp(node) ::= "<node.name>"
+
+InExp(node) ::= <<
+<Render(node.right)>.containsKey(<Render(node.left)>)
+>>
+
+IntExp(node) ::= "<node.value>"
+
+KeysExp(node) ::= <<
+<Render(node.expression)>.keys()
+>>
+
+MinusExp(node) ::= <<
+-<Render(node.expression)>
+>>
+
+NamedTupleExp(node) ::= <<
+<TupleExp(node)>
+>>
+
+NewExp(node) ::= <<
+create\<<node.machineIdentifier>\>(<node.payloadExpression>);
+>>
+
+NondetExp(node) ::= "randomBool()"
+
+NotExp(node) ::= <<
+!<node.expression>
+>>
+
+NullExp(node) ::= "NULL"
+
+SizeofExp(node) ::= <<
+<node.expression>.size()
+>>
+
+ThisExp(node) ::= "this"
+
+TupleExp(node) ::= <<
+PTuple\<<node.arguments:{arg | <type(arg.expressionType)>}; separator=", ">\>(<node.arguments:Render(); separator=", ">)
+>>
+
+ValueExp(node) ::= <<
+<Render(node.expression)>.values()
+>>

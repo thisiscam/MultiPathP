@@ -19,12 +19,12 @@ public class BasicCppTranslator extends TranslatorBase {
 
     @Override
     public void translate(String outDir) throws IOException {
-        STGroupFile headerTemplateGroup = new STGroupFile(getClass().getResource("header.stg").getPath());
+        STGroupFile headerTemplateGroup = getSTGroupFile("header.stg");
         ST headerTemplate = headerTemplateGroup.getInstanceOf("HeaderFile");
         headerTemplate.add("program", program);
         FileUtils.writeStringToFile(new File(outDir, "header.h"), headerTemplate.render());
 
-        STGroupFile machineTemplateGroup = new STGroupFile(getClass().getResource("machine.stg").getPath());
+        STGroupFile machineTemplateGroup = getSTGroupFile("machine.stg");
         for (PMachine machine : program.getMachines()) {
             ST machineImplementationTemplate = machineTemplateGroup.getInstanceOf("MachineImplementationFile");
             machineImplementationTemplate.add("program", program);

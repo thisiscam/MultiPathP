@@ -2,6 +2,7 @@ package com.multipathp.pprogram.ast;
 
 import org.inferred.freebuilder.FreeBuilder;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 /**
@@ -9,17 +10,18 @@ import java.util.Optional;
  */
 @FreeBuilder
 public abstract class ReturnStmt extends Stmt {
-    public abstract Optional<Exp> getExpression();
+    @Nullable
+    public abstract Exp getExpression();
 
     @Override
     public int getChildrenCount() {
-        return getExpression().isPresent() ? 1 : 0;
+        return getExpression() != null ? 1 : 0;
     }
 
     @Override
     public PASTNode getChild(int i) {
-        if(getExpression().isPresent() && i == 0) {
-            return getExpression().get();
+        if(getExpression() != null && i == 0) {
+            return getExpression();
         } else {
             throw new IndexOutOfBoundsException();
         }

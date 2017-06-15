@@ -5,6 +5,7 @@ import com.multipathp.pprogram.types.PType;
 import org.inferred.freebuilder.FreeBuilder;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @FreeBuilder
 public abstract class PMachine extends PASTNode {
@@ -15,6 +16,15 @@ public abstract class PMachine extends PASTNode {
     public abstract Map<String, PType> getVarDecls();
     public abstract Map<String, PFunction> getFunDecls();
     public abstract Map<String, PMachineState> getStateDecls();
+    public abstract PMachineState getStartState();
+
+    public Set<PFunction> getUniqueTransitions() {
+        Set<PFunction> uniqueTransitions = new HashSet<>();
+        getStateDecls().values().stream().forEach(s -> {
+            uniqueTransitions.addAll(s.getTransitions().stream().map(PTransition::getFunction).collect(Collectors.toList()));
+        });
+        return uniqueTransitions;
+    }
 
     @Override
     public int getChildrenCount() {
@@ -45,6 +55,12 @@ public abstract class PMachine extends PASTNode {
 
         public Builder putFunDecls(PFunction function) {
             return putFunDecls(function.getName(), function);
+        }
+
+        @Override
+        public PMachine build() {
+            getStateDecls().values().stream().filter(PMachineState::isStart).findFirst().ifPresent(this::setStartState);
+            return super.build();
         }
     }
 }

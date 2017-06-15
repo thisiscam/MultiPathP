@@ -1,5 +1,6 @@
 package com.multipathp.pprogram.ast;
 
+import com.google.common.base.Preconditions;
 import com.multipathp.pparser.pParser;
 import com.multipathp.pprogram.ast.StmtBlock;
 import com.multipathp.pprogram.types.PType;
@@ -13,11 +14,14 @@ import java.util.Optional;
 @FreeBuilder
 public abstract class PFunction extends PASTNode {
     public abstract String getName();
-    public abstract Map<String, PType> getLocalDecls();
     public abstract LinkedHashMap<String, PType> getParams();
     public abstract PType getRetType();
     public abstract StmtBlock getStmtBlock();
     public abstract boolean isModel();
+
+    public LinkedHashMap<String, PType> getLocalDecls() {
+        return getStmtBlock().getLocalVarDecls();
+    }
 
     @Override
     public int getChildrenCount() {
@@ -46,6 +50,7 @@ public abstract class PFunction extends PASTNode {
 
         public Builder() {
             setParams(new LinkedHashMap<>());
+            setModel(false);
         }
 
         public Builder addParams(String name, PType type) {

@@ -12,6 +12,7 @@ public abstract class PProgram extends PASTNode {
     /* The original AST set where this program is created from */
     public abstract ParseTreeSetParser.ParseTreeSet getASTSet();
 
+    public abstract PMachine getMainMachine();
     public abstract Map<String, PEvent> getEventDecls();
     public abstract List<PMachine> getMachines();
     public abstract Map<String, PFunction> getGlobalFunctionDecls();
@@ -43,6 +44,7 @@ public abstract class PProgram extends PASTNode {
     public static class Builder extends PProgram_Builder {
         @Override
         public PProgram build() {
+            getMachines().stream().filter(PMachine::isMain).findFirst().ifPresent(this::setMainMachine);
             PProgram ret = super.build();
             ret.accept(new IdentifierResolver());
             ret.accept(new CallGraphAnnotator());

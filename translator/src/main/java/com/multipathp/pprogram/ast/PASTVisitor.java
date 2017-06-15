@@ -148,6 +148,18 @@ public abstract class PASTVisitor<T> {
         return visitChildren(sendStmt);
     }
 
+    public T visit(SetAttributeStmt setAttributeStmt) {
+        return visitChildren(setAttributeStmt);
+    }
+
+    public T visit(SetIndexStmt setIndexStmt) {
+        return visitChildren(setIndexStmt);
+    }
+
+    public T visit(SetItemStmt setItemStmt) {
+        return visitChildren(setItemStmt);
+    }
+
     public T visit(SizeofExp sizeofExp) {
         return visitChildren(sizeofExp);
     }

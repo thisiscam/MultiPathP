@@ -8,13 +8,17 @@ import org.stringtemplate.v4.STGroupFile;
  * Created by jianqiaoyang on 5/29/17.
  */
 public class StringTemplateTest {
-    abstract class TreeNode {
+    static abstract class TreeNode {
         public TreeNode[] treeNodes;
     }
-    class LeafNode extends TreeNode {
-
+    static class LeafNode extends TreeNode {
+        enum Kind {
+            P,
+            Q
+        }
+        public Kind kind = Kind.P;
     }
-    class XNode extends TreeNode {
+    static class XNode extends TreeNode {
         public String[] test = new String[]{"a", "c"};
         public String label = "X";
         public TreeNode getA() {
@@ -28,7 +32,7 @@ public class StringTemplateTest {
             this.treeNodes = new TreeNode[]{a, b};
         }
     }
-    class YNode extends TreeNode {
+    static class YNode extends TreeNode {
         public String name = "Y";
         public YNode(TreeNode a, TreeNode b, TreeNode c) {
             this.treeNodes = new TreeNode[]{a, b, c};

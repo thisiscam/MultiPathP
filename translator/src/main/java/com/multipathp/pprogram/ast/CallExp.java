@@ -30,7 +30,7 @@ public abstract class CallExp extends Exp {
     }
 
     public void setCallee(PFunction callee) {
-        if(callee != null) {
+        if(this.callee != null) {
             throw new IllegalStateException("callee cannot be re-set");
         }
         this.callee = callee;

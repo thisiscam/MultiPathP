@@ -6,11 +6,9 @@ import com.multipathp.pprogram.ast.*;
 import com.multipathp.pprogram.types.PType;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.RuleNode;
+import sun.tools.tree.IdentifierExpression;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> {
     private PTypeConverter typeConverter;
@@ -217,29 +215,31 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
 
     @Override
     public Void visitState_body_item_entry_unnamed(pParser.State_body_item_entry_unnamedContext ctx) {
-        function = new PFunction.Builder().setName(state.getName() + "_Entry");
+        function = new PFunction.Builder().setName(state.getName() + "EntryImpl").setRetType(PType.VOID);
         visitChildren(ctx);
-        state.setEntryFunction(function.getName());
+        state.setEntryFunctionName(function.getName());
+        machine.putFunDecls(function.build());
         return null;
     }
 
     @Override
     public Void visitState_body_item_entry_fn_named(pParser.State_body_item_entry_fn_namedContext ctx) {
-        state.setEntryFunction(ctx.ID().getText());
+        state.setEntryFunctionName(ctx.ID().getText());
         return null;
     }
 
     @Override
     public Void visitState_body_item_exit_unnamed(pParser.State_body_item_exit_unnamedContext ctx) {
-        function = new PFunction.Builder().setName(state.getName() + "_Exit");
+        function = new PFunction.Builder().setName(state.getName() + "ExitImpl").setRetType(PType.VOID);
         visitChildren(ctx);
-        state.setExitFunction(function.getName());
+        state.setExitFunctionName(function.getName());
+        machine.putFunDecls(function.build());
         return null;
     }
 
     @Override
     public Void visitState_body_item_exit_fn_named(pParser.State_body_item_exit_fn_namedContext ctx) {
-        state.setExitFunction(ctx.ID().getText());
+        state.setExitFunctionName(ctx.ID().getText());
         return null;
     }
 
@@ -269,8 +269,10 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
     }
 
     private void addTransitionsHelper(RuleNode ctx, String toStateName, boolean isPush) {
+        function.setRetType(PType.VOID);
         visitChildren(ctx);
         state.addTransition(function, eventList, toStateName, isPush);
+        machine.putFunDecls(function.build());
     }
 
     private int anonymousHandlerCounter = 0;
@@ -283,7 +285,7 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
 
     @Override
     public Void visitState_body_item_on_e_do_unnamed(pParser.State_body_item_on_e_do_unnamedContext ctx) {
-        function = new PFunction.Builder().setName(String.format("AnonymousHandler_%d", anonymousHandlerCounter++));
+        function = new PFunction.Builder().setName(String.format("HandlerImpl%d", anonymousHandlerCounter++));
         addTransitionsHelper(ctx, null, false);
         return null;
     }
@@ -296,7 +298,8 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
 
     @Override
     public Void visitState_body_item_on_e_goto(pParser.State_body_item_on_e_gotoContext ctx) {
-        addTransitionsHelper(ctx, ctx.state_target().getText(), false);
+        visitChildren(ctx);
+        state.addTransition((String)null, eventList, ctx.state_target().getText(), false);
         return null;
     }
 
@@ -410,12 +413,42 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
 
         @Override
         public Optional<Stmt> visitStmt_assign(pParser.Stmt_assignContext ctx) {
-            return Optional.of(
-                    new AssignStmt.Builder()
-                        .setTarget(exp(ctx.exp(0)))
-                        .setExpression(exp(ctx.exp(1)))
-                        .build()
-            );
+            Exp targetExp = exp(ctx.exp(0));
+            Exp rhs = exp(ctx.exp(1));
+            if(targetExp instanceof IdExp) {
+                return Optional.of(
+                        new AssignStmt.Builder()
+                                .setTarget((IdExp)targetExp)
+                                .setExpression(rhs)
+                                .build()
+                );
+            }
+            if(targetExp instanceof GetAttributeExp) {
+                return Optional.of(
+                        new SetAttributeStmt.Builder()
+                                .setTarget((GetAttributeExp)targetExp)
+                                .setExpression(rhs)
+                                .build()
+                );
+            }
+            if(targetExp instanceof GetIndexExp) {
+                return Optional.of(
+                        new SetIndexStmt.Builder()
+                                .setTarget((GetIndexExp)targetExp)
+                                .setExpression(rhs)
+                                .build()
+                );
+            }
+            if(targetExp instanceof GetItemExp) {
+                return Optional.of(
+                        new SetItemStmt.Builder()
+                                .setTarget((GetItemExp)targetExp)
+                                .setExpression(rhs)
+                                .build()
+                );
+            }
+            ErrorReporter.error("Invalid LHS", ctx, set);
+            return null;
         }
 
         @Override
@@ -464,9 +497,20 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
                     new ConditionalStmt.Builder()
                             .setCondition(exp(ctx.exp()))
                             .setThenBranch(stmt(ctx.stmt(0)))
-                            .setElseBranch(ctx.stmt(1).accept(this))
+                            .setElseBranch(ctx.stmt(1).accept(this).orElse(null))
                             .build()
             );
+        }
+
+        private Exp singleExpOrTuple(pParser.Single_expr_arg_listContext ctx) {
+            List<Exp> arguments = ctx.accept(
+                    new UtilVisitors.ArgumentListVisitor<>(set, new ExpVisitor())
+            );
+            if(arguments.size() == 1) {
+                return arguments.get(0);
+            } else {
+                return new TupleExp.Builder().addAllArguments(arguments).build();
+            }
         }
 
         @Override
@@ -488,9 +532,7 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
                             .setExpression(
                                     new NewExp.Builder()
                                             .setMachineIdentifier(ctx.ID().getText())
-                                            .addAllArguments(ctx.single_expr_arg_list().accept(
-                                                    new UtilVisitors.ArgumentListVisitor<>(set, new ExpVisitor())
-                                            ))
+                                            .setPayloadExpression(singleExpOrTuple(ctx.single_expr_arg_list()))
                                             .build()
                             ).build()
             );
@@ -527,6 +569,7 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
         public Optional<Stmt> visitStmt_raise(pParser.Stmt_raiseContext ctx) {
             return Optional.of(
                     new RaiseStmt.Builder()
+                        .setEventExpression(exp(ctx.exp()))
                         .build()
             );
         }
@@ -535,9 +578,8 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
         public Optional<Stmt> visitStmt_raise_with_arguments(pParser.Stmt_raise_with_argumentsContext ctx) {
             return Optional.of(
                         new RaiseStmt.Builder()
-                            .addAllArguments(ctx.single_expr_arg_list().accept(
-                                    new UtilVisitors.ArgumentListVisitor<>(set, new ExpVisitor())
-                            ))
+                            .setEventExpression(exp(ctx.exp()))
+                            .setPayloadExpression(singleExpOrTuple(ctx.single_expr_arg_list()))
                             .build()
             );
         }
@@ -548,7 +590,7 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
             return Optional.of(
                     new SendStmt.Builder()
                             .setTargetExpression(exp(ctx.exp(0)))
-                            .setMessageExpression(exp(ctx.exp(1)))
+                            .setEventExpression(exp(ctx.exp(1)))
                             .build()
             );
         }
@@ -559,8 +601,8 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
             return Optional.of(
                     new SendStmt.Builder()
                             .setTargetExpression(exp(ctx.exp(0)))
-                            .setMessageExpression(exp(ctx.exp(1)))
-                            .addAllArguments(ctx.single_expr_arg_list().accept(new UtilVisitors.ArgumentListVisitor<>(set, new ExpVisitor())))
+                            .setEventExpression(exp(ctx.exp(1)))
+                            .setPayloadExpression(singleExpOrTuple(ctx.single_expr_arg_list()))
                             .build()
             );
         }
@@ -578,7 +620,7 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
         public Optional<Stmt> visitStmt_announce(pParser.Stmt_announceContext ctx) {
             return Optional.of(
               new AnnounceStmt.Builder()
-                      .setTargetExpression(exp(ctx.exp()))
+                      .setEventExpression(exp(ctx.exp()))
                       .build()
             );
         }
@@ -587,8 +629,8 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
         public Optional<Stmt> visitStmt_announce_with_arguments(pParser.Stmt_announce_with_argumentsContext ctx) {
             return Optional.of(
               new AnnounceStmt.Builder()
-                    .setTargetExpression(exp(ctx.exp()))
-                    .addAllArguments(ctx.single_expr_arg_list().accept(new UtilVisitors.ArgumentListVisitor<>(set, new ExpVisitor())))
+                    .setEventExpression(exp(ctx.exp()))
+                    .setPayloadExpression(singleExpOrTuple(ctx.single_expr_arg_list()))
                     .build()
             );
         }
@@ -703,9 +745,7 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
             public Exp visitExp_new_with_arguments(pParser.Exp_new_with_argumentsContext ctx) {
                 return new NewExp.Builder()
                                 .setMachineIdentifier(ctx.ID().getText())
-                                .addAllArguments(ctx.single_expr_arg_list().accept(
-                                        new UtilVisitors.ArgumentListVisitor<>(set, this)
-                                ))
+                                .setPayloadExpression(singleExpOrTuple(ctx.single_expr_arg_list()))
                                 .build();
             }
 

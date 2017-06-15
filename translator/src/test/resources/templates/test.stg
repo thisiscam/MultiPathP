@@ -1,6 +1,8 @@
 main(tree) ::= "<_render(tree, false)>"
 
-LeafNode(tree, copy) ::= "terminal"
+LeafNode(tree, copy) ::= <<
+<tree.kind>
+>>
 
 XNode(tree, copy) ::= <<
     (x

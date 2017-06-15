@@ -2,17 +2,84 @@ import "common.stg"
 
 MachineImplementationFileName(machine) ::= "<machineName(machine)>.cpp"
 
+EntryFunctionName(state) ::= "<state.name>Entry"
+
+InvokeAuxFunction(function) ::= <<
+<if(function.name)><function.name>(<if(function.params)>cast(<first(function.params.values)>, payload)<endif>);<endif>
+>>
+
+EntryFunction(state) ::= <<
+inline void <EntryFunctionName(state)>(const PAny& payload) {
+    states.set(states.size(), <state.name>);
+    <InvokeAuxFunction(state.entryFunction)>
+}
+>>
+
+TransitionFunctionWrapperName(function) ::= "<function.name>_Wrap"
+
+TransitionFunction(function) ::= <<
+inline void <TransitionFunctionWrapperName(function)>(const PAny& payload) {
+    <InvokeAuxFunction(function)>
+}
+>>
+
 MachineImplementationFile(machine, program) ::= <<
 #include "header.h"
 
 namespace <program.name> {
-const bool <machineName(machine)>::_DeferedSet[][] = {<program.eventDecls.values:
-                                                        {e | {<machine.stateDecls.values:
-                                                            {state | <if(state.deferedEvents.(e.name))>true<else>false<endif>}; separator=",">\}};
-                                                    separator=",">};
-const bool <machineName(machine)>::_IgnoredSet[][] = {<program.eventDecls.values:
-                                                        {e | {<machine.stateDecls.values:
-                                                            {state | <if(state.ignoredEvents.(e.name))>true<else>false<endif>}; separator=",">\}};
-                                                    separator=",">};
+
+class <machineName(machine)> final : public PMachine {
+
+public:
+    
+    inline void start(const PAny& payload) override {
+        <EntryFunctionName(machine.startState)>(payload);
+    }
+
+private:
+
+    /* region Entry Methods */
+    <machine.stateDecls.values:EntryFunction(); separator="\n">
+    /* end Entry Methods */
+
+    /* region Transition Methods */
+    <machine.uniqueTransitions:TransitionFunction(); separator="\n">
+    /* end Transition Methods */
+
+    /* region Function Implementations */
+    <machine.funDecls.values:FunctionImplementation(); separator="\n">
+    /* end Function Implementations */
+
+    /* region Machine Fields */
+    <machine.varDecls.keys:{varName | <type(machine.varDecls.(varName))> <varName> = <typeDefaultValue(machine.varDecls.(varName))>;}; separator="\n">
+    /* end Machine Fields  */
+
+    /* region Jump Tables */
+    inline bool isDefered(int state, int event) const override {
+        static const bool _isDefered[][] = {<program.eventDecls.values:
+                                        {e | {<machine.stateDecls.values:
+                                            {state | <if(state.deferedEvents.(e.name))>true<else>false<endif>}; separator=",">\}};
+                                    separator=",">};
+        return _isDefered[state][event];
+    }
+
+    inline bool isGotoTransition(int state, int event) const override {
+        static const bool _isGotoTransition[][] = {<program.eventDecls.values:
+                                                {e | {<machine.stateDecls.values:
+                                                    {state | <if(state.deferedEvents.(e.name))>true<else>false<endif>}; separator=",">\}};
+                                            separator=",">};
+        return _isGotoTransition[state][event];
+    }
+
+    inline ExitFunction getExitFunction(int state) const override {
+        static ExitFunction _exitFunctions[] = {<machine.stateDecls.values: {state | &<if(state.exitFunction.isPresent)><state.exitFunction.get><else>exitIgnore<endif>}; separator=",">};
+        return _exitFunctions[state];
+    }
+
+    inline TransitionFunction getTransition(int state, int event) const override {
+        static TransitionFunction _transitions[][] = {};
+        return _transitions[state][event];
+    }
+    /* end Jump Tables */
 }
 >>

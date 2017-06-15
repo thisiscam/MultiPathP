@@ -2,27 +2,28 @@ package com.multipathp.pprogram.ast;
 
 import org.inferred.freebuilder.FreeBuilder;
 
-import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * Created by jianqiaoyang on 5/29/17.
  */
 @FreeBuilder
 public abstract class AnnounceStmt extends Stmt {
-    public abstract Exp getTargetExpression();
-    public abstract List<Exp> getArguments();
+    public abstract Exp getEventExpression();
+    @Nullable
+    public abstract Exp getPayloadExpression();
 
     @Override
     public int getChildrenCount() {
-        return 1 + getArguments().size();
+        return getPayloadExpression() == null ? 1 : 0;
     }
 
     @Override
     public PASTNode getChild(int i) {
-        if(i == 0) {
-            return getTargetExpression();
-        } else {
-            return getArguments().get(i - 1);
+        switch (i) {
+            case 0: return getEventExpression();
+            case 1: return getPayloadExpression();
+            default: throw new IndexOutOfBoundsException();
         }
     }
 

@@ -1,5 +1,7 @@
 package com.multipathp.pprogram.types;
 
+import com.multipathp.pprogram.ast.PTransition;
+
 import java.util.Objects;
 
 public class PType {
@@ -8,6 +10,7 @@ public class PType {
     public static PType INT = new PType("$int$", false);
     public static PType BOOL = new PType("$bool$", false);
     public static PType MACHINE = new PType("$machine$", false);
+    public static PType VOID = new PType("$void$", false);
     public static PType ANY = new PType("$any$", true);
     private String typename;
     private boolean clonable;

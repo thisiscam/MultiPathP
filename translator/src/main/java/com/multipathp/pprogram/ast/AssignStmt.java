@@ -7,7 +7,7 @@ import org.inferred.freebuilder.FreeBuilder;
  */
 @FreeBuilder
 public abstract class AssignStmt extends Stmt {
-    public abstract Exp getTarget();
+    public abstract IdExp getTarget();
     public abstract Exp getExpression();
 
     @Override

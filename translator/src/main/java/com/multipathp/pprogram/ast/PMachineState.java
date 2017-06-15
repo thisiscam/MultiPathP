@@ -3,19 +3,55 @@ package com.multipathp.pprogram.ast;
 import com.multipathp.pprogram.PEvent;
 import org.inferred.freebuilder.FreeBuilder;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 @FreeBuilder
 public abstract class PMachineState extends PASTNode {
     public abstract String getName();
     public abstract boolean isStart();
-    public abstract Optional<String> getEntryFunction();
-    public abstract Optional<String> getExitFunction();
+    @Nullable
+    public abstract String getEntryFunctionName();
+    @Nullable
+    public abstract String getExitFunctionName();
     public abstract Map<String, PEvent> getDeferedEvents();
     public abstract Map<String, PEvent> getIgnoredEvents();
 
     public abstract List<PTransition> getTransitions();
     public abstract Map<PEvent, PTransition> getTransitionsMap();
+
+    @Nullable
+    private PFunction entryFunction;
+    public PFunction getEntryFunction() {
+        if(getEntryFunctionName() != null && entryFunction == null) {
+            throw new IllegalStateException("entryFunction must be set first");
+        }
+        return entryFunction;
+    }
+
+    public void setEntryFunction(PFunction entryFunction) {
+        if(this.entryFunction != null) {
+            throw new IllegalStateException("entryFunction cannot be re-set");
+        }
+        this.entryFunction = entryFunction;
+    }
+
+    @Nullable
+    private PFunction exitFunction;
+    public PFunction getExitFunction() {
+        if(getExitFunctionName() != null && exitFunction == null) {
+            throw new IllegalStateException("exitFunction must be set first");
+        }
+        return exitFunction;
+    }
+
+    public void setExitFunction(PFunction exitFunction) {
+        if(this.exitFunction != null) {
+            throw new IllegalStateException("exitFunction cannot be re-set");
+        }
+        this.exitFunction = exitFunction;
+    }
+
 
     @Override
     public int getChildrenCount() {

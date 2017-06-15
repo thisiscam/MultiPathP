@@ -29,7 +29,9 @@ public class CallGraphAnnotator extends SimpleScopedPASTVisitor<Void> {
             CanRaiseEventAnnotation canRaiseEventAnnotation = f.getDecoration(CanRaiseEventAnnotation.class);
             if (!canRaiseEventAnnotation.canRaiseEvent) {
                 canRaiseEventAnnotation.canRaiseEvent = true;
-                canRaiseEventFunctions.addAll(callGraph.get(f));
+                if(callGraph.containsKey(f)) {
+                    canRaiseEventFunctions.addAll(callGraph.get(f));
+                }
             }
         }
         return null;
