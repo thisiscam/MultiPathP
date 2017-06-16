@@ -24,11 +24,11 @@ public:
     	return PMap<Kp, Vp>(static_cast<PList<PTuple<Kp, Vp>>>(data));
     }
 
-	int size() const {
+	inline int size() const {
 		return data.size();
 	}
 
-	void insert(const K& k, const V& v) {
+	inline void insert(const K& k, const V& v) {
 		for (int i=0; i < data.size(); i++) {
 			if (k == data.get(i).v0) {
 				throw runtime_error("Reinsertion of key into PMap");
@@ -37,7 +37,7 @@ public:
 		data.add(PTuple<K, V>(k, v));
 	}
 
-	bool containsKey(const K& k) const {
+	inline bool containsKey(const K& k) const {
 		for (int i=0; i < data.size(); i++) {
 			if (k == data.get(i).v0) {
 				return true;
@@ -46,7 +46,7 @@ public:
 		return false;
 	}
 
-	const V& get(const K& k) const {
+	inline const V& get(const K& k) const {
 		for (int i=0; i < data.size(); i++) {
 			if (k == data.get(i).v0) {
 				return data.get(i).v1;
@@ -55,7 +55,7 @@ public:
 		throw runtime_error("Key does not exist in dictionary");
 	}
 
-	V& get(const K& k) {
+	inline V& get(const K& k) {
 		for (int i=0; i < data.size(); i++) {
 			if (k == data.get(i).v0) {
 				return data.get(i).v1;
@@ -64,7 +64,7 @@ public:
 		throw runtime_error("Key does not exist in dictionary");
 	}
 
-	void set(const K& k, const V& v) {
+	inline void set(const K& k, const V& v) {
 		for (int i=0; i < data.size(); i++) {
 			if (k == data.get(i).v0) {
 				data.get(i).v1 = v;
@@ -75,7 +75,7 @@ public:
 	}
 
 
-	PList<K> keys() 
+	inline PList<K> keys() 
     {
     	PList<K> ret;
     	for(int i = 0; i < data.size(); i++)
@@ -85,7 +85,7 @@ public:
     	return ret;
     }
 
-    PList<V> values() 
+    inline PList<V> values() 
     {
     	PList<K> ret;
     	for(int i = 0; i < data.size(); i++)
@@ -95,7 +95,7 @@ public:
     	return ret;
     }
 
-	bool operator == (const PMap<K, V>& other) const {
+	inline bool operator == (const PMap<K, V>& other) const {
 		if(size() == other.size()) {
 			for(int i=0; i < size(); i++) {
 				if(other.containsEntry(data.get(i).v0, data.get(i).v1)) {
@@ -106,7 +106,7 @@ public:
 		return false;
 	}
 
-	bool operator != (const PMap<K, V>& other) const {
+	inline bool operator != (const PMap<K, V>& other) const {
 		return !(*this == other);
 	}
 
@@ -114,7 +114,7 @@ public:
 private:
 	PMap(const PList<PTuple<K, V>> data):data(data) { }
 
-	bool containsEntry(const K& k, const V& v) const {
+	inline bool containsEntry(const K& k, const V& v) const {
 		for(int i=0; i < size(); i++) {
 			if (k == data.get(i).v0) {
 				return v == data.get(i).v1;

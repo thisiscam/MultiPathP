@@ -5,6 +5,10 @@ typeMap ::= [
     "$event$": "Event",
     "$machine$": "PMachine*",
     "$void$": "void",
+    "$seq$": "PList\<<type(t.indexedInnerType)>\>",
+    "$map$": "PMap\<<type(t.keyType)>, <type(t.valueType)>\>",
+    "$tuple$": "PTuple\<<t.innerTypes:type(); separator=\", \">\>",
+    "$namedtuple$": "PTuple\<<t.innerTypes:type(); separator=\", \">\>",
     "default": key
 ]
 
@@ -14,15 +18,31 @@ typeDefaultValueMap ::= [
     "$null$": "NULL",
     "$event$": "0",
     "$machine$": "NULL",
+    "$seq$": "<type(t)>()",
+    "$tuple$": "<type(t)>()",
+    "$namedtuple$": "<type(t)>()",
+    "$map$": "<type(t)>()",
     "default": "NULL"
 ]
 
 type(t) ::= "<typeMap.(t.name)>"
 typeDefaultValue(t) ::= "<typeDefaultValueMap.(t.name)>"
-machineName(machine) ::= "Machine<machine.name>"
+prefixMachineName(name) ::= "Machine<name>"
+machineName(machine) ::= "<prefixMachineName(machine.name)>"
 cast(t, exp) ::= "static_cast\<<type(t)>\>(<exp>)"
 
-Render(node) ::= "<(node:{t | <t.class.superclass.simpleName>})(node)>"
+MachineImplementationFileName(machine) ::= "<machineName(machine)>.hpp"
+
+Render(node) ::= <<
+<if(node)><(node:{t | <t.class.superclass.simpleName>})(node)>
+<endif>
+>>
+
+LValue(node) ::= "<(node:{t | <t.class.superclass.simpleName>LValue})(node)>"
+
+Arg(node) ::= "<if(node)>tmp<node.reference><endif>"
+
+ExpRef() ::= "auto&& <Arg(node)> ="
 
 FunctionParams(params) ::= <<
 <params.keys: {id | <type(params.(id))> <id>}; separator=", ">
@@ -30,41 +50,48 @@ FunctionParams(params) ::= <<
 
 FunctionImplementation(function) ::= <<
 inline <type(function.retType)> <function.name>(<FunctionParams(function.params)>) {
-    <Render(function.stmtBlock)>
+    <StmtBlock(function.stmtBlock)><\\>
 }
 >>
 
 StmtBlock(node) ::= <<
 <node.localVarDecls.keys: {id | <type(node.localVarDecls.values.(id))> <id>;}><\\>
-<Render(node.stmtList)>
+<StmtListStmt(node.stmtList)>
+>>
+
+SendArgsHelper() ::= <<
+<Arg(node.eventExpression)><if(node.payloadExpression)>, <Arg(node.payloadExpression)><endif>
 >>
 
 AnnounceStmt(node) ::= <<
-MachineController.announce(<[node.eventExpression, node.payloadExpression]:Render(); separator=", ">);
+<[node.eventExpression, node.payloadExpression]:Render()><\\>
+Controller::announce(<SendArgsHelper()>);
 >>
 
 AssertStmt(node) ::= <<
-assert(<Render(node.exp)>, "<node.message>");
+<Render(node.exp)><\\>
+assert(<Arg(node.exp)>, "<node.message>");
 >>
 
 AssignStmt(node) ::= <<
-<Render(node.target)> = <Render(node.expression)>;
+<Render(node.expression)><\\>
+<LValue(node.target)> = <Arg(node.expression)>;
 >>
 
 ConditionalStmt(node) ::= <<
-if(<Render(node.condition)>) {
+<Render(node.condition)><\\>
+if(<Arg(node.condition)>) {
     <Render(node.thenBranch)>
 }<if(node.elseBranch)> else {
     <Render(node.elseBranch)>
 }<endif>
 >>
 
-ExpStmt(node) ::= <<
-<Render(node.expression)>;
->>
+ExpStmt(node) ::= "<Render(node.expression)>"
 
 InsertStmt(node) ::= <<
-<Render(node.target)>.insert(<Render(node.expression)>);
+<[node.target, node.expression]:Render()><\\>
+<Arg(node.target)>.insert(<Arg(node.expression)>);
 >>
 
 PrintStmt(node) ::= <<
@@ -72,44 +99,51 @@ print("<node.string>");
 >>
 
 RaiseStmt(node) ::= <<
-raise(<[node.eventExpression, node.payloadExpression]:Render(); separator=", ">);
+<[node.eventExpression, node.payloadExpression]:Render()><\\>
+raise(<SendArgsHelper()>); retcode = RAISED_EVENT; return;
 >>
 
 RemoveStmt(node) ::= <<
-<Render(node.target)>.removeAt(<Render(node.expression)>);
+<[node.target, node.expression]:Render()><\\>
+<Arg(node.target)>.removeAt(<Arg(node.expression)>);
 >>
 
 ReturnStmt(node) ::= <<
-return<if(node.expression)> <Render(node.expression)><endif>;
+<Render(node.expression)><\\>
+return<if(node.expression)> <Arg(node.expression)><endif>;
 >>
 
 SendStmt(node) ::= <<
-send(<[node.targetExpression, node.eventExpression, node.payloadExpression]:Render(); separator=", ">);
+<[node.targetExpression, node.eventExpression, node.payloadExpression]:Render()><\\>
+send(<Arg(node.targetExpression)>, <SendArgsHelper()>);
 >>
 
 SetAttributeStmt(node) ::= <<
-<Render(node.target)> = <Render(node.expression)>;
+<Render(node.expression)><\\>
+<LValue(node.target)> = <Arg(node.expression)>;
 >>
 
 SetIndexStmt(node) ::= <<
-<Render(node.target)> = (<Render(node.expression)>);
+<Render(node.expression)><\\>
+<LValue(node.target)> = <Arg(node.expression)>;
 >>
 
 SetItemStmt(node) ::= <<
-<Render(node.target.targetExpression)>.set(<Render(node.target.indexerExpression)>, <Render(node.expression)>);
+<Render(node.target.targetExpression)><\\>
+<Render(node.target.indexerExpression)><\\>
+<Render(node.expression)><\\>
+<LValue(node.target.targetExpression)>.set(<Arg(node.target.indexerExpression)>, <Arg(node.expression)>);
 >>
 
 StmtListStmt(node) ::= <<
-<node.stmts:Render(); separator="\n">
+<node.stmts:Render()>
 >>
 
 WhileStmt(node) ::= <<
-while(<Render(node.condition)>) {
-    <Render(node.stmt)>
+<Render(node.condition)><\\>
+while(<Arg(node.condition)>) {
+    <Render(node.stmt)><\\>
 }
->>
-
-BinaryExp(node, operatorMap) ::= <<
 >>
 
 ArithmeticExpKindMap ::= [
@@ -119,7 +153,9 @@ ArithmeticExpKindMap ::= [
     "DIV": "/"
 ]
 ArithmeticExp(node) ::= <<
-<Render(node.left)> <ArithmeticExpKindMap.(node.kind)> <Render(node.right)>
+<Render(node.left)><\\>
+<Render(node.right)><\\>
+<ExpRef()> <Arg(node.left)> <ArithmeticExpKindMap.(node.kind)> <Arg(node.right)>;
 >>
 
 BinaryLogicExpKindMap ::= [
@@ -127,7 +163,9 @@ BinaryLogicExpKindMap ::= [
     "AND": "&"
 ]
 BinaryLogicExp(node) ::= <<
-<Render(node.left)> <BinaryLogicExpKindMap.(node.kind)> <Render(node.right)>
+<Render(node.left)><\\>
+<Render(node.right)><\\>
+<ExpRef()> <Arg(node.left)> <BinaryLogicExpKindMap.(node.kind)> <Arg(node.right)>;
 >>
 
 BoolLiteralExpKindMap ::= [
@@ -137,11 +175,15 @@ BoolLiteralExpKindMap ::= [
 BoolLiteralExp(node) ::= "<BoolLiteralExpKindMap.(node.kind)>"
 
 CallExp(node) ::= <<
-<node.functionName>(<node.arguments:Render(); separator=", ">)
+<node.arguments:Render()><\\>
+<ExpRef()> <node.functionName>(<node.arguments:Arg(); separator=", ">);
+<if(node.canRaiseEvent)>if(retcode == Constants.RAISED_EVENT) { return<if(function.retType)> <typeDefaultValue(function.retType)><endif>; }<endif>
 >>
 
-CastExp(node) ::= "<cast(node.castToType, Render(node.expression))>"
-
+CastExp(node) ::= <<
+<Render(node.expression)><\\>
+<ExpRef()> <cast(node.castToType, Arg(node.expression))>;
+>>
 
 ComparisonExpKindMap ::= [
     "LT": "<",
@@ -152,45 +194,71 @@ ComparisonExpKindMap ::= [
     "EQ": "=="
 ]
 ComparisonExp(node) ::= <<
-<Render(node.left)> <BinaryLogicExpKindMap.(node.kind)> <Render(node.right)>
+<Render(node.left)><\\>
+<Render(node.right)><\\>
+<ExpRef()> <Arg(node.left)> <ComparisonExpKindMap.(node.kind)> <Arg(node.right)>;
 >>
 
-DefaultExp(node) ::= "<typeDefaultValue(node.typeForDefault)>"
+DefaultExp(node) ::= <<
+<ExpRef()> <typeDefaultValue(node.typeForDefault)>;
+>>
 
 GetAttributeExp(node) ::= <<
-<Render(node.targetExpression)>.v<node.index>
+<Render(node.targetExpression)><\\>
+<ExpRef()> <Arg(node.targetExpression)>.v<node.index>;
+>>
+
+GetAttributeExpLValue(node) ::= <<
+<LValue(node.targetExpression)>.v<node.index>
 >>
 
 GetIndexExp(node) ::= <<
-<Render(node.targetExpression)>.v<node.index>
+<Render(node.targetExpression)><\\>
+<ExpRef()> <Arg(node.targetExpression)>.v<node.index>;
+>>
+
+GetIndexExpLValue(node) ::= <<
+<LValue(node.targetExpression)>.v<node.index>
 >>
 
 GetItemExp(node) ::= <<
-<Render(node.targetExpression)>.get(<Render(node.indexerExpression)>)
+<Render(node.targetExpression)><\\>
+<Render(node.indexerExpression)><\\>
+<ExpRef()> <Arg(node.targetExpression)>.get(<Arg(node.indexerExpression)>);
 >>
 
-GroupExo(node) ::= <<
-(<Render(node.expression)>)
+GroupExp(node) ::= <<
+<Render(node.expression)>
 >>
 
 HaltExp(node) ::= <<
-#error halt not supported
+<ExpRef()> EVENT_HALT;
 >>
 
-IdExp(node) ::= "<node.name>"
+IdExp(node) ::= <<
+<ExpRef()> <node.name>;
+>>
+
+IdExpLValue(node) ::= "<node.name>"
 
 InExp(node) ::= <<
-<Render(node.right)>.containsKey(<Render(node.left)>)
+<Render(node.right)><\\>
+<Render(node.left)><\\>
+<ExpRef()> <Arg(node.right)>.containsKey(<Arg(node.left)>);
 >>
 
-IntExp(node) ::= "<node.value>"
+IntExp(node) ::= <<
+<ExpRef()> <node.value>;
+>>
 
 KeysExp(node) ::= <<
-<Render(node.expression)>.keys()
+<Render(node.expression)><\\>
+<ExpRef()> <Args(node.expression)>.keys();
 >>
 
 MinusExp(node) ::= <<
--<Render(node.expression)>
+<Render(node.expression)><\\>
+<ExpRef()> -<Arg(node.expression)>;
 >>
 
 NamedTupleExp(node) ::= <<
@@ -198,27 +266,38 @@ NamedTupleExp(node) ::= <<
 >>
 
 NewExp(node) ::= <<
-create\<<node.machineIdentifier>\>(<node.payloadExpression>);
+<Render(node.payloadExpression)><\\>
+<ExpRef()> create\<<prefixMachineName(node.machineIdentifier)>\>(<Arg(node.payloadExpression)>);
 >>
 
-NondetExp(node) ::= "randomBool()"
+NondetExp(node) ::= <<
+<ExpRef()> randomBool();
+>>
 
 NotExp(node) ::= <<
-!<node.expression>
+<Render(node.expression)><\\>
+<ExpRef()> !<Arg(node.expression)>;
 >>
 
-NullExp(node) ::= "NULL"
+NullExp(node) ::= <<
+<ExpRef()> NULL;
+>>
 
 SizeofExp(node) ::= <<
-<node.expression>.size()
+<Render(node.expression)><\\>
+<ExpRef()> <Arg(node.expression)>.size();
 >>
 
-ThisExp(node) ::= "this"
+ThisExp(node) ::= <<
+<ExpRef()> this;
+>>
 
 TupleExp(node) ::= <<
-PTuple\<<node.arguments:{arg | <type(arg.expressionType)>}; separator=", ">\>(<node.arguments:Render(); separator=", ">)
+<node.arguments:Render()><\\>
+<ExpRef()> <type(node.expressionType)>(<node.arguments:Arg(); separator=", ">);
 >>
 
 ValueExp(node) ::= <<
-<Render(node.expression)>.values()
+<Render(node.expression)><\\>
+<ExpRef()> <Arg(node.expression)>.values();
 >>

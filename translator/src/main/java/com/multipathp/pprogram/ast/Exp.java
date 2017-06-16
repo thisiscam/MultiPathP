@@ -7,4 +7,7 @@ import com.multipathp.pprogram.types.PType;
  */
 public abstract class Exp extends PASTNode {
     public abstract PType getExpressionType();
+
+    private static int counter = 1;
+    public final int reference = counter++;
 }

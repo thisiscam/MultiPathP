@@ -8,9 +8,11 @@ import java.nio.file.Paths;
 
 
 public abstract class TranslatorBase {
-    protected PProgram program;
+    protected final PProgram program;
+    protected final String projectName;
 
-    public TranslatorBase(PProgram program) {
+    public TranslatorBase(String projectName, PProgram program) {
+        this.projectName = projectName;
         this.program = program;
     }
 

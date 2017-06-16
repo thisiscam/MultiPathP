@@ -1,5 +1,6 @@
 package com.multipathp.pprogram.types;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -10,6 +11,10 @@ public class PTypeNamedTuple extends PType implements IPTypeGetIndexable {
     public PTypeNamedTuple(LinkedHashMap<String, PType> namedTypes) {
         super("$namedtuple$", true);
         this.namedTypes = namedTypes;
+    }
+
+    public Collection<PType> getInnerTypes() {
+        return namedTypes.values();
     }
 
     public int getIndexByAttribute(String name) {

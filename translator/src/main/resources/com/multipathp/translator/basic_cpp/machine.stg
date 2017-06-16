@@ -1,8 +1,7 @@
 import "common.stg"
 
-MachineImplementationFileName(machine) ::= "<machineName(machine)>.cpp"
-
-EntryFunctionName(state) ::= "<state.name>Entry"
+PrefixEntryFunctionName(stateName) ::= "<stateName>Entry"
+EntryFunctionName(state) ::= "<PrefixEntryFunctionName(state.name)>"
 
 InvokeAuxFunction(function) ::= <<
 <if(function.name)><function.name>(<if(function.params)>cast(<first(function.params.values)>, payload)<endif>);<endif>
@@ -23,31 +22,31 @@ inline void <TransitionFunctionWrapperName(function)>(const PAny& payload) {
 }
 >>
 
-MachineImplementationFile(machine, program) ::= <<
-#include "header.h"
-
-namespace <program.name> {
+MachineImplementationFile(projectName, program, machine) ::= <<
+namespace <projectName> {
 
 class <machineName(machine)> final : public PMachine {
-
+    friend class Scheduler;
 public:
-    
+    <machineName(machine)>(ExecutionEngine& engine):PMachine(engine) { }
+
     inline void start(const PAny& payload) override {
         <EntryFunctionName(machine.startState)>(payload);
     }
 
 private:
+    <rest(machine.stateDecls):{state | static const int <state.name> = <i>;}; separator="\n">
 
     /* region Entry Methods */
-    <machine.stateDecls.values:EntryFunction(); separator="\n">
+    <rest(machine.stateDecls):EntryFunction(); separator="\n\n">
     /* end Entry Methods */
 
     /* region Transition Methods */
-    <machine.uniqueTransitions:TransitionFunction(); separator="\n">
+    <machine.uniqueTransitions:TransitionFunction(); separator="\n\n">
     /* end Transition Methods */
 
     /* region Function Implementations */
-    <machine.funDecls.values:FunctionImplementation(); separator="\n">
+    <machine.funDecls.values:FunctionImplementation(); separator="\n\n">
     /* end Function Implementations */
 
     /* region Machine Fields */
@@ -56,29 +55,40 @@ private:
 
     /* region Jump Tables */
     inline bool isDefered(int state, int event) const override {
-        static const bool _isDefered[][] = {<program.eventDecls.values:
-                                        {e | {<machine.stateDecls.values:
+        static const bool _isDefered[][] = {<program.eventDecls:
+                                        {e | {<machine.stateDecls:
                                             {state | <if(state.deferedEvents.(e.name))>true<else>false<endif>}; separator=",">\}};
                                     separator=",">};
         return _isDefered[state][event];
     }
 
     inline bool isGotoTransition(int state, int event) const override {
-        static const bool _isGotoTransition[][] = {<program.eventDecls.values:
-                                                {e | {<machine.stateDecls.values:
+        static const bool _isGotoTransition[][] = {<program.eventDecls:
+                                                {e | {<machine.stateDecls:
                                                     {state | <if(state.deferedEvents.(e.name))>true<else>false<endif>}; separator=",">\}};
                                             separator=",">};
         return _isGotoTransition[state][event];
     }
 
     inline ExitFunction getExitFunction(int state) const override {
-        static ExitFunction _exitFunctions[] = {<machine.stateDecls.values: {state | &<if(state.exitFunction.isPresent)><state.exitFunction.get><else>exitIgnore<endif>}; separator=",">};
+        static ExitFunction _exitFunctions[] = {<machine.stateDecls: {state | &<if(state.exitFunction.isPresent)><state.exitFunction.get><else>exitIgnore<endif>}; separator=",">};
         return _exitFunctions[state];
     }
 
     inline TransitionFunction getTransition(int state, int event) const override {
-        static TransitionFunction _transitions[][] = {};
+        static TransitionFunction _transitions[][] = {<program.eventDecls:
+                                                {e | {<machine.stateDecls:
+                                                    {state | <if(state.transitionsMap.(e))>&<if(state.transitionsMap.(e).isPush)>transitionPushState<elseif(state.transitionsMap.(e).functionName)><state.transitionsMap.(e).functionName><else>emptyTransition<endif><else>NULL<endif>}; separator=",">\}};
+                                            separator=",">};
         return _transitions[state][event];
+    }
+
+    inline EntryFunction getTransitionEntry(int state, int event) const override {
+        static TransitionFunction _entries[][] = {<program.eventDecls:
+                                                {e | {<machine.stateDecls:
+                                                    {state | <if(state.transitionsMap.(e))>&<if(state.transitionsMap.(e).toStateName)><PrefixEntryFunctionName(state.transitionsMap.(e).toStateName)><else>emptyEntry<endif><else>NULL<endif>}; separator=",">\}};
+                                            separator=",">};
+        return _entries[state][event];
     }
     /* end Jump Tables */
 }

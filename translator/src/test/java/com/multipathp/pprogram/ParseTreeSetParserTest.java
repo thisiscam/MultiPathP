@@ -29,7 +29,7 @@ public class ParseTreeSetParserTest {
         assertEquals(set.getParsedFilePaths().size(), 1);
         ParseTreeToPAST converter = new ParseTreeToPAST(set);
         PProgram program = converter.getProgram();
-        BasicCppTranslator translator = new BasicCppTranslator(program);
+        BasicCppTranslator translator = new BasicCppTranslator("pingpong", program);
         translator.translate("test_dir");
     }
 }

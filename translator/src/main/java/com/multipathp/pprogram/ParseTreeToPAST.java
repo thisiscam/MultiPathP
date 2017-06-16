@@ -50,7 +50,7 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
     public Void visitEvent_decl(pParser.Event_declContext ctx) {
         event = new PEvent.Builder().setName(ctx.ID().getText());
         ctx.ev_type_or_none().accept(this);
-        program.putEventDecls(event.getName(), event.build());
+        program.addEventDecls(event.build());
         return null;
     }
 
@@ -209,7 +209,7 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
                 .setName(ctx.ID().getText())
                 .setStart(!ctx.is_start_state_or_none().isEmpty());
         visitChildren(ctx);
-        machine.putStateDecls(state.getName(), state.build());
+        machine.addStateDecls(state.build());
         return null;
     }
 
@@ -251,7 +251,8 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
 
     @Override
     public Void visitState_body_item_ignore(pParser.State_body_item_ignoreContext ctx) {
-        state.putAllIgnoredEvents(ctx.non_default_event_list().accept(new UtilVisitors.NonDefaultEventListVisitor()));
+        Collection<PEvent> ignoreEvents = ctx.non_default_event_list().accept(new UtilVisitors.NonDefaultEventListVisitor()).values();
+        state.addTransition((String) null, ignoreEvents, null, false);
         return null;
     }
 

@@ -16,6 +16,10 @@ template<typename ...> struct List { };
 
 };
 
+#ifndef DECL_TYPES
+#error "Must declare all usable before using PTypes! "
+#endif
+
 #include "PAny.hpp"
 #include "PList.hpp"
 #include "PTuple.hpp"

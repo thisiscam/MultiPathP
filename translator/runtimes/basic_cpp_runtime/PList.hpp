@@ -27,11 +27,11 @@ public:
 		}
 	}
 
-	int size() const {
+	inline int size() const {
 		return _size;
 	}
 
-	const PList& operator=(const PList& other)
+	inline const PList& operator=(const PList& other)
     {
         for(int i=0; i < other.size(); i++) {
 			data.set(i, other.data.get(i));
@@ -50,12 +50,12 @@ public:
     }
 
 
-	void add(const T& item) {
+	inline void add(const T& item) {
 		data.set(size(), item);
 		_size++;
 	}
 
-	void insert(int idx, const T& item) {
+	inline void insert(int idx, const T& item) {
 		for(int i = size(); i > idx; i--) {
 			data.set(i, data.get(i - 1));
 		}
@@ -63,49 +63,49 @@ public:
 		_size++;
 	}
 
-	void removeAt(int idx) {
+	inline void removeAt(int idx) {
 		for(int i = idx + 1; i < size(); i++) {
 			data.get(i - 1, data.get(i));
 		}
 		_size--;
 	}
 
-	void removeRange(int start, int count) {
+	inline void removeRange(int start, int count) {
 		for (int i = start + count; i < size(); i++) {
 			data.set(i - count, data.get(i));
 		}
 		_size = _size - count;
 	}
 
-	void removeRange(int start) {
+	inline void removeRange(int start) {
 		if(size() < start) {
 			throw new out_of_range("PList::removeRange");
 		}
 		_size = start;
 	}
 
-	const T& get(const int idx) const {
+	inline const T& get(const int idx) const {
 		if(idx >= size()) {
 			throw out_of_range("PList::get");
 		}
 		return data.get(idx);
 	}
 
-	T& get(const int idx) {
+	inline T& get(const int idx) {
 		if(idx >= size()) {
 			throw out_of_range("PList::get");
 		}
 		return data.get(idx);
 	}
 
-	void set(const int idx, const T& value) {
+	inline void set(const int idx, const T& value) {
 		if(idx >= size()) {
 			throw out_of_range("PList::get");
 		}
 		data.set(idx, value);
 	}
 
-	bool operator == (const PList<T>& other) const {
+	inline bool operator == (const PList<T>& other) const {
 		if(size() == other.size()) {
 			for(int i=0; i < size(); i++) {
 				if(data.get(i) != other.data.get(i)) {
@@ -118,7 +118,7 @@ public:
 		}
 	}
 
-	bool operator != (const PList<T>& other) const {
+	inline bool operator != (const PList<T>& other) const {
 		return !(*this == other);
 	}
 

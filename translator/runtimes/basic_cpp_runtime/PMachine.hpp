@@ -19,6 +19,9 @@ const int RAISED_EVENT = 1;
 
 const int EVENT_NEW_MACHINE = -1;
 const int EVENT_NULL = 0;
+const int EVENT_HALT = 1;
+
+const int STATE_HALT = 0;
 
 class PMachine
 {
@@ -27,6 +30,9 @@ class PMachine
     using ExitFunction = void (PMachine::*)();
 
 public:
+    PMachine(ExecutionEngine& engine):engine(engine) { 
+        states.add(STATE_HALT);
+    }
 
 	virtual void start(const PAny& payload) = 0;
 
@@ -45,14 +51,15 @@ public:
 	inline void step(int stateIndex, int e, const PAny& payload) {
 		int state = states.get(stateIndex);
         if(isGotoTransition(state, e)) {
-            for(int i=states.size() - 1; i > stateIndex; i--)
-            {
+            for(int i=states.size() - 1; i > stateIndex; i--) {
                 popState();
             }
         }
         retcode = EXECUTE_FINISHED;
-        TransitionFunction transition_fn = getTransition(state, e);
-        (this->*transition_fn)(payload);
+        TransitionFunction transitionFn = getTransition(state, e);
+        (this->*transitionFn)(payload);
+        EntryFunction entryFn = getTransitionEntry(state, e);
+        (this->*entryFn)(payload);
 	}
 
 protected:
@@ -62,7 +69,7 @@ protected:
 
 	template<typename M>
 	void create(const PAny& payload) {
-		sendQueue.add(PTuple<PMachine*, int, PAny>(PMachine::alloc<M>(), EVENT_NEW_MACHINE, payload));
+		sendQueue.add(PTuple<PMachine*, int, PAny>(PMachine::alloc<M>(engine), EVENT_NEW_MACHINE, payload));
 	}
 
 	inline void raise(int e, const PAny& payload) {
@@ -90,7 +97,7 @@ protected:
     }
 
     inline bool randomBool() {
-    	return true;
+    	return engine.randomBool();
     }
 
     inline void assert(bool cond, const string& message) {
@@ -99,13 +106,18 @@ protected:
     	}
     }
 
-    inline void transitionIgnore(const PAny& payload) { }
+    inline void emptyTransition(const PAny& payload) { }
 
     inline void transitionPushState(const PAny& payload) {
         states._size ++;
     }
 
     inline void emptyEntry(const PAny& payload) { }
+
+    inline void haltEntry(const PAny& payload) {
+        states = PList<int>();
+        states.add(STATE_HALT);
+    }
 
     inline void emptyExit() { }
 
@@ -119,10 +131,11 @@ private:
     virtual bool isGotoTransition(int state, int event) const = 0;
     virtual ExitFunction getExitFunction(int state) const = 0;
     virtual TransitionFunction getTransition(int state, int event) const = 0;
+    virtual EntryFunction getTransitionEntry(int state, int event) const = 0;
 
     template<typename M>
-    static M* alloc() {
-        return new M();
+    static M* alloc(ExecutionEngine& engine) {
+        return new M(engine);
     }
 };
 

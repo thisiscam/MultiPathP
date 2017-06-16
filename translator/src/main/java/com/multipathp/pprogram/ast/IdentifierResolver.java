@@ -62,7 +62,7 @@ public class IdentifierResolver extends SimpleScopedPASTVisitor<Void> {
             idExp.setExpressionType(function.getParams().get(idName));
         } else if(!isGlobalFunction && machine.getVarDecls().containsKey(idName)) {
             idExp.setExpressionType(machine.getVarDecls().get(idName));
-        } else if (program.getEventDecls().containsKey(idName)) {
+        } else if (program.getEventByName(idName).isPresent()) {
             idExp.setExpressionType(PType.EVENT);
         } else {
             //TODO: better error reporting mechanism

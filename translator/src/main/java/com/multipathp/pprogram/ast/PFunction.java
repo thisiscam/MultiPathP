@@ -23,6 +23,10 @@ public abstract class PFunction extends PASTNode {
         return getStmtBlock().getLocalVarDecls();
     }
 
+    public boolean canRaiseEvent() {
+        return getDecoration(CallGraphAnnotator.CanRaiseEventAnnotation.class).getCanRaiseEvent();
+    }
+
     @Override
     public int getChildrenCount() {
         return 1;

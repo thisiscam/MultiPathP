@@ -15,12 +15,12 @@ public abstract class PMachine extends PASTNode {
     public abstract Map<String, PEvent> getObservedEvents();
     public abstract Map<String, PType> getVarDecls();
     public abstract Map<String, PFunction> getFunDecls();
-    public abstract Map<String, PMachineState> getStateDecls();
+    public abstract List<PMachineState> getStateDecls();
     public abstract PMachineState getStartState();
 
     public Set<PFunction> getUniqueTransitions() {
         Set<PFunction> uniqueTransitions = new HashSet<>();
-        getStateDecls().values().stream().forEach(s -> {
+        getStateDecls().stream().forEach(s -> {
             uniqueTransitions.addAll(s.getTransitions().stream().map(PTransition::getFunction).collect(Collectors.toList()));
         });
         return uniqueTransitions;
@@ -38,7 +38,7 @@ public abstract class PMachine extends PASTNode {
         }
         i -= getFunDecls().size();
         if(0 <= i && i < getStateDecls().size()) {
-            return (PMachineState) getStateDecls().values().toArray()[i];
+            return (PMachineState) getStateDecls().toArray()[i];
         }
         throw new IndexOutOfBoundsException();
     }
@@ -50,7 +50,9 @@ public abstract class PMachine extends PASTNode {
 
     public static class Builder extends PMachine_Builder {
         public Builder() {
+            super();
             setSpec(false);
+            addStateDecls(PMachineState.HALT_STATE);
         }
 
         public Builder putFunDecls(PFunction function) {
@@ -59,7 +61,7 @@ public abstract class PMachine extends PASTNode {
 
         @Override
         public PMachine build() {
-            getStateDecls().values().stream().filter(PMachineState::isStart).findFirst().ifPresent(this::setStartState);
+            getStateDecls().stream().filter(PMachineState::isStart).findFirst().ifPresent(this::setStartState);
             return super.build();
         }
     }

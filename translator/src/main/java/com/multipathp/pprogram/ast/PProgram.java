@@ -13,11 +13,14 @@ public abstract class PProgram extends PASTNode {
     public abstract ParseTreeSetParser.ParseTreeSet getASTSet();
 
     public abstract PMachine getMainMachine();
-    public abstract Map<String, PEvent> getEventDecls();
+    public abstract List<PEvent> getEventDecls();
     public abstract List<PMachine> getMachines();
     public abstract Map<String, PFunction> getGlobalFunctionDecls();
     public abstract Map<String, PType> getTypedefs();
 
+    public Optional<PEvent> getEventByName(String eventName) {
+        return getEventDecls().stream().filter(e -> e.getName().equals(eventName)).findFirst();
+    }
 
     @Override
     public int getChildrenCount() {
@@ -42,6 +45,12 @@ public abstract class PProgram extends PASTNode {
     }
 
     public static class Builder extends PProgram_Builder {
+
+        public Builder() {
+            super();
+            addEventDecls(PEvent.EVENT_NULL, PEvent.EVENT_HALT);
+        }
+
         @Override
         public PProgram build() {
             getMachines().stream().filter(PMachine::isMain).findFirst().ifPresent(this::setMainMachine);

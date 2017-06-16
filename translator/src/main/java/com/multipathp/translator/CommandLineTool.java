@@ -8,6 +8,8 @@ import com.multipathp.pprogram.ParseTreeSetParser;
 import com.multipathp.pprogram.ParseTreeToPAST;
 import com.multipathp.pprogram.ast.PProgram;
 import com.multipathp.translator.basic_cpp.BasicCppTranslator;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -28,6 +30,9 @@ public class CommandLineTool {
 
         @Parameter(names = {"-o", "--out-dir"}, description = "output directory")
         String outDir = "";
+
+        @Parameter(names = {"--name"}, description = "name of the project, default to input file name")
+        String projectName = null;
 
         @Parameter(names = {"-h", "--help"}, description = "displays this help message", help = true)
         boolean displayUsage;
@@ -50,10 +55,13 @@ public class CommandLineTool {
             cmdParser.usage();
             System.exit(0);
         }
-        Constructor translatorConstructor = Class.forName(BasicCppTranslator.class.getPackage().getName() + "." + options.translator).getConstructor(PProgram.class);
+        if(options.projectName == null) {
+            options.projectName = FilenameUtils.getBaseName(options.inputFile);
+        }
+        Constructor translatorConstructor = Class.forName(BasicCppTranslator.class.getPackage().getName() + "." + options.translator).getConstructor(String.class, PProgram.class);
         ParseTreeSetParser.ParseTreeSet set = new ParseTreeSetParser(options.includeDirectories).parseFile(options.inputFile);
         PProgram program = new ParseTreeToPAST(set).getProgram();
-        TranslatorBase translator = (TranslatorBase) translatorConstructor.newInstance(program);
+        TranslatorBase translator = (TranslatorBase) translatorConstructor.newInstance(options.projectName, program);
         translator.translate(options.outDir);
     }
 }

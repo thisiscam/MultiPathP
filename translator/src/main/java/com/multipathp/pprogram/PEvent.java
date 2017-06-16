@@ -9,8 +9,10 @@ import java.util.Optional;
 @FreeBuilder
 public abstract class PEvent {
     public static PEvent EVENT_NULL = new PEvent.Builder().setName("$EVENT_NULL$").build();
-    abstract String getName();
-    abstract Optional<PType> getPayloadType();
+    public static PEvent EVENT_HALT = new PEvent.Builder().setName("$EVENT_HALT$").build();
+
+    public abstract String getName();
+    public abstract Optional<PType> getPayloadType();
 
     @Override
     public boolean equals(Object o) {

@@ -11,6 +11,10 @@ public class PTypeTuple extends PType implements IPTypeGetIndexable {
         super("$tuple$", true);
     }
 
+    public Collection<PType> getInnerTypes() {
+        return Ts;
+    }
+
     @Override
     public PType getIndexedInnerType(int index) {
         return Ts.get(index);

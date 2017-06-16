@@ -1,13 +1,46 @@
 import "common.stg"
 
-HeaderFile(program) ::= <<
+BuiltInEvents ::= [
+	"$EVENT_NULL$": [],
+	"$EVENT_HALT$": [],
+	default: key
+]
+
+HeaderFile(declTypes, projectName, program) ::= <<
+#ifndef <projectName>_H
+#define <projectName>_H
+
+#define DECL_TYPES List\<<declTypes:type(); separator=", ">\>
 #include "basic_cpp_runtime.h"
 
 using namespace basic_cpp;
 
-namespace <program.name> {
+namespace <projectName> {
 
-<program.eventDecls.values:{e | const int <e.name> = <i>;}; separator="\n">
+<program.eventDecls:{e | <if(BuiltInEvents.(e.name))>const int <e.name> = <i0>;
+<endif>}><\\>
+
+<program.machines:{m | class <machineName(m)>;}; separator="\n">
 
 };
+
+<program.machines:{m | #include "<MachineImplementationFileName(m)>"}; separator="\n">
+
+namespace <projectName> {
+
+class Controller {
+public:
+	
+	static inline PMachine* createMainMachine(ExecutionEngine& engine) {
+		return new <machineName(program.mainMachine)>();
+	}
+
+	static inline void announce(int event, const PAny& payload) {
+		
+	}
+};
+
+}
+
+#endif
 >>
