@@ -30,15 +30,7 @@ public class PMachineHaltState extends PMachineState {
     }
 
     public Map<String, PEvent> getDeferedEvents() {
-        return new HashMap<>();
-    }
-
-    public List<PTransition> getTransitions() {
-        return new ArrayList<>();
-    }
-
-    public Map<PEvent, PTransition> getTransitionsMap() {
-        return new Map<PEvent, PTransition>() {
+        return new Map<String, PEvent>() {
             @Override
             public int size() {
                 return 0;
@@ -51,36 +43,35 @@ public class PMachineHaltState extends PMachineState {
 
             @Override
             public boolean containsKey(Object key) {
-                return key instanceof PEvent;
+                return key instanceof String;
             }
 
             @Override
             public boolean containsValue(Object value) {
-                return false;
+                return value instanceof PEvent;
             }
 
             @Override
-            public PTransition get(Object key) {
+            public PEvent get(Object key) {
                 if(containsKey(key)) {
-                    PEvent e = (PEvent) key;
-                    return new PTransition.Builder().setOnE(e).setPush(false).build();
+                    return new PEvent.Builder().setName((String)key).build();
                 } else {
                     return null;
                 }
             }
 
             @Override
-            public PTransition put(PEvent key, PTransition value) {
+            public PEvent put(String key, PEvent value) {
                 return null;
             }
 
             @Override
-            public PTransition remove(Object key) {
+            public PEvent remove(Object key) {
                 return null;
             }
 
             @Override
-            public void putAll(Map<? extends PEvent, ? extends PTransition> m) {
+            public void putAll(Map<? extends String, ? extends PEvent> m) {
 
             }
 
@@ -90,19 +81,27 @@ public class PMachineHaltState extends PMachineState {
             }
 
             @Override
-            public Set<PEvent> keySet() {
+            public Set<String> keySet() {
                 return null;
             }
 
             @Override
-            public Collection<PTransition> values() {
+            public Collection<PEvent> values() {
                 return null;
             }
 
             @Override
-            public Set<Entry<PEvent, PTransition>> entrySet() {
+            public Set<Entry<String, PEvent>> entrySet() {
                 return null;
             }
         };
+    }
+
+    public List<PTransition> getTransitions() {
+        return new ArrayList<>();
+    }
+
+    public Map<PEvent, PTransition> getTransitionsMap() {
+        return new HashMap<>();
     }
 }

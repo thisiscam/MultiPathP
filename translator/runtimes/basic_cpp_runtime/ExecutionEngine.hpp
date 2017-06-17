@@ -3,27 +3,26 @@
 
 namespace basic_cpp_runtime {
 
+class Scheduler;
+
 class ExecutionEngine {
 public:
-	ExecutionEngine(Scheduler& scheduler, int maxIteration=200):
-		scheduler(scheduler),
+	ExecutionEngine(int maxIteration=200):
 		maxIteration(maxIteration)
 	{ }
 
-	inline void run(PMachine* machine) {
-		scheduler.startMachine(machine);
-		for(int i = 0; i < maxIteration; i++) {
-			if(!scheduler.step()) {
-				break;
-			}
-		}
-	}
+	inline void run(Scheduler& scheduler, PMachine* machine);
 
+	bool randomBool();
+
+	int randomInt(int max);
+	
 private:
-	Scheduler& scheduler;
 	int maxIteration;
 };
 
 };
+
+#include "ExecutionEngine.ipp"
 
 #endif

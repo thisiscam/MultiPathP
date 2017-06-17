@@ -1,55 +1,45 @@
 #ifndef SCHEDULER_HPP
 #define SCHEDULER_HPP
 
+#include "SendQueueItem.hpp"
+
 namespace basic_cpp_runtime {
+
+struct SchedulerChoice {
+public:
+    SchedulerChoice() = default;
+
+    SchedulerChoice(PMachine* machine, const int& queueIdx, const int& stateIdx):
+    	machine(machine),queueIdx(queueIdx),stateIdx(stateIdx) { }
+
+    PMachine* machine;
+    int queueIdx;
+    int stateIdx;
+};
 
 class Scheduler {
 
 protected:
 
-	struct SchedulerChoice
-    {
-        PMachine* machine;
-        int queueIdx;
-        int stateIdx;
-    };
+	virtual SchedulerChoice chooseMachine() = 0;
 
-	virtual bool chooseMachine(SchedulerChoice& choice) = 0;
-
-	virtual void startMachine(PMachine* machine, const PAny& payload) = 0;
-
-	inline PList<SendQueueItem> getSendQueue(PMachine* machine) {
-		return machine->sendQueue;
-	}
+	inline PList<SendQueueItem>& getSendQueue(PMachine* machine);
 
 	PList<PMachine*> machines;
 	
+	ExecutionEngine& engine;
+
 public:
-	inline bool step() {
-		SchedulerChoice&& chosen = chooseMachine(chosen);
-		if(chosen.machine == NULL) {
-			return false;
-		} else {
-			if(chosen.queueIdx < 0) {
-				std::cout << chosen.machine << " executes null event" << std::endl;
-				chosen.machine->step(chosen.stateIdx, EVENT_NULL);
-			} else {
-				SendQueueItem&& item = chosen.machine.sendQueue.get(chosen.queueIdx);
-				chosen.machine.sendQueue.removeAt(chosen.queueIdx);
-				if(item.e == EVENT_NEW_MACHINE) {
-					std::cout << chosen.machine << " creates " << item.target << std::endl;
-					startMachine(item.target, item.payload);
-				} else {
-					std::cout << chosen.machine << " sends event " << item.e << " to " << item.target << std::endl;
-					item.target->step(chosen.stateIdx, item.e, item.payload);
-				}
-			}
-			return true;
-		}
-	}
+	Scheduler(ExecutionEngine& engine):engine(engine) { }
+
+	virtual void startMachine(PMachine* machine, const PAny& payload = PAny()) = 0;
+
+	inline bool step();
 
 };
 
 };
+
+#include "Scheduler.ipp"
 
 #endif

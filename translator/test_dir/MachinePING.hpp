@@ -10,28 +10,30 @@ public:
     }
 
 private:
-    static const int Ping_Init = 1;
-    static const int Ping_SendPing = 2;
-    static const int Ping_WaitPong = 3;
-    static const int Done = 4;
+    enum {
+        Ping_Init = 1,
+        Ping_SendPing = 2,
+        Ping_WaitPong = 3,
+        Done = 4
+    };
 
     /* region Entry Methods */
     inline void Ping_InitEntry(const PAny& payload) {
-        states.set(states.size(), Ping_Init);
+        states.setTop(Ping_Init);
         Ping_InitEntryImpl();
     }
 
     inline void Ping_SendPingEntry(const PAny& payload) {
-        states.set(states.size(), Ping_SendPing);
+        states.setTop(Ping_SendPing);
         Ping_SendPingEntryImpl();
     }
 
     inline void Ping_WaitPongEntry(const PAny& payload) {
-        states.set(states.size(), Ping_WaitPong);
+        states.setTop(Ping_WaitPong);
     }
 
     inline void DoneEntry(const PAny& payload) {
-        states.set(states.size(), Done);
+        states.setTop(Done);
     }
     /* end Entry Methods */
 
@@ -62,28 +64,64 @@ private:
 
     /* region Jump Tables */
     inline bool isDefered(int state, int event) const override {
-        static const bool _isDefered[][] = {{false,false,false,false,false},{false,false,false,false,false},{false,false,false,false,false},{false,false,false,false,false},{false,false,false,false,false}};
+        static const bool _isDefered[5][5] = 
+            {
+                { true, true, true, true, true} /* halt */,
+                { true,false,false,false,false} /* Ping_Init */,
+                { true,false,false,false,false} /* Ping_SendPing */,
+                { true,false,false,false,false} /* Ping_WaitPong */,
+                { true,false,false,false,false} /* Done */
+            };
         return _isDefered[state][event];
     }
 
     inline bool isGotoTransition(int state, int event) const override {
-        static const bool _isGotoTransition[][] = {{false,false,false,false,false},{false,false,false,false,false},{false,false,false,false,false},{false,false,false,false,false},{false,false,false,false,false}};
+        static const bool _isGotoTransition[5][5] =
+            {
+                {false,false,false,false,false} /* halt */,
+                {false, true,false,false, true} /* Ping_Init */,
+                {false, true,false,false, true} /* Ping_SendPing */,
+                {false, true,false, true,false} /* Ping_WaitPong */,
+                {false, true,false,false,false} /* Done */
+            };
         return _isGotoTransition[state][event];
     }
 
     inline ExitFunction getExitFunction(int state) const override {
-        static ExitFunction _exitFunctions[] = {&exitIgnore,&exitIgnore,&exitIgnore,&exitIgnore,&exitIgnore};
+        #define E(f) ((ExitFunction)&MachinePING::f)
+        static ExitFunction _exitFunctions[] = {&MachinePING::emptyExit,&MachinePING::emptyExit,&MachinePING::emptyExit,&MachinePING::emptyExit,&MachinePING::emptyExit};
+        #undef E
         return _exitFunctions[state];
     }
 
     inline TransitionFunction getTransition(int state, int event) const override {
-        static TransitionFunction _transitions[][] = {{&emptyTransition,NULL,NULL,NULL,NULL},{&emptyTransition,&emptyTransition,&emptyTransition,&emptyTransition,&emptyTransition},{&emptyTransition,NULL,NULL,NULL,NULL},{&emptyTransition,NULL,NULL,&emptyTransition,NULL},{&emptyTransition,&emptyTransition,&emptyTransition,NULL,NULL}};
+        #define E(f) ((TransitionFunction)&MachinePING::f)
+        static TransitionFunction _transitions[5][5] = 
+            {
+                {NULL,NULL,NULL,NULL,NULL},
+                {NULL,E(emptyTransition),NULL,NULL,E(emptyTransition)},
+                {NULL,E(emptyTransition),NULL,NULL,E(emptyTransition)},
+                {NULL,E(emptyTransition),NULL,E(emptyTransition),NULL},
+                {NULL,E(emptyTransition),NULL,NULL,NULL}
+            };
+        #undef E
         return _transitions[state][event];
     }
 
     inline EntryFunction getTransitionEntry(int state, int event) const override {
-        static TransitionFunction _entries[][] = {{&emptyEntry,NULL,NULL,NULL,NULL},{&emptyEntry,&haltEntry,&haltEntry,&haltEntry,&haltEntry},{&emptyEntry,NULL,NULL,NULL,NULL},{&emptyEntry,NULL,NULL,&Ping_SendPingEntry,NULL},{&emptyEntry,&Ping_SendPingEntry,&Ping_WaitPongEntry,NULL,NULL}};
+        #define E(f) ((TransitionFunction)&MachinePING::f)
+        static TransitionFunction _entries[5][5] = 
+            {
+                {NULL,NULL,NULL,NULL,NULL},
+                {NULL,E(haltEntry),NULL,NULL,E(Ping_SendPingEntry)},
+                {NULL,E(haltEntry),NULL,NULL,E(Ping_WaitPongEntry)},
+                {NULL,E(haltEntry),NULL,E(Ping_SendPingEntry),NULL},
+                {NULL,E(haltEntry),NULL,NULL,NULL}
+            };
+        #undef E
         return _entries[state][event];
     }
     /* end Jump Tables */
-}
+};
+
+};

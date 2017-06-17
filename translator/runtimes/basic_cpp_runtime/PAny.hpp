@@ -66,7 +66,7 @@ public:
 		i(i),b(b),m(m),ptr(ptr) 
 	{ }
 	
-	PAny():PAny(typeid(int), 0, false, NULL, NULL) { };
+	PAny():type(NULL) { };
 
 	PAny(const PAny& other) = default;
 
@@ -76,16 +76,17 @@ public:
 
 	PAny& operator=(PAny&& other) = default;
 
-	template<typename T>
-	PAny(const T& v):PAny(typeid(T), 0, false, NULL, new T(v)) { }
+	template<template<typename ...> class Container, typename ...Ts>
+	PAny(const Container<Ts...>& v):
+		PAny(typeid(Container<Ts...>), 0, false, NULL, new Container<Ts...>(v)) { }
 
 	PAny(const int& v):PAny(typeid(int), v, false, NULL, NULL) { }
 
 	PAny(const bool& v):PAny(typeid(bool), 0, v, NULL, NULL) { }
 
-	PAny(PMachine* const & v):PAny(typeid(bool), 0, false, v, NULL) { }
+	PAny(PMachine* v):PAny(typeid(PMachine*), 0, false, v, NULL) { }
 
-	inline explicit operator int() {
+	inline operator int() const {
 		if(type == &typeid(int)) {
 			return i;
 		} else {
@@ -93,7 +94,7 @@ public:
 		}
 	}
 
-	inline explicit operator bool() {
+	inline operator bool() const {
 		if(type == &typeid(bool)) {
 			return b;
 		} else {
@@ -101,7 +102,7 @@ public:
 		}
 	}
 
-	inline explicit operator PMachine*() {
+	inline operator PMachine*() const {
 		if(type == &typeid(PMachine*)) {
 			return m;
 		} else {
@@ -123,7 +124,7 @@ public:
 	};
 
 	template<template<typename ...> class Container, typename ...Ts>
-	explicit operator Container<Ts...>() {
+	operator Container<Ts...>() {
 		return CastJumpTable<DECL_TYPES, Container<Ts...>>::table().at(type)(*this);
 	}
 

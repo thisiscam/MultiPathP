@@ -2,7 +2,7 @@ typeMap ::= [
     "$int$": "int",
     "$bool$": "bool",
     "$null$": "PAny",
-    "$event$": "Event",
+    "$event$": "int",
     "$machine$": "PMachine*",
     "$void$": "void",
     "$seq$": "PList\<<type(t.indexedInnerType)>\>",
@@ -29,7 +29,7 @@ type(t) ::= "<typeMap.(t.name)>"
 typeDefaultValue(t) ::= "<typeDefaultValueMap.(t.name)>"
 prefixMachineName(name) ::= "Machine<name>"
 machineName(machine) ::= "<prefixMachineName(machine.name)>"
-cast(t, exp) ::= "static_cast\<<type(t)>\>(<exp>)"
+cast(t, exp) ::= "static_cast\<<type(t)>>(<exp>)"
 
 MachineImplementationFileName(machine) ::= "<machineName(machine)>.hpp"
 

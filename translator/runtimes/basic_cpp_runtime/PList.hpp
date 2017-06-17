@@ -65,7 +65,7 @@ public:
 
 	inline void removeAt(int idx) {
 		for(int i = idx + 1; i < size(); i++) {
-			data.get(i - 1, data.get(i));
+			data.set(i - 1, data.get(i));
 		}
 		_size--;
 	}
@@ -103,6 +103,10 @@ public:
 			throw out_of_range("PList::get");
 		}
 		data.set(idx, value);
+	}
+
+	inline void setTop(const T& value) {
+		data.set(size() - 1, value);
 	}
 
 	inline bool operator == (const PList<T>& other) const {

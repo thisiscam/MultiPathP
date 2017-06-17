@@ -29,7 +29,7 @@ public abstract class PEvent {
         return Objects.hash(getName());
     }
 
-    static class Builder extends PEvent_Builder {
+    public static class Builder extends PEvent_Builder {
 
     }
 }

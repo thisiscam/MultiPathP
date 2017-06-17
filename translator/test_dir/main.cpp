@@ -4,8 +4,9 @@ using namespace pingpong;
 
 int main(int argc, char const *argv[])
 {
-	Scheduler scheduler;
-	ExecutionEngine engine = ExecutionEngine(scheduler);
-	engine.run(Controller::createMainMachine(engine));
+	ExecutionEngine engine = ExecutionEngine();
+	RandomScheduler scheduler(engine);
+	PMachine* mainMachine = Controller::createMainMachine(engine);
+	engine.run(scheduler, mainMachine);
 	return 0;
 }

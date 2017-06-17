@@ -1,10 +1,10 @@
 #ifndef pingpong_H
 #define pingpong_H
 
-#define DECL_TYPES List<PMachine*, Event>
+#define DECL_TYPES List<PMachine*, int>
 #include "basic_cpp_runtime.h"
 
-using namespace basic_cpp;
+using namespace basic_cpp_runtime;
 
 namespace pingpong {
 
@@ -24,8 +24,13 @@ namespace pingpong {
 
 class Controller {
 public:
+
 	static inline PMachine* createMainMachine(ExecutionEngine& engine) {
-		return new MachinePING();
+		return new MachinePING(engine);
+	}
+
+	static inline void announce(int event, const PAny& payload) {
+
 	}
 };
 

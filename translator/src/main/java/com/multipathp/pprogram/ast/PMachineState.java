@@ -92,5 +92,13 @@ public abstract class PMachineState extends PASTNode {
                 addTransitions(transition);
             }
         }
+
+        @Override
+        public PMachineState build() {
+            if(!getTransitionsMap().containsKey(PEvent.EVENT_NULL)) {
+                putDeferedEvents(PEvent.EVENT_NULL.getName(), PEvent.EVENT_NULL);
+            }
+            return super.build();
+        }
     }
 }

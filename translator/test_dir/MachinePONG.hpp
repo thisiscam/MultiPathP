@@ -10,18 +10,20 @@ public:
     }
 
 private:
-    static const int Pong_WaitPing = 1;
-    static const int Pong_SendPong = 2;
+    enum {
+        Pong_WaitPing = 1,
+        Pong_SendPong = 2
+    };
 
     /* region Entry Methods */
     inline void Pong_WaitPingEntry(const PAny& payload) {
-        states.set(states.size(), Pong_WaitPing);
+        states.setTop(Pong_WaitPing);
         Pong_WaitPingEntryImpl();
     }
 
     inline void Pong_SendPongEntry(const PAny& payload) {
-        states.set(states.size(), Pong_SendPong);
-        Pong_SendPongEntryImpl(cast(com.multipathp.pprogram.types.PType@44543d5, payload));
+        states.setTop(Pong_SendPong);
+        Pong_SendPongEntryImpl(static_cast<PMachine*>(payload));
     }
     /* end Entry Methods */
 
@@ -46,28 +48,56 @@ private:
 
     /* region Jump Tables */
     inline bool isDefered(int state, int event) const override {
-        static const bool _isDefered[][] = {{false,false,false},{false,false,false},{false,false,false},{false,false,false},{false,false,false}};
+        static const bool _isDefered[3][5] = 
+            {
+                { true, true, true, true, true} /* halt */,
+                { true,false,false,false,false} /* Pong_WaitPing */,
+                { true,false,false,false,false} /* Pong_SendPong */
+            };
         return _isDefered[state][event];
     }
 
     inline bool isGotoTransition(int state, int event) const override {
-        static const bool _isGotoTransition[][] = {{false,false,false},{false,false,false},{false,false,false},{false,false,false},{false,false,false}};
+        static const bool _isGotoTransition[3][5] =
+            {
+                {false,false,false,false,false} /* halt */,
+                {false, true, true,false,false} /* Pong_WaitPing */,
+                {false, true,false,false, true} /* Pong_SendPong */
+            };
         return _isGotoTransition[state][event];
     }
 
     inline ExitFunction getExitFunction(int state) const override {
-        static ExitFunction _exitFunctions[] = {&exitIgnore,&exitIgnore,&exitIgnore};
+        #define E(f) ((ExitFunction)&MachinePONG::f)
+        static ExitFunction _exitFunctions[] = {&MachinePONG::emptyExit,&MachinePONG::emptyExit,&MachinePONG::emptyExit};
+        #undef E
         return _exitFunctions[state];
     }
 
     inline TransitionFunction getTransition(int state, int event) const override {
-        static TransitionFunction _transitions[][] = {{&emptyTransition,NULL,NULL},{&emptyTransition,&emptyTransition,&emptyTransition},{&emptyTransition,&emptyTransition,NULL},{&emptyTransition,NULL,NULL},{&emptyTransition,NULL,&emptyTransition}};
+        #define E(f) ((TransitionFunction)&MachinePONG::f)
+        static TransitionFunction _transitions[3][5] = 
+            {
+                {NULL,NULL,NULL,NULL,NULL},
+                {NULL,E(emptyTransition),E(emptyTransition),NULL,NULL},
+                {NULL,E(emptyTransition),NULL,NULL,E(emptyTransition)}
+            };
+        #undef E
         return _transitions[state][event];
     }
 
     inline EntryFunction getTransitionEntry(int state, int event) const override {
-        static TransitionFunction _entries[][] = {{&emptyEntry,NULL,NULL},{&emptyEntry,&haltEntry,&haltEntry},{&emptyEntry,&Pong_SendPongEntry,NULL},{&emptyEntry,NULL,NULL},{&emptyEntry,NULL,&Pong_WaitPingEntry}};
+        #define E(f) ((TransitionFunction)&MachinePONG::f)
+        static TransitionFunction _entries[3][5] = 
+            {
+                {NULL,NULL,NULL,NULL,NULL},
+                {NULL,E(haltEntry),E(Pong_SendPongEntry),NULL,NULL},
+                {NULL,E(haltEntry),NULL,NULL,E(Pong_WaitPingEntry)}
+            };
+        #undef E
         return _entries[state][event];
     }
     /* end Jump Tables */
-}
+};
+
+};

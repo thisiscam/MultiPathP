@@ -13,7 +13,7 @@ HeaderFile(declTypes, projectName, program) ::= <<
 #define DECL_TYPES List\<<declTypes:type(); separator=", ">\>
 #include "basic_cpp_runtime.h"
 
-using namespace basic_cpp;
+using namespace basic_cpp_runtime;
 
 namespace <projectName> {
 
@@ -32,11 +32,11 @@ class Controller {
 public:
 	
 	static inline PMachine* createMainMachine(ExecutionEngine& engine) {
-		return new <machineName(program.mainMachine)>();
+		return new <machineName(program.mainMachine)>(engine);
 	}
 
 	static inline void announce(int event, const PAny& payload) {
-		
+
 	}
 };
 

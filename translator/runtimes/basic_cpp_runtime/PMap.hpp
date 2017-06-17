@@ -20,7 +20,7 @@ public:
 	PMap() = default;
 
     template<typename Kp, typename Vp>
-    explicit operator PMap<Kp, Vp>() {
+    operator PMap<Kp, Vp>() {
     	return PMap<Kp, Vp>(static_cast<PList<PTuple<Kp, Vp>>>(data));
     }
 
