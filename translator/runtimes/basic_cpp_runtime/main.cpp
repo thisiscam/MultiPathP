@@ -6,17 +6,17 @@
 // using namespace basic_cpp_runtime;
 
 static int f(int i) {
-	return i;
+    return i;
 }
 
 static int g() {
-	auto&& a = f(3);
-	return a;
+    auto&& a = f(3);
+    return a;
 }
 
 int main(int argc, char const *argv[])
 {
-	auto&& a = f(1);
-	auto&& b = f(2);
-	std::cout << a + b << std::endl;
+    auto&& a = f(1);
+    auto&& b = f(2);
+    std::cout << a + b << std::endl;
 }

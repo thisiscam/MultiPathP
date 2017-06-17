@@ -11,14 +11,14 @@ class RandomScheduler final : public Scheduler {
 
 protected:
 
-	inline SchedulerChoice chooseMachine() override;
+    inline SchedulerChoice chooseMachine() override;
 
-	inline void startMachine(PMachine* machine, const PAny& payload) override;
+    inline void startMachine(PMachine* machine, const PAny& payload) override;
 
 
 public:
-	
-	RandomScheduler(ExecutionEngine& engine):Scheduler(engine) { }
+    
+    RandomScheduler(ExecutionEngine& engine):Scheduler(engine) { }
 
 };
 

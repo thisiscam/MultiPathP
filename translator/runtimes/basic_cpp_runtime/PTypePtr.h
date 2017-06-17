@@ -5,7 +5,7 @@ namespace basic_cpp_runtime {
 
 class PTypePtr {
 public:
-	virtual ~PTypePtr() = default;
+    virtual ~PTypePtr() = default;
 };
 
 };

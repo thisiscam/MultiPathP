@@ -7,18 +7,18 @@ class Scheduler;
 
 class ExecutionEngine {
 public:
-	ExecutionEngine(int maxIteration=200):
-		maxIteration(maxIteration)
-	{ }
+    ExecutionEngine(int maxIteration=200):
+        maxIteration(maxIteration)
+    { }
 
-	inline void run(Scheduler& scheduler, PMachine* machine);
+    inline void run(Scheduler& scheduler, PMachine* machine);
 
-	bool randomBool();
+    bool randomBool();
 
-	int randomInt(int max);
-	
+    int randomInt(int max);
+    
 private:
-	int maxIteration;
+    int maxIteration;
 };
 
 };

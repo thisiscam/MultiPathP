@@ -6,13 +6,13 @@
 
 inline
 void print_type(const type_info& info) {
-	int s;
-  	std::cout << abi::__cxa_demangle(info.name(), 0, 0, &s) << std::endl;
+    int s;
+    std::cout << abi::__cxa_demangle(info.name(), 0, 0, &s) << std::endl;
 }
 
 template<typename T>
 void print_type() {
-	print_type(typeid(T));
+    print_type(typeid(T));
 }
 
 #endif

@@ -12,51 +12,51 @@ template <typename T0, typename T1>
 class PTuple<T0, T1> final : public PTypePtr {
 
 public:
-	PTuple() = default;
-	
-	PTuple(const T0& v0, const T1& v1):v0(v0),v1(v1) { }
+    PTuple() = default;
+    
+    PTuple(const T0& v0, const T1& v1):v0(v0),v1(v1) { }
 
-	template<typename T0p, typename T1p>
-	operator PTuple<T0p, T1p>() {
-		return PTuple<T0p, T1p>(static_cast<T0p>(v0), static_cast<T1p>(v1));
-	}
+    template<typename T0p, typename T1p>
+    operator PTuple<T0p, T1p>() {
+        return PTuple<T0p, T1p>(static_cast<T0p>(v0), static_cast<T1p>(v1));
+    }
 
-	inline bool operator == (const PTuple<T0, T1>& other) const {
-		return v0 == other.v0 && v1 == other.v1;
-	}
+    inline bool operator == (const PTuple<T0, T1>& other) const {
+        return v0 == other.v0 && v1 == other.v1;
+    }
 
-	inline bool operator != (const PTuple<T0, T1>& other) const {
-		return !(*this == other);
-	}
+    inline bool operator != (const PTuple<T0, T1>& other) const {
+        return !(*this == other);
+    }
 
-	T0 v0;
-	T1 v1;
+    T0 v0;
+    T1 v1;
 };
 
 template <typename T0, typename T1, typename T2>
 class PTuple<T0, T1, T2> final : public PTypePtr {
 
 public:
-	PTuple() = default;
+    PTuple() = default;
 
-	PTuple(const T0& v0, const T1& v1, const T2& v2):v0(v0),v1(v1),v2(v2) { }
+    PTuple(const T0& v0, const T1& v1, const T2& v2):v0(v0),v1(v1),v2(v2) { }
 
-	template<typename T0p, typename T1p, typename T2p>
-	operator PTuple<T0p, T1p, T2p>() {
-		return PTuple<T0p, T1p>(static_cast<T0p>(v0), static_cast<T1p>(v1), static_cast<T2p>(v2));
-	}
+    template<typename T0p, typename T1p, typename T2p>
+    operator PTuple<T0p, T1p, T2p>() {
+        return PTuple<T0p, T1p>(static_cast<T0p>(v0), static_cast<T1p>(v1), static_cast<T2p>(v2));
+    }
 
-	inline bool operator == (const PTuple<T0, T1, T2>& other) const {
-		return v0 == other.v0 && v1 == other.v1 && v2 == other.v2;
-	}
+    inline bool operator == (const PTuple<T0, T1, T2>& other) const {
+        return v0 == other.v0 && v1 == other.v1 && v2 == other.v2;
+    }
 
-	inline bool operator != (const PTuple<T0, T1, T2>& other) const {
-		return !(*this == other);
-	}
+    inline bool operator != (const PTuple<T0, T1, T2>& other) const {
+        return !(*this == other);
+    }
 
-	T0 v0;
-	T1 v1;
-	T2 v2;
+    T0 v0;
+    T1 v1;
+    T2 v2;
 };
 
 
