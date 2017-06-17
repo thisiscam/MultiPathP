@@ -74,7 +74,7 @@ private:
     /* end Function Implementations */
 
     /* region Machine Fields */
-    <machine.varDecls.keys:{varName | <type(machine.varDecls.(varName))> <varName> = <typeDefaultValue(machine.varDecls.(varName))>;}; separator="\n">
+    <machine.varDecls.keys:{varName | <type(machine.varDecls.(varName))> <varName>;}; separator="\n">
     /* end Machine Fields  */
 
     /* region Jump Tables */

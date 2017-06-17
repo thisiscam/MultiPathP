@@ -9,6 +9,7 @@ public class PTypeTuple extends PType implements IPTypeGetIndexable {
 
     public PTypeTuple(Collection<PType> Ts) {
         super("$tuple$", true);
+        this.Ts.addAll(Ts);
     }
 
     public Collection<PType> getInnerTypes() {

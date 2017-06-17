@@ -416,40 +416,12 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
         public Optional<Stmt> visitStmt_assign(pParser.Stmt_assignContext ctx) {
             Exp targetExp = exp(ctx.exp(0));
             Exp rhs = exp(ctx.exp(1));
-            if(targetExp instanceof IdExp) {
-                return Optional.of(
-                        new AssignStmt.Builder()
-                                .setTarget((IdExp)targetExp)
-                                .setExpression(rhs)
-                                .build()
-                );
-            }
-            if(targetExp instanceof GetAttributeExp) {
-                return Optional.of(
-                        new SetAttributeStmt.Builder()
-                                .setTarget((GetAttributeExp)targetExp)
-                                .setExpression(rhs)
-                                .build()
-                );
-            }
-            if(targetExp instanceof GetIndexExp) {
-                return Optional.of(
-                        new SetIndexStmt.Builder()
-                                .setTarget((GetIndexExp)targetExp)
-                                .setExpression(rhs)
-                                .build()
-                );
-            }
-            if(targetExp instanceof GetItemExp) {
-                return Optional.of(
-                        new SetItemStmt.Builder()
-                                .setTarget((GetItemExp)targetExp)
-                                .setExpression(rhs)
-                                .build()
-                );
-            }
-            ErrorReporter.error("Invalid LHS", ctx, set);
-            return null;
+            return Optional.of(
+                    new AssignStmt.Builder()
+                            .setTarget(targetExp)
+                            .setExpression(rhs)
+                            .build()
+            );
         }
 
         @Override
@@ -507,7 +479,9 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
             List<Exp> arguments = ctx.accept(
                     new UtilVisitors.ArgumentListVisitor<>(set, new ExpVisitor())
             );
-            if(arguments.size() == 1) {
+            if(arguments.size() == 0) {
+                return null;
+            } else if(arguments.size() == 1) {
                 return arguments.get(0);
             } else {
                 return new TupleExp.Builder().addAllArguments(arguments).build();
@@ -759,7 +733,8 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
             public Exp visitExp_tuple_n_elems(pParser.Exp_tuple_n_elemsContext ctx) {
                 Exp argumentHead = ctx.exp().accept(this);
                 Collection<Exp> argumentRest = ctx.expr_arg_list().accept(new UtilVisitors.ArgumentListVisitor<>(set, this));
-                return new TupleExp.Builder().addArguments(argumentHead).addAllArguments(argumentRest).build();
+                TupleExp x = new TupleExp.Builder().addArguments(argumentHead).addAllArguments(argumentRest).build();
+                return x;
             }
 
             @Override

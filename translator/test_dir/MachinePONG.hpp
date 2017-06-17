@@ -32,6 +32,7 @@ private:
 
     /* region Function Implementations */
     inline void Pong_WaitPingEntryImpl() {
+
     }
 
     inline void Pong_SendPongEntryImpl(PMachine* payload) {

@@ -30,7 +30,7 @@ public:
 
     inline void insert(const K& k, const V& v) {
         for (int i=0; i < data.size(); i++) {
-            if (k == data.get(i).v0) {
+            if (k == data.get(i).v0()) {
                 throw runtime_error("Reinsertion of key into PMap");
             }
         }
@@ -39,7 +39,7 @@ public:
 
     inline bool containsKey(const K& k) const {
         for (int i=0; i < data.size(); i++) {
-            if (k == data.get(i).v0) {
+            if (k == data.get(i).v0()) {
                 return true;
             }
         }
@@ -48,7 +48,7 @@ public:
 
     inline const V& get(const K& k) const {
         for (int i=0; i < data.size(); i++) {
-            if (k == data.get(i).v0) {
+            if (k == data.get(i).v0()) {
                 return data.get(i).v1;
             }
         }
@@ -57,7 +57,7 @@ public:
 
     inline V& get(const K& k) {
         for (int i=0; i < data.size(); i++) {
-            if (k == data.get(i).v0) {
+            if (k == data.get(i).v0()) {
                 return data.get(i).v1;
             }
         }
@@ -66,7 +66,7 @@ public:
 
     inline void set(const K& k, const V& v) {
         for (int i=0; i < data.size(); i++) {
-            if (k == data.get(i).v0) {
+            if (k == data.get(i).v0()) {
                 data.get(i).v1 = v;
                 return;
             }
@@ -80,7 +80,7 @@ public:
         PList<K> ret;
         for(int i = 0; i < data.size(); i++)
         {
-            ret.add(data[i].v0);
+            ret.add(data[i].v0());
         }
         return ret;
     }
@@ -98,7 +98,7 @@ public:
     inline bool operator == (const PMap<K, V>& other) const {
         if(size() == other.size()) {
             for(int i=0; i < size(); i++) {
-                if(other.containsEntry(data.get(i).v0, data.get(i).v1)) {
+                if(other.containsEntry(data.get(i).v0(), data.get(i).v1)) {
                     return true;
                 }
             }
@@ -116,7 +116,7 @@ private:
 
     inline bool containsEntry(const K& k, const V& v) const {
         for(int i=0; i < size(); i++) {
-            if (k == data.get(i).v0) {
+            if (k == data.get(i).v0()) {
                 return v == data.get(i).v1;
             }
         }

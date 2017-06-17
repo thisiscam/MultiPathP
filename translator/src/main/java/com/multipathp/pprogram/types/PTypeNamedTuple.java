@@ -10,7 +10,7 @@ public class PTypeNamedTuple extends PType implements IPTypeGetIndexable {
 
     public PTypeNamedTuple(LinkedHashMap<String, PType> namedTypes) {
         super("$namedtuple$", true);
-        this.namedTypes = namedTypes;
+        this.namedTypes.putAll(namedTypes);
     }
 
     public Collection<PType> getInnerTypes() {

@@ -49,7 +49,6 @@ public:
         return ret;
     }
 
-
     inline void add(const T& item) {
         data.set(size(), item);
         _size++;
@@ -61,6 +60,10 @@ public:
         }
         data.set(idx, item);
         _size++;
+    }
+
+    inline void insert(PTuple<int, T> item) {
+        insert(item.v0(), item.v1());
     }
 
     inline void removeAt(int idx) {
