@@ -34,22 +34,15 @@ private:
 
     /* region Function Implementations */
     inline void InitEntryImpl(PMachine* payload) {
-        auto&& tmp58 = payload;
-        coor = tmp58;
-        auto&& tmp59 = eUnit;
-        raise(tmp59); retcode = RAISED_EVENT; return;
+        coor = payload;
+        raise(eUnit); retcode = RAISED_EVENT; return;
     }
 
     inline void HandlerImpl0() {
-        auto&& tmp60 = randomBool();
-        if(tmp60) {
-            auto&& tmp61 = coor;
-            auto&& tmp62 = eSuccess;
-            send(tmp61, tmp62);
+        if(randomBool()) {
+            send(coor, eSuccess);
         } else {
-            auto&& tmp63 = coor;
-            auto&& tmp64 = eFailure;
-            send(tmp63, tmp64);
+            send(coor, eFailure);
         }
     }
     /* end Function Implementations */

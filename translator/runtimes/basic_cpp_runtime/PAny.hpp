@@ -61,10 +61,6 @@ private:
     struct EqHelperFunctor;
 
 public:
-    PAny(const type_info& type, int i, bool b, PMachine* m, PTypePtr* ptr):
-        type(&type),
-        i(i),b(b),m(m),ptr(ptr) 
-    { }
     
     PAny():type(NULL) { };
 
@@ -78,15 +74,26 @@ public:
 
     template<template<typename ...> class Container, typename ...Ts>
     PAny(const Container<Ts...>& v):
-        PAny(typeid(Container<Ts...>), 0, false, NULL, new Container<Ts...>(v)) { }
+        type(&typeid(Container<Ts...>)), 
+        ptr(new Container<Ts...>(v))
+    { }
 
-    PAny(const int& v):PAny(typeid(int), v, false, NULL, NULL) { }
+    PAny(const int& v):
+        type(&typeid(int)), 
+        i(v) 
+    { }
 
-    PAny(const bool& v):PAny(typeid(bool), 0, v, NULL, NULL) { }
+    PAny(const bool& v):
+        type(&typeid(bool)),
+        b(v) 
+    { }
 
-    PAny(PMachine* v):PAny(typeid(PMachine*), 0, false, v, NULL) { }
+    PAny(PMachine* const & v):
+        type(&typeid(PMachine*)),
+        m(v)
+    { }
 
-    inline operator int() const {
+    inline operator const int&() const {
         if(type == &typeid(int)) {
             return i;
         } else {
@@ -94,7 +101,7 @@ public:
         }
     }
 
-    inline operator bool() const {
+    inline operator const bool&() const {
         if(type == &typeid(bool)) {
             return b;
         } else {
@@ -102,7 +109,7 @@ public:
         }
     }
 
-    inline operator PMachine*() const {
+    inline operator PMachine* const &() const {
         if(type == &typeid(PMachine*)) {
             return m;
         } else {

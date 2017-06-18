@@ -33,24 +33,11 @@ cast(t, exp) ::= "static_cast\<<type(t)>>(<exp>)"
 
 MachineImplementationFileName(machine) ::= "<machineName(machine)>.hpp"
 
-Render_(node, refDecl) ::= <<
+Render(node) ::= <<
 <if(node)><(node:{t | <t.class.superclass.simpleName>})(node)><endif>
 >>
 
-RenderNoDecl(node) ::= "<Render_(node, false)>"
-
-Render(node) ::= "<Render_(node, true)>"
-
-MaybeRenderStmt(node) ::= <<
-<if(node)><Render(node)>
-<endif>
->>
-
 LValue(node) ::= "<(node:{t | <t.class.superclass.simpleName>LValue})(node)>"
-
-Arg(node) ::= "<if(node)>tmp<node.reference><endif>"
-
-ExpRef() ::= "<if(refDecl)>auto&& <endif><Arg(node)> ="
 
 FunctionParams(params) ::= <<
 <params.keys: {id | <type(params.(id))> <id>}; separator=", ">
@@ -68,40 +55,41 @@ StmtBlock(node) ::= <<
 <Render(node.stmtList)>
 >>
 
-SendArgsHelper() ::= <<
-<Arg(node.eventExpression)><if(node.payloadExpression)>, <Arg(node.payloadExpression)><endif>
+PayloadExpression() ::= <<
+<if(node.payloadExpression)>, <Render(node.payloadExpression)><endif>
+>>
+
+EventPayloadArguments() ::= <<
+<Render(node.eventExpression)><PayloadExpression()>
 >>
 
 AnnounceStmt(node) ::= <<
-<Render(node.eventExpression)>
-<MaybeRenderStmt(node.payloadExpression)><\\>
-Controller::announce(<SendArgsHelper()>);
+Controller::announce(<EventPayloadArguments()>);
 >>
 
 AssertStmt(node) ::= <<
-<Render(node.exp)>
-assert(<Arg(node.exp)>, "<node.message>");
+assert(<Render(node.exp)>, "<node.message>");
 >>
 
 AssignStmt(node) ::= <<
-<Render(node.expression)>
-<LValue(node.target)> = <Arg(node.expression)>;
+<LValue(node.target)> = <Render(node.expression)>;
 >>
 
 ConditionalStmt(node) ::= <<
-<Render(node.condition)>
-if(<Arg(node.condition)>) {
+if(<Render(node.condition)>) {
     <Render(node.thenBranch)>
 }<if(node.elseBranch)> else {
     <Render(node.elseBranch)>
 }<endif>
 >>
 
-ExpStmt(node) ::= "<Render(node.expression)>"
+ExpStmt(node) ::= <<
+<Render(node.expression)>;<//>
+<if(node.expression.canRaiseEvent)>if(retcode == RAISED_EVENT) { return<if(function.retType)> <typeDefaultValue(function.retType)><endif>; }<endif>
+>>
 
 InsertStmt(node) ::= <<
-<[node.target, node.expression]:Render(); separator="\n">
-<Arg(node.target)>.insert(<Arg(node.expression)>);
+<Render(node.target)>.insert(<Render(node.expression)>);
 >>
 
 PrintStmt(node) ::= <<
@@ -109,25 +97,19 @@ print("<node.string>");
 >>
 
 RaiseStmt(node) ::= <<
-<Render(node.eventExpression)>
-<MaybeRenderStmt(node.payloadExpression)><\\>
-raise(<SendArgsHelper()>); retcode = RAISED_EVENT; return;
+raise(<EventPayloadArguments()>); retcode = RAISED_EVENT; return;
 >>
 
 RemoveStmt(node) ::= <<
-<[node.target, node.expression]:Render(); separator="\n">
-<Arg(node.target)>.removeAt(<Arg(node.expression)>);
+<Render(node.target)>.removeAt(<Render(node.expression)>);
 >>
 
 ReturnStmt(node) ::= <<
-<Render(node.expression)>
-return<if(node.expression)> <Arg(node.expression)><endif>;
+return<if(node.expression)> <Render(node.expression)><endif>;
 >>
 
 SendStmt(node) ::= <<
-<[node.targetExpression, node.eventExpression]:Render(); separator="\n">
-<MaybeRenderStmt(node.payloadExpression)><\\>
-send(<Arg(node.targetExpression)>, <SendArgsHelper()>);
+send(<Render(node.targetExpression)>, <EventPayloadArguments()>);
 >>
 
 StmtListStmt(node) ::= <<
@@ -135,10 +117,8 @@ StmtListStmt(node) ::= <<
 >>
 
 WhileStmt(node) ::= <<
-<Render(node.condition)>
-while(<Arg(node.condition)>) {
+while(<Render(node.condition)>) {
     <Render(node.stmt)>
-    <RenderNoDecl(node.condition)>
 }
 >>
 
@@ -149,9 +129,7 @@ ArithmeticExpKindMap ::= [
     "DIV": "/"
 ]
 ArithmeticExp(node) ::= <<
-<Render(node.left)>
-<Render(node.right)>
-<ExpRef()> <Arg(node.left)> <ArithmeticExpKindMap.(node.kind)> <Arg(node.right)>;
+<Render(node.left)> <ArithmeticExpKindMap.(node.kind)> <Render(node.right)>
 >>
 
 BinaryLogicExpKindMap ::= [
@@ -159,9 +137,7 @@ BinaryLogicExpKindMap ::= [
     "AND": "&"
 ]
 BinaryLogicExp(node) ::= <<
-<Render(node.left)>
-<Render(node.right)>
-<ExpRef()> <Arg(node.left)> <BinaryLogicExpKindMap.(node.kind)> <Arg(node.right)>;
+<Render(node.left)> <BinaryLogicExpKindMap.(node.kind)> <Render(node.right)>
 >>
 
 BoolLiteralExpKindMap ::= [
@@ -171,14 +147,11 @@ BoolLiteralExpKindMap ::= [
 BoolLiteralExp(node) ::= "<BoolLiteralExpKindMap.(node.kind)>"
 
 CallExp(node) ::= <<
-<node.arguments:Render(); separator="\n">
-<ExpRef()> <node.functionName>(<node.arguments:Arg(); separator=", ">);
-<if(node.canRaiseEvent)>if(retcode == Constants.RAISED_EVENT) { return<if(function.retType)> <typeDefaultValue(function.retType)><endif>; }<endif>
+<node.functionName>(<node.arguments:Render(); separator=",">)
 >>
 
 CastExp(node) ::= <<
-<Render(node.expression)>
-<ExpRef()> <cast(node.castToType, Arg(node.expression))>;
+<cast(node.castToType, Render(node.expression))>
 >>
 
 ComparisonExpKindMap ::= [
@@ -190,27 +163,24 @@ ComparisonExpKindMap ::= [
     "EQ": "=="
 ]
 ComparisonExp(node) ::= <<
-<Render(node.left)>
-<Render(node.right)>
-<ExpRef()> <Arg(node.left)> <ComparisonExpKindMap.(node.kind)> <Arg(node.right)>;
+<Render(node.left)> <ComparisonExpKindMap.(node.kind)> <Render(node.right)>
 >>
 
 DefaultExp(node) ::= <<
-<ExpRef()> <typeDefaultValue(node.typeForDefault)>;
+<typeDefaultValue(node.typeForDefault)>
 >>
 
 GetAttributeExp(node) ::= <<
-<Render(node.targetExpression)>
-<ExpRef()> <Arg(node.targetExpression)>.v<node.index>;
+<Render(node.targetExpression)>.v<node.index>()
 >>
 
 GetAttributeExpLValue(node) ::= <<
-<LValue(node.targetExpression)>.v<node.index>
+<LValue(node.targetExpression)>.v<node.index>l()
 >>
 
 GetIndexExp(node) ::= <<
 <Render(node.targetExpression)>
-<ExpRef()> <Arg(node.targetExpression)>.v<node.index>();
+<Render(node.targetExpression)>.v<node.index>()
 >>
 
 GetIndexExpLValue(node) ::= <<
@@ -218,49 +188,43 @@ GetIndexExpLValue(node) ::= <<
 >>
 
 GetItemExp(node) ::= <<
-<Render(node.targetExpression)>
-<Render(node.indexerExpression)>
-<ExpRef()> <Arg(node.targetExpression)>.get(<Arg(node.indexerExpression)>);
+<Render(node.targetExpression)>.get(<Render(node.indexerExpression)>)
 >>
 
 GetItemExpLValue(node) ::= <<
-<Render(node.targetExpression)>
-<Render(node.indexerExpression)>
-<ExpRef()> <Arg(node.targetExpression)>.getl(<Arg(node.indexerExpression)>);
+<Render(node.targetExpression)>.getl(<Render(node.indexerExpression)>)
 >>
 
 GroupExp(node) ::= <<
-<Render(node.expression)>
+(<Render(node.expression)>)
 >>
 
 HaltExp(node) ::= <<
-<ExpRef()> EVENT_HALT;
+EVENT_HALT
 >>
 
 IdExp(node) ::= <<
-<ExpRef()> <node.name>;
+<node.name>
 >>
 
-IdExpLValue(node) ::= "<node.name>"
+IdExpLValue(node) ::= <<
+<node.name>
+>>
 
 InExp(node) ::= <<
-<Render(node.right)>
-<Render(node.left)>
-<ExpRef()> <Arg(node.right)>.containsKey(<Arg(node.left)>);
+<Render(node.right)>.containsKey(<Render(node.left)>)
 >>
 
 IntExp(node) ::= <<
-<ExpRef()> <node.value>;
+<node.value>
 >>
 
 KeysExp(node) ::= <<
-<Render(node.expression)>
-<ExpRef()> <Args(node.expression)>.keys();
+<Render(node.expression)>.keys()
 >>
 
 MinusExp(node) ::= <<
-<Render(node.expression)>
-<ExpRef()> -<Arg(node.expression)>;
+-<Render(node.expression)>;
 >>
 
 NamedTupleExp(node) ::= <<
@@ -268,38 +232,33 @@ NamedTupleExp(node) ::= <<
 >>
 
 NewExp(node) ::= <<
-<MaybeRenderStmt(node.payloadExpression)><\\>
-<ExpRef()> create\<<prefixMachineName(node.machineIdentifier)>\>(<Arg(node.payloadExpression)>);
+create\<<prefixMachineName(node.machineIdentifier)>\>(<Render(node.payloadExpression)>)
 >>
 
 NondetExp(node) ::= <<
-<ExpRef()> randomBool();
+randomBool()
 >>
 
 NotExp(node) ::= <<
-<Render(node.expression)>
-<ExpRef()> !<Arg(node.expression)>;
+!<Render(node.expression)>
 >>
 
 NullExp(node) ::= <<
-<ExpRef()> NULL;
+NULL
 >>
 
 SizeofExp(node) ::= <<
-<Render(node.expression)>
-<ExpRef()> <Arg(node.expression)>.size();
+<Render(node.expression)>.size()
 >>
 
 ThisExp(node) ::= <<
-<ExpRef()> this;
+this
 >>
 
 TupleExp(node) ::= <<
-<node.arguments:Render(); separator="\n">
-<ExpRef()> <type(node.expressionType)>(<node.arguments:Arg(); separator=", ">);
+<type(node.expressionType)>(<node.arguments:Render(); separator=", ">)
 >>
 
 ValueExp(node) ::= <<
-<Render(node.expression)>
-<ExpRef()> <Arg(node.expression)>.values();
+<Render(node.expression)>.values()
 >>

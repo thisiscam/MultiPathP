@@ -2,6 +2,7 @@
 #define PTUPLE_HPP
 
 #include "PTypePtr.h"
+#include "Ref.hpp"
 
 namespace basic_cpp_runtime {
 
@@ -29,12 +30,11 @@ public:
         return !(*this == other);
     }
 
+    inline const T0& v0() const { return _v0; }
+    inline const T1& v1() const { return _v1; }
 
-    const T0& v0() { return _v0; }
-    const T1& v1() { return _v1; }
-
-    T0& v0l() { return _v0; }
-    T1& v1l() { return _v1; }
+    inline Ref<T0> v0l() { return _v0; }
+    inline Ref<T1> v1l() { return _v1; }
 
     T0 _v0;
     T1 _v1;
@@ -61,19 +61,34 @@ public:
         return !(*this == other);
     }
 
-    const T0& v0() { return _v0; }
-    const T1& v1() { return _v1; }
-    const T2& v2() { return _v2; }
+    inline const T0& v0() const { return _v0; }
+    inline const T1& v1() const { return _v1; }
+    inline const T2& v2() const { return _v2; }
 
-    T0& v0l() { return _v0; }
-    T1& v1l() { return _v1; }
-    T2& v2l() { return _v2; }
+    inline Ref<T0> v0l() { return _v0; }
+    inline Ref<T1> v1l() { return _v1; }
+    inline Ref<T2> v2l() { return _v2; }
 
     T0 _v0;
     T1 _v1;
     T2 _v2;
 };
 
+
+template<typename T0, typename T1>
+class Ref<PTuple<T0, T1>> final {
+    REF_BODY(PTuple<T0, T1>)
+    Ref<T0> v0l() { return value->v0l(); }
+    Ref<T1> v1l() { return value->v1l(); }
+};
+
+template<typename T0, typename T1, typename T2>
+class Ref<PTuple<T0, T1, T2>> final {
+    REF_BODY(PTuple<T0, T1, T2>)
+    Ref<T0> v0l() { return value->v0l(); }
+    Ref<T1> v1l() { return value->v1l(); }
+    Ref<T2> v2l() { return value->v2l(); }
+};
 
 };
 

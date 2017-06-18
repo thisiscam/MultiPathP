@@ -23,18 +23,18 @@ public:
 
     PList(const PList& other):_size(other.size()) {
         for(int i=0; i < other.size(); i++) {
-            data.set(i, other.data.get(i));
+            data.getl(i) = other.data.get(i);
         }
     }
 
-    inline int size() const {
+    inline const int& size() const {
         return _size;
     }
 
     inline const PList& operator=(const PList& other)
     {
         for(int i=0; i < other.size(); i++) {
-            data.set(i, other.data.get(i));
+            data.getl(i) = other.data.get(i);
         }
         _size = other.size();
         return *this;
@@ -50,15 +50,15 @@ public:
     }
 
     inline void add(const T& item) {
-        data.set(size(), item);
+        data.getl(size()) = item;
         _size++;
     }
 
-    inline void insert(int idx, const T& item) {
+    inline void insert(const int& idx, const T& item) {
         for(int i = size(); i > idx; i--) {
-            data.set(i, data.get(i - 1));
+            data.getl(i) = data.get(i - 1);
         }
-        data.set(idx, item);
+        data.getl(idx) = item;
         _size++;
     }
 
@@ -66,50 +66,43 @@ public:
         insert(item.v0(), item.v1());
     }
 
-    inline void removeAt(int idx) {
+    inline void removeAt(const int& idx) {
         for(int i = idx + 1; i < size(); i++) {
-            data.set(i - 1, data.get(i));
+            data.getl(i - 1) = data.get(i);
         }
         _size--;
     }
 
-    inline void removeRange(int start, int count) {
+    inline void removeRange(const int& start, const int& count) {
         for (int i = start + count; i < size(); i++) {
-            data.set(i - count, data.get(i));
+            data.getl(i - count) = data.get(i);
         }
         _size = _size - count;
     }
 
-    inline void removeRange(int start) {
+    inline void removeRange(const int& start) {
         if(size() < start) {
             throw new out_of_range("PList::removeRange");
         }
         _size = start;
     }
 
-    inline const T& get(const int idx) const {
+    inline T get(const int& idx) const {
         if(idx >= size()) {
             throw out_of_range("PList::get");
         }
         return data.get(idx);
     }
 
-    inline T& get(const int idx) {
+    inline Ref<T> getl(const int& idx) {
         if(idx >= size()) {
             throw out_of_range("PList::get");
         }
-        return data.get(idx);
-    }
-
-    inline void set(const int idx, const T& value) {
-        if(idx >= size()) {
-            throw out_of_range("PList::get");
-        }
-        data.set(idx, value);
+        return data.getl(idx);
     }
 
     inline void setTop(const T& value) {
-        data.set(size() - 1, value);
+        data.getl(size() - 1) = value;
     }
 
     inline bool operator == (const PList<T>& other) const {
@@ -132,6 +125,12 @@ public:
 private:
     int _size = 0;
     DefaultArray<T> data;
+};
+
+template<typename T>
+class Ref<PList<T>> final {
+    REF_BODY(PList<T>)
+    Ref<T> getl(const int idx) { return value->getl(idx); }
 };
 
 };

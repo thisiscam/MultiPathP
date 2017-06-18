@@ -28,28 +28,13 @@ private:
     inline void InitEntryImpl() {
         PMachine* coor;
         int index;
-        auto&& tmp2 = create<MachineCoordinateMachine>();
-        coor = tmp2;
-        auto&& tmp4 = 0;
-        index = tmp4;
-        auto&& tmp5 = index;
-        auto&& tmp6 = 5;
-        auto&& tmp7 = tmp5 < tmp6;
-        while(tmp7) {
-            auto&& tmp8 = randomBool();
-            if(tmp8) {
-                auto&& tmp9 = coor;
-                auto&& tmp10 = eTransaction;
-                auto&& tmp11 = index;
-                send(tmp9, tmp10, tmp11);
+        coor = create<MachineCoordinateMachine>();
+        index = 0;
+        while(index < 5) {
+            if(randomBool()) {
+                send(coor, eTransaction, index);
             }
-            auto&& tmp13 = index;
-            auto&& tmp14 = 1;
-            auto&& tmp15 = tmp13 + tmp14;
-            index = tmp15;
-            auto&& tmp5 = index;
-            auto&& tmp6 = 5;
-            tmp7 = tmp5 < tmp6;
+            index = index + 1;
         }
     }
     /* end Function Implementations */
