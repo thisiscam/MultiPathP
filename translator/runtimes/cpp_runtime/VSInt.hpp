@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <cassert>
 
+#include "ValueSummaryOperations.h"
+
 namespace RUNTIME_NAMESPACE {
 
 template<>
@@ -61,47 +63,47 @@ public:
     }
 
     inline ValueSummary<int> operator +(const ValueSummary<int>& b) const {
-        return binaryOp<int>(*this, b, [](int a, int b) { return a + b; });
+        return binaryOp<ValueSummary<int>>(*this, b, [](int a, int b) { return a + b; });
     }
 
     inline ValueSummary<int> operator -(const ValueSummary<int>& b) const {
-        return binaryOp<int>(*this, b, [](int a, int b) { return a - b; });
+        return binaryOp<ValueSummary<int>>(*this, b, [](int a, int b) { return a - b; });
     }
 
     inline ValueSummary<int> operator *(const ValueSummary<int>& b) const {
-        return binaryOp<int>(*this, b, [](int a, int b) { return a * b; });
+        return binaryOp<ValueSummary<int>>(*this, b, [](int a, int b) { return a * b; });
     }
 
     inline ValueSummary<int> operator /(const ValueSummary<int>& b) const {
-        return binaryOp<int>(*this, b, [](int a, int b) { return a / b; });
+        return binaryOp<ValueSummary<int>>(*this, b, [](int a, int b) { return a / b; });
     }
 
     inline ValueSummary<bool> operator <(const ValueSummary<int>& b) const {
-        return binaryOp<bool>(*this, b, [](int a, int b) { return a < b; });
+        return binaryOp<ValueSummary<bool>>(*this, b, [](int a, int b) { return a < b; });
     }
 
     inline ValueSummary<bool> operator <=(const ValueSummary<int>& b) const {
-        return binaryOp<bool>(*this, b, [](int a, int b) { return a <= b; });
+        return binaryOp<ValueSummary<bool>>(*this, b, [](int a, int b) { return a <= b; });
     }
 
     inline ValueSummary<bool> operator >(const ValueSummary<int>& b) const {
-        return binaryOp<bool>(*this, b, [](int a, int b) { return a > b; });
+        return binaryOp<ValueSummary<bool>>(*this, b, [](int a, int b) { return a > b; });
     }
 
     inline ValueSummary<bool> operator >=(const ValueSummary<int>& b) const {
-        return binaryOp<bool>(*this, b, [](int a, int b) { return a >= b; });
+        return binaryOp<ValueSummary<bool>>(*this, b, [](int a, int b) { return a >= b; });
     }
 
     inline ValueSummary<bool> operator ==(const ValueSummary<int>& b) const {
-        return binaryOp<bool>(*this, b, [](int a, int b) { return a == b; });
+        return binaryOp<ValueSummary<bool>>(*this, b, [](int a, int b) { return a == b; });
     }
 
     inline ValueSummary<bool> operator !=(const ValueSummary<int>& b) const {
-        return binaryOp<bool>(*this, b, [](int a, int b) { return a != b; });
+        return binaryOp<ValueSummary<bool>>(*this, b, [](int a, int b) { return a != b; });
     }
 
     inline ValueSummary<int> operator -() {
-        return unaryOp<int>(*this, [](int a) { return -a; });
+        return unaryOp<ValueSummary<int>>(*this, [](int a) { return -a; });
     }
 
     inline ValueSummary<int>& operator ++() {
@@ -147,13 +149,11 @@ public:
 
     friend std::ostream& operator<<(std::ostream&, const ValueSummary<int>&);
 
-    template<typename ReturnType, typename A, typename B, typename BinOp>
-    friend ValueSummary<ReturnType>
-    binaryOp(const ValueSummary<A>& a, const ValueSummary<B>& b, BinOp&& binOp);
+    template<typename, bool, typename, typename, typename>
+    friend struct BinaryOpFunctor;
 
-    template<typename ReturnType, typename A, typename UnaryOp>
-    friend ValueSummary<ReturnType> 
-    unaryOp(const ValueSummary<A>& a, UnaryOp&& uOp);
+    template<typename, bool, typename, typename>
+    friend struct UnaryOpFunctor;
 
 private:
 
@@ -168,6 +168,12 @@ public:
             values[value] |= pred;
         }
 
+        void addValue(const Bdd& pred, const ValueSummary<int>& values) {
+            for(const auto& v : values.values) {
+                addValue(v.second, v.first);
+            }
+        }
+
         ValueSummary<int> build() {
             return ValueSummary<int>(values);
         }
@@ -177,91 +183,91 @@ public:
 };
 
 inline ValueSummary<int> operator+(const ValueSummary<int>& a, int b) {
-    return unaryOp<int>(a, [=](int a) { return a + b; });
+    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a + b; });
 }
 
 inline ValueSummary<int> operator+(int b, const ValueSummary<int>& a) {
-    return unaryOp<int>(a, [=](int a) { return a + b; });
+    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a + b; });
 }
 
 inline ValueSummary<int> operator-(const ValueSummary<int>& a, int b) {
-    return unaryOp<int>(a, [=](int a) { return a - b; });
+    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a - b; });
 }
 
 inline ValueSummary<int> operator-(int b, const ValueSummary<int>& a) {
-    return unaryOp<int>(a, [=](int a) { return a - b; });
+    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a - b; });
 }
 
 inline ValueSummary<int> operator*(const ValueSummary<int>& a, int b) {
-    return unaryOp<int>(a, [=](int a) { return a * b; });
+    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a * b; });
 }
 
 inline ValueSummary<int> operator*(int b, const ValueSummary<int>& a) {
-    return unaryOp<int>(a, [=](int a) { return a * b; });
+    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a * b; });
 }
 
 inline ValueSummary<int> operator/(const ValueSummary<int>& a, int b) {
-    return unaryOp<int>(a, [=](int a) { return a / b; });
+    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a / b; });
 }
 
 inline ValueSummary<int> operator/(int b, const ValueSummary<int>& a) {
-    return unaryOp<int>(a, [=](int a) { return a / b; });
+    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a / b; });
 }
 
 inline ValueSummary<int> operator%(const ValueSummary<int>& a, int b) {
-    return unaryOp<int>(a, [=](int a) { return a % b; });
+    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a % b; });
 }
 
 inline ValueSummary<int> operator%(int b, const ValueSummary<int>& a) {
-    return unaryOp<int>(a, [=](int a) { return a % b; });
+    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a % b; });
 }
 
 inline ValueSummary<bool> operator>(const ValueSummary<int>& a, int b) {
-    return unaryOp<bool>(a, [=](int a) { return a > b; });
+    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a > b; });
 }
 
 inline ValueSummary<bool> operator>(int b, const ValueSummary<int>& a) {
-    return unaryOp<bool>(a, [=](int a) { return a > b; });
+    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a > b; });
 }
 
 inline ValueSummary<bool> operator>=(const ValueSummary<int>& a, int b) {
-    return unaryOp<bool>(a, [=](int a) { return a >= b; });
+    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a >= b; });
 }
 
 inline ValueSummary<bool> operator>=(int b, const ValueSummary<int>& a) {
-    return unaryOp<bool>(a, [=](int a) { return a >= b; });
+    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a >= b; });
 }
 
 inline ValueSummary<bool> operator<(const ValueSummary<int>& a, int b) {
-    return unaryOp<bool>(a, [=](int a) { return a < b; });
+    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a < b; });
 }
 
 inline ValueSummary<bool> operator<(int b, const ValueSummary<int>& a) {
-    return unaryOp<bool>(a, [=](int a) { return a < b; });
+    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a < b; });
 }
 
 inline ValueSummary<bool> operator<=(const ValueSummary<int>& a, int b) {
-    return unaryOp<bool>(a, [=](int a) { return a <= b; });
+    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a <= b; });
 }
 
 inline ValueSummary<bool> operator<=(int b, const ValueSummary<int>& a) {
-    return unaryOp<bool>(a, [=](int a) { return a <= b; });
+    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a <= b; });
 }
 
 inline ValueSummary<bool> operator==(const ValueSummary<int>& a, int b) {
-    return unaryOp<bool>(a, [=](int a) { return a == b; });
+    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a == b; });
 }
 
 inline ValueSummary<bool> operator==(int b, const ValueSummary<int>& a) {
-    return unaryOp<bool>(a, [=](int a) { return a == b; });
+    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a == b; });
 }
 
 inline ValueSummary<bool> operator!=(const ValueSummary<int>& a, int b) {
-    return unaryOp<bool>(a, [=](int a) { return a != b; });
+    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a != b; });
 }
 
 inline ValueSummary<bool> operator!=(int b, const ValueSummary<int>& a) {
-    return unaryOp<bool>(a, [=](int a) { return a != b; });
+    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a != b; });
 }
 
 std::ostream& operator<<(std::ostream& os, const ValueSummary<int>& v)  

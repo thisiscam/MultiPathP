@@ -34,7 +34,7 @@ public:
 
     virtual void startMachine(Ptr<PMachine> machine, const PAny& payload = PAny()) = 0;
 
-    inline bool step();
+    inline Bool step();
 
 };
 

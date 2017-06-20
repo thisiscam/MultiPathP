@@ -12,7 +12,7 @@
 // }
 
 #include <iostream>
-#define DECL_TYPES List<int, PAny, PTuple<int, int>, PList<PTuple<int, int>>>
+#define DECL_TYPES List<int, PTuple<int, int>, PList<PTuple<int, int>>>
 #define USE_VALUE_SUMMARY
 #include "basic_cpp_runtime.h"
 

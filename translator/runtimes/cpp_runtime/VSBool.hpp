@@ -64,7 +64,7 @@ public:
     class Builder {
 
     public: 
-        void addValue(const Bdd& pred, bool value) {
+        inline void addValue(const Bdd& pred, bool value) {
             if(value) {
                 T |= pred;
             } else {
@@ -72,7 +72,12 @@ public:
             }
         }
 
-        ValueSummary<bool> build() {
+        void addValue(const Bdd& pred, const ValueSummary<bool>& values) {
+            addValue(values.T, true);
+            addValue(values.F, false);
+        }
+
+        inline ValueSummary<bool> build() {
             return ValueSummary<bool>(T, F);
         }
 

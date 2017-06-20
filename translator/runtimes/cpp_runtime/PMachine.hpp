@@ -42,31 +42,40 @@ public:
 
     virtual void start(const PAny& payload) = 0;
 
-    inline Int canServeEvent(Int e) {
-        for(Int i = states.size() - 1; i >= 0; i--) {
+    inline FUNCTION_DECL(Int, canServeEvent, (Int e), {
+        FOR(Int i = states.size() - 1, i >= 0, --i, {
             Int state = states.get(i);
-            if(isDefered(state, e)) {
-                return -1;
-            } else if(getTransition(state, e) != NULL) {
-                return i;
-            }
-        }
+            IF(isDefered(state, e)) 
+            THEN({
+                RETURN(-1);
+            }) 
+            ELSE({
+                IF(getTransition(state, e) != NULL) 
+                THEN({
+                    RETURN(i);
+                })
+                ENDIF()
+            })
+            ENDIF()
+        })
         throw runtime_error("Unhandled event");
-    }
+    })
 
-    inline void step(Int stateIndex, Int e, const PAny& payload = PAny()) {
+    inline FUNCTION_DECL(void, step, (Int stateIndex, Int e, const PAny& payload = PAny()), {
         Int state = states.get(stateIndex);
-        if(isGotoTransition(state, e)) {
-            for(Int i = states.size() - 1; i > stateIndex; i--) {
+        IF(isGotoTransition(state, e)) 
+        THEN({
+            FOR(Int i = states.size() - 1, i > stateIndex, --i, {
                 popState();
-            }
-        }
+            })
+        })
+        ENDIF()
         retcode = EXECUTE_FINISHED;
         TransitionFunction transitionFn = getTransition(state, e);
         (this->*transitionFn)(payload);
         EntryFunction entryFn = getTransitionEntry(state, e);
         (this->*entryFn)(payload);
-    }
+    })
 
 protected:
 
@@ -81,36 +90,41 @@ protected:
         return machine;
     }
 
-    inline void raise(Int e, const PAny& payload = PAny()) {
-        for(Int i = states.size() - 1; i >= 0; i--) {
+    inline FUNCTION_DECL(void, raise, (Int e, const PAny& payload = PAny()), {
+        FOR(Int i = states.size() - 1, i >= 0, --i, {
             Int state = states.get(i);
             TransitionFunction f = getTransition(state, e);
-            if(f != NULL) {
+            IF(f != NULL)
+            THEN({
                 (this->*f)(payload);
                 EntryFunction entryFn = getTransitionEntry(state, e);
                 (this->*entryFn)(payload);
-                return;
-            } else {
+                RETURN();
+            })
+            ELSE({
                 popState();
-            }
-        }
+            })
+            ENDIF()
+        })
         throw runtime_error("Unhandled event");
-    }
+    })
 
-    inline void popState() {
+    inline FUNCTION_DECL(void, popState, (), {
         Int last = states.size() - 1;
         Int current_state = states.get(last);
         states.removeRange(last);
         ExitFunction eF = getExitFunction(current_state);
-        if(eF != NULL) {
+        IF(eF != NULL) 
+        THEN({
             (this->*eF)();
-        }
-    }
+        })
+        ENDIF()
+    })
 
     inline Bool randomBool();
 
     inline void passert(Bool cond, const string& message) {
-        if(!cond) {
+        IF_ONLY(!cond) {
             throw runtime_error(message);
         }
     }
@@ -118,7 +132,7 @@ protected:
     inline void emptyTransition(const PAny& payload) { }
 
     inline void transitionPushState(const PAny& payload) {
-        states._size ++;
+        ++states._size;
     }
 
     inline void emptyEntry(const PAny& payload) { }

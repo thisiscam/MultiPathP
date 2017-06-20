@@ -6,7 +6,7 @@ namespace RUNTIME_NAMESPACE {
 #define REF_BODY(T...)                                  \
                                                         \
 public:                                                 \
-                                                        \
+    Ref():value(NULL) { }                               \
     Ref(T& value):value(&value) { }                     \
                                                         \
     inline const Ref& operator=(const T& other)         \
@@ -16,7 +16,7 @@ public:                                                 \
     }                                                   \
                                                         \
 private:                                                \
-    T* value;                                           \
+    Ptr<T> value;                                       \
 public:
 
 #define END_REF() };

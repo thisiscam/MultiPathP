@@ -20,9 +20,9 @@ public:
     {
         // TODO: better filter initialization
         for(const auto& gv : other.values) {
-            Bdd pred = PathConstraint::pc() & gv.predicate;
+            Bdd pred = PathConstraint::pc() & gv.second;
             if (!pred.isZero()) {
-                values.insert({pred, gv.value});
+                values.push_back({pred, gv.first});
             }
         }
     }
@@ -33,17 +33,24 @@ public:
 
     inline ValueSummary<T>& operator= (const ValueSummary<T>& rhs) {
         for(const auto& gvRhs : rhs.values) {
-            Bdd pred = PathConstraint::pc() & gvRhs.predicate;
+            Bdd pred = PathConstraint::pc() & gvRhs.second;
             if(!pred.isZero()) {
-                for(const auto& gvLhs : values) {
-                    gvLhs.predicate &= !pred;
+                for(auto& gvLhs : values) {
+                    gvLhs.second &= !pred;
                 }
-                values.push_back({pred, gvRhs.value});
+                values.push_back({pred, gvRhs.first});
             }
         }
         return *this;
     }
 
+    inline ValueSummary<bool> operator ==(const ValueSummary<T>& b) const {
+        return binaryOp<ValueSummary<bool>>(*this, b, [](T a, T b) { return a == b; });
+    }
+
+    inline ValueSummary<bool> operator !=(const ValueSummary<T>& b) const {
+        return binaryOp<ValueSummary<bool>>(*this, b, [](T a, T b) { return a != b; });
+    }
 
 private:
 

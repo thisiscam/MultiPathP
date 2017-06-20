@@ -21,7 +21,8 @@ get(const RUNTIME_NAMESPACE::ValueSummary<std::shared_ptr<T>>& ptr) {
 }
 
 template<typename FROM, typename TO, typename T>
-TO getCast(const RUNTIME_NAMESPACE::ValueSummary<std::shared_ptr<T>>& ptr) {
+RUNTIME_NAMESPACE::ValueSummary<TO> 
+getCast(const RUNTIME_NAMESPACE::ValueSummary<std::shared_ptr<T>>& ptr) {
     return RUNTIME_NAMESPACE::unaryOp<TO>(ptr, [](const std::shared_ptr<T>& ptr) { return getCast<FROM, TO>(ptr); });
 }
 #endif

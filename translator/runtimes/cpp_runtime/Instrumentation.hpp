@@ -48,6 +48,9 @@ ReturnType functionName args {                              \
         }                           \
     }
 
+#define IF_ONLY(condition)              \
+    if(IfBranch::onlyTrue(condition))          
+
 #define WHILE(condition, block)                 \
     {                                           \
         Bdd loopMergePointPc;                   \
@@ -60,6 +63,15 @@ ReturnType functionName args {                              \
         }                                       \
     }
 
+#define FOR(initializer, condition, increment, block)   \
+    {                                                   \
+        initializer;                                    \
+        WHILE(condition, {                              \
+            block;                                      \
+            increment;                                  \
+        });                                             \
+    }
+
 #define BREAK()                                     \
     {                                               \
         loopMergePointPc |= PathConstraint::pc();   \
@@ -67,7 +79,17 @@ ReturnType functionName args {                              \
         return;                                     \
     }
 
-#define RETURN(val)                             \
+/* WARNING: the following macro is not portable */
+#define GET_MACRO(_0, _1, NAME, ...) NAME
+#define RETURN(...) GET_MACRO(_0, ##__VA_ARGS__, RETURN1, RETURN0)(__VA_ARGS__)
+
+#define RETURN0()                               \
+    {                                           \
+        PathConstraint::pc() = Bdd::bddZero();  \
+        return;                                 \
+    }
+
+#define RETURN1(val)                            \
     {                                           \
         __ret = (val);                          \
         PathConstraint::pc() = Bdd::bddZero();  \
@@ -85,8 +107,8 @@ class IfBranch final {
 public:
 
     template<typename Then, typename Else>
-    static inline bool eval(ValueSummary<bool> condition, Then&& thenBlock, Else&& elseBlock) {
-        Bdd falseBranch = condition.F;
+    static inline bool eval(const ValueSummary<bool>& condition, Then&& thenBlock, Else&& elseBlock) {
+        Bdd falseBranch = PathConstraint::pc() & condition.F;
         PathConstraint::pc() &= condition.T;
         if(PathConstraint::isNotZero()) {
             thenBlock();
@@ -101,14 +123,19 @@ public:
     }
 
     template<typename Then>
-    static inline bool eval(ValueSummary<bool> condition, Then&& thenBlock) {
-        Bdd falseBranch = condition.F;
+    static inline bool eval(const ValueSummary<bool>& condition, Then&& thenBlock) {
+        Bdd falseBranch = PathConstraint::pc() & condition.F;
         PathConstraint::pc() &= condition.T;
         if(PathConstraint::isNotZero()) {
             thenBlock();
         }
         PathConstraint::pc() |= falseBranch;
         return merge();
+    }
+
+    static inline bool onlyTrue(const ValueSummary<bool>& condition) {
+        Bdd falseBranch = PathConstraint::pc() & condition.F;
+        return falseBranch.isZero();
     }
 };
 

@@ -102,7 +102,7 @@ public:
     { }
 
     inline operator const Int&() const {
-        if(type == &typeid(Int)) {
+        IF_ONLY(type == &typeid(Int)) {
             return i;
         } else {
             throw bad_cast();
@@ -110,7 +110,7 @@ public:
     }
 
     inline operator const Bool&() const {
-        if(type == &typeid(Bool)) {
+        IF_ONLY(type == &typeid(Bool)) {
             return b;
         } else {
             throw bad_cast();
@@ -118,7 +118,7 @@ public:
     }
 
     inline operator Ptr<PMachine> const &() const {
-        if(type == &typeid(Ptr<PMachine>)) {
+        IF_ONLY(type == &typeid(Ptr<PMachine>)) {
             return m;
         } else {
             throw bad_cast();
@@ -140,7 +140,13 @@ public:
 
     template<template<typename ...> class Container, typename ...Ts>
     operator Container<Ts...>() {
+#ifdef USE_VALUE_SUMMARY
+        return unaryOp<Container<Ts...>>(type, [&](const type_info* type) {
+            return CastJumpTable<DECL_TYPES, Container<Ts...>>::table().at(type)(*this);
+        });
+#else
         return CastJumpTable<DECL_TYPES, Container<Ts...>>::table().at(type)(*this);
+#endif
     }
 
 
@@ -172,15 +178,21 @@ public:
     };
 
     Bool operator == (const PAny& other) const {
+#ifdef USE_VALUE_SUMMARY
+        return binaryOp<Bool>(type, other.type, [&](const type_info* a, const type_info* b) {
+            return EqJumpTable<product<List, DECL_TYPES, DECL_TYPES>::type>::table()
+                    .at(make_tuple(a, b))(*this, other);
+        });
+#else
         return EqJumpTable<product<List, DECL_TYPES, DECL_TYPES>::type>::table().at(make_tuple(type, other.type))(*this, other);
-        return false;
+#endif
     }
 
     Bool operator != (const PAny& other) const {
         return !(*this == other);
     }
 
-    const type_info* type;
+    Ptr<const type_info> type;
     Int i;
     Bool b;
     Ptr<PMachine> m;
@@ -204,7 +216,7 @@ struct PAny::EqHelperFunctor<Bool, Bool> {
 template<> 
 struct PAny::EqHelperFunctor<Ptr<PMachine>, Ptr<PMachine>> {
     static Bool impl(const PAny& a, const PAny& b) {
-    return a.m == b.m;
+        return a.m == b.m;
     }
 };
 
