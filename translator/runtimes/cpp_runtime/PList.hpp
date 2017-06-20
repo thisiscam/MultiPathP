@@ -22,7 +22,7 @@ public:
     PList(PList&&) = default;
 
     PList(const PList& other):_size(other.size()) {
-        for(Int i = 0; i < other.size(); i++) {
+        for(Int i = 0; i < other.size(); ++i) {
             data.getl(i) = other.data.get(i);
         }
     }
@@ -33,7 +33,7 @@ public:
 
     inline const PList& operator=(const PList& other)
     {
-        for(Int i = 0; i < other.size(); i++) {
+        for(Int i = 0; i < other.size(); ++i) {
             data.getl(i) = other.data.get(i);
         }
         _size = other.size();
@@ -43,7 +43,7 @@ public:
     template<typename U>
     operator PList<U>() const {
         PList<U> ret;
-        for(Int i = 0; i < size(); i++) {
+        for(Int i = 0; i < size(); ++i) {
             ret.add(static_cast<U>(data.get(i)));
         }
         return ret;
@@ -67,14 +67,14 @@ public:
     }
 
     inline void removeAt(const Int& idx) {
-        for(Int i = idx + 1; i < size(); i++) {
+        for(Int i = idx + 1; i < size(); ++i) {
             data.getl(i - 1) = data.get(i);
         }
         _size--;
     }
 
     inline void removeRange(const Int& start, const Int& count) {
-        for (Int i = start + count; i < size(); i++) {
+        for (Int i = start + count; i < size(); ++i) {
             data.getl(i - count) = data.get(i);
         }
         _size = _size - count;
@@ -107,7 +107,7 @@ public:
 
     inline Bool operator == (const PList<T>& other) const {
         if(size() == other.size()) {
-            for(Int i = 0; i < size(); i++) {
+            for(Int i = 0; i < size(); ++i) {
                 if(data.get(i) != other.data.get(i)) {
                     return false;
                 }

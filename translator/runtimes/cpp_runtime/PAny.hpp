@@ -49,9 +49,9 @@ struct IsCastable<Container<A, As...>, Container<B, Bs...>> {
 class PAny final {
 
 #ifdef USE_VALUE_SUMMARY
-using AnyDataPoInter = ValueSummary<shared_ptr<PTypePtr const>>;
+using AnyDataPointer = ValueSummary<shared_ptr<PTypePtr const>>;
 #else
-using AnyDataPoInter = shared_ptr<PTypePtr const>;
+using AnyDataPointer = shared_ptr<PTypePtr const>;
 #endif
 
 private:
@@ -126,9 +126,9 @@ public:
     }
 
     template<typename TO>
-    using CastFunctionPoInter = TO (*)(const PAny&);
+    using CastFunctionPointer = TO (*)(const PAny&);
     template<typename TO>
-    using CastTableType = std::map<const type_info*, CastFunctionPoInter<TO>>;
+    using CastTableType = std::map<const type_info*, CastFunctionPointer<TO>>;
     template<typename, typename> struct CastJumpTable;
     template<typename ...FROMs, typename TO>
     struct CastJumpTable<List<FROMs...>, TO> {
@@ -184,7 +184,7 @@ public:
     Int i;
     Bool b;
     Ptr<PMachine> m;
-    AnyDataPoInter ptr;
+    AnyDataPointer ptr;
 };
 
 template<> 

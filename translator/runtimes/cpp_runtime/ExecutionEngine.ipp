@@ -8,7 +8,7 @@ namespace RUNTIME_NAMESPACE {
 inline void 
 ExecutionEngine::run(Scheduler& scheduler, Ptr<PMachine> machine) {
     scheduler.startMachine(machine);
-    for(int i = 0; i < maxIteration; i++) {
+    for(int i = 0; i < maxIteration; ++i) {
         if(!scheduler.step()) {
             break;
         }

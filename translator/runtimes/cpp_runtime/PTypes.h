@@ -14,12 +14,6 @@ template<typename ...Ts> class PTuple;
 /* Region Declare Types */
 template<typename ...> struct List { };
 
-};
-
-#ifndef DECL_TYPES
-#error "Must declare all usable before using PTypes! "
-#endif
-
 #ifdef USE_VALUE_SUMMARY
 template<typename T>
 using Ptr = ValueSummary<T*>;
@@ -30,6 +24,12 @@ template<typename T>
 using Ptr = T*;
 using Int = int;
 using Bool = bool;
+#endif
+
+};
+
+#ifndef DECL_TYPES
+#error "Must declare all usable before using PTypes! "
 #endif
 
 #include "PAny.hpp"

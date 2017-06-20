@@ -29,7 +29,7 @@ public:
     }
 
     inline void insert(const K& k, const V& v) {
-        for (Int i = 0; i < data.size(); i++) {
+        for (Int i = 0; i < data.size(); ++i) {
             if (k == data.get(i).v0()) {
                 throw runtime_error("Reinsertion of key into PMap");
             }
@@ -38,7 +38,7 @@ public:
     }
 
     inline Bool containsKey(const K& k) const {
-        for (Int i = 0; i < data.size(); i++) {
+        for (Int i = 0; i < data.size(); ++i) {
             if (k == data.get(i).v0()) {
                 return true;
             }
@@ -47,7 +47,7 @@ public:
     }
 
     inline V get(const K& k) const {
-        for (Int i = 0; i < data.size(); i++) {
+        for (Int i = 0; i < data.size(); ++i) {
             if (k == data.get(i).v0()) {
                 return data.get(i).v1();
             }
@@ -56,7 +56,7 @@ public:
     }
 
     inline Ref<V> getl(const K& k) {
-        for (Int i = 0; i < data.size(); i++) {
+        for (Int i = 0; i < data.size(); ++i) {
             if (k == data.get(i).v0()) {
                 return data.getl(i).v1l();
             }
@@ -65,7 +65,7 @@ public:
     }
 
     inline void set(const K& k, const V& v) {
-        for (Int i = 0; i < data.size(); i++) {
+        for (Int i = 0; i < data.size(); ++i) {
             if (k == data.get(i).v0()) {
                 data.getl(i).v1l() = v;
                 return;
@@ -78,7 +78,7 @@ public:
     inline PList<K> keys() 
     {
         PList<K> ret;
-        for(Int i = 0; i < data.size(); i++)
+        for(Int i = 0; i < data.size(); ++i)
         {
             ret.add(data.get(i).v0());
         }
@@ -88,7 +88,7 @@ public:
     inline PList<V> values() 
     {
         PList<K> ret;
-        for(Int i = 0; i < data.size(); i++)
+        for(Int i = 0; i < data.size(); ++i)
         {
             ret.add(data.get(i).v1());
         }
@@ -97,7 +97,7 @@ public:
 
     inline Bool operator == (const PMap<K, V>& other) const {
         if(size() == other.size()) {
-            for(Int i = 0; i < size(); i++) {
+            for(Int i = 0; i < size(); ++i) {
                 if(other.containsEntry(data.get(i).v0(), data.get(i).v1())) {
                     return true;
                 }
@@ -115,7 +115,7 @@ private:
     PMap(const PList<PTuple<K, V>> data):data(data) { }
 
     inline Bool containsEntry(const K& k, const V& v) const {
-        for(Int i = 0; i < size(); i++) {
+        for(Int i = 0; i < size(); ++i) {
             if (k == data.get(i).v0()) {
                 return v == data.get(i).v1();
             }
