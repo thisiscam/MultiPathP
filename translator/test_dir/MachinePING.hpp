@@ -59,7 +59,7 @@ private:
     /* end Function Implementations */
 
     /* region Machine Fields */
-    PMachine* pongId = NULL;
+    Ptr<PMachine> pongId = NULL;
     /* end Machine Fields  */
 
     /* region Jump Tables */

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace basic_cpp_runtime {
+namespace RUNTIME_NAMESPACE {
 
 /* TODO: modeling map. */
 template<typename K, typename V>
@@ -24,12 +24,12 @@ public:
         return PMap<Kp, Vp>(static_cast<PList<PTuple<Kp, Vp>>>(data));
     }
 
-    inline const int& size() const {
+    inline const Int& size() const {
         return data.size();
     }
 
     inline void insert(const K& k, const V& v) {
-        for (int i=0; i < data.size(); i++) {
+        for (Int i = 0; i < data.size(); i++) {
             if (k == data.get(i).v0()) {
                 throw runtime_error("Reinsertion of key into PMap");
             }
@@ -37,8 +37,8 @@ public:
         data.add(PTuple<K, V>(k, v));
     }
 
-    inline bool containsKey(const K& k) const {
-        for (int i=0; i < data.size(); i++) {
+    inline Bool containsKey(const K& k) const {
+        for (Int i = 0; i < data.size(); i++) {
             if (k == data.get(i).v0()) {
                 return true;
             }
@@ -47,7 +47,7 @@ public:
     }
 
     inline V get(const K& k) const {
-        for (int i=0; i < data.size(); i++) {
+        for (Int i = 0; i < data.size(); i++) {
             if (k == data.get(i).v0()) {
                 return data.get(i).v1();
             }
@@ -56,7 +56,7 @@ public:
     }
 
     inline Ref<V> getl(const K& k) {
-        for (int i=0; i < data.size(); i++) {
+        for (Int i = 0; i < data.size(); i++) {
             if (k == data.get(i).v0()) {
                 return data.getl(i).v1l();
             }
@@ -65,7 +65,7 @@ public:
     }
 
     inline void set(const K& k, const V& v) {
-        for (int i=0; i < data.size(); i++) {
+        for (Int i = 0; i < data.size(); i++) {
             if (k == data.get(i).v0()) {
                 data.getl(i).v1l() = v;
                 return;
@@ -78,7 +78,7 @@ public:
     inline PList<K> keys() 
     {
         PList<K> ret;
-        for(int i = 0; i < data.size(); i++)
+        for(Int i = 0; i < data.size(); i++)
         {
             ret.add(data.get(i).v0());
         }
@@ -88,16 +88,16 @@ public:
     inline PList<V> values() 
     {
         PList<K> ret;
-        for(int i = 0; i < data.size(); i++)
+        for(Int i = 0; i < data.size(); i++)
         {
             ret.add(data.get(i).v1());
         }
         return ret;
     }
 
-    inline bool operator == (const PMap<K, V>& other) const {
+    inline Bool operator == (const PMap<K, V>& other) const {
         if(size() == other.size()) {
-            for(int i=0; i < size(); i++) {
+            for(Int i = 0; i < size(); i++) {
                 if(other.containsEntry(data.get(i).v0(), data.get(i).v1())) {
                     return true;
                 }
@@ -106,7 +106,7 @@ public:
         return false;
     }
 
-    inline bool operator != (const PMap<K, V>& other) const {
+    inline Bool operator != (const PMap<K, V>& other) const {
         return !(*this == other);
     }
 
@@ -114,8 +114,8 @@ public:
 private:
     PMap(const PList<PTuple<K, V>> data):data(data) { }
 
-    inline bool containsEntry(const K& k, const V& v) const {
-        for(int i=0; i < size(); i++) {
+    inline Bool containsEntry(const K& k, const V& v) const {
+        for(Int i = 0; i < size(); i++) {
             if (k == data.get(i).v0()) {
                 return v == data.get(i).v1();
             }

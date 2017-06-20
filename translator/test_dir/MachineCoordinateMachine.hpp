@@ -38,17 +38,17 @@ private:
     /* region Function Implementations */
     inline void InitEntryImpl() {
         int index;
-        PMachine* temp;
+        Ptr<PMachine> temp;
         index = 0;
         while(index < 3) {
             temp = create<MachineParticipantMachine>(this);
-            participants.insert(PTuple<int, PMachine*>(index, temp));
+            participants.insert(PTuple<int, Ptr<PMachine>>(index, temp));
             index = index + 1;
         }
         raise(eUnit); retcode = RAISED_EVENT; return;
     }
 
-    inline PMachine* ChooseParticipantNonDet() {
+    inline Ptr<PMachine> ChooseParticipantNonDet() {
         int index;
         index = 0;
         while(index < participants.size()) {
@@ -61,7 +61,7 @@ private:
     }
 
     inline void TransactionStateEntryImpl() {
-        PMachine* p;
+        Ptr<PMachine> p;
         p = ChooseParticipantNonDet();
         if(randomBool()) {
             send(p, eCommit);
@@ -72,7 +72,7 @@ private:
     /* end Function Implementations */
 
     /* region Machine Fields */
-    PList<PMachine*> participants;
+    PList<Ptr<PMachine>> participants;
     /* end Machine Fields  */
 
     /* region Jump Tables */

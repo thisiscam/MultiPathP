@@ -18,7 +18,7 @@ private:
     /* region Entry Methods */
     inline void InitEntry(const PAny& payload) {
         states.setTop(Init);
-        InitEntryImpl(static_cast<PMachine*>(payload));
+        InitEntryImpl(static_cast<Ptr<PMachine>>(payload));
     }
 
     inline void WaitForRequestEntry(const PAny& payload) {
@@ -33,7 +33,7 @@ private:
     /* end Transition Methods */
 
     /* region Function Implementations */
-    inline void InitEntryImpl(PMachine* payload) {
+    inline void InitEntryImpl(Ptr<PMachine> payload) {
         coor = payload;
         raise(eUnit); retcode = RAISED_EVENT; return;
     }
@@ -48,7 +48,7 @@ private:
     /* end Function Implementations */
 
     /* region Machine Fields */
-    PMachine* coor;
+    Ptr<PMachine> coor;
     /* end Machine Fields  */
 
     /* region Jump Tables */

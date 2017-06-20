@@ -8,16 +8,17 @@
 #include <iostream>
 
 #include "PTypePtr.h"
+#include "SharedPointerUtils.h"
 #include "utils/crossproduct.hpp"
 
 using namespace std;
 
-namespace basic_cpp_runtime {
+namespace RUNTIME_NAMESPACE {
 
 template<typename T>
 struct IsSimpleType
 {
-    static constexpr bool value = std::is_same<T, int>::value || std::is_same<T, bool>::value || std::is_same<T, PMachine*>::value;
+    static constexpr bool value = std::is_same<T, Int>::value || std::is_same<T, bool>::value || std::is_same<T, Ptr<PMachine>>::value;
 };
 
 template<typename, typename> struct IsCastable {
@@ -46,10 +47,17 @@ struct IsCastable<Container<A, As...>, Container<B, Bs...>> {
 
 
 class PAny final {
+
+#ifdef USE_VALUE_SUMMARY
+using AnyDataPoInter = ValueSummary<shared_ptr<PTypePtr const>>;
+#else
+using AnyDataPoInter = shared_ptr<PTypePtr const>;
+#endif
+
 private:
     template<typename FROM, typename TO>
     static TO CastHelper(typename std::enable_if<IsCastable<FROM, TO>::value, const PAny&>::type from) {
-        return static_cast<TO>(*(FROM*)from.ptr.get());
+        return getCast<FROM, TO>(from.ptr);
     }
 
     template<typename FROM, typename TO>
@@ -78,39 +86,39 @@ public:
         ptr(new Container<Ts...>(v))
     { }
 
-    PAny(const int& v):
-        type(&typeid(int)), 
+    PAny(const Int& v):
+        type(&typeid(Int)), 
         i(v) 
     { }
 
-    PAny(const bool& v):
-        type(&typeid(bool)),
+    PAny(const Bool& v):
+        type(&typeid(Bool)),
         b(v) 
     { }
 
-    PAny(PMachine* const & v):
-        type(&typeid(PMachine*)),
+    PAny(Ptr<PMachine> const & v):
+        type(&typeid(Ptr<PMachine>)),
         m(v)
     { }
 
-    inline operator const int&() const {
-        if(type == &typeid(int)) {
+    inline operator const Int&() const {
+        if(type == &typeid(Int)) {
             return i;
         } else {
             throw bad_cast();
         }
     }
 
-    inline operator const bool&() const {
-        if(type == &typeid(bool)) {
+    inline operator const Bool&() const {
+        if(type == &typeid(Bool)) {
             return b;
         } else {
             throw bad_cast();
         }
     }
 
-    inline operator PMachine* const &() const {
-        if(type == &typeid(PMachine*)) {
+    inline operator Ptr<PMachine> const &() const {
+        if(type == &typeid(Ptr<PMachine>)) {
             return m;
         } else {
             throw bad_cast();
@@ -118,9 +126,9 @@ public:
     }
 
     template<typename TO>
-    using CastFunctionPointer = TO (*)(const PAny&);
+    using CastFunctionPoInter = TO (*)(const PAny&);
     template<typename TO>
-    using CastTableType = std::map<const type_info*, CastFunctionPointer<TO>>;
+    using CastTableType = std::map<const type_info*, CastFunctionPoInter<TO>>;
     template<typename, typename> struct CastJumpTable;
     template<typename ...FROMs, typename TO>
     struct CastJumpTable<List<FROMs...>, TO> {
@@ -136,7 +144,7 @@ public:
     }
 
 
-    using EqFunctionPointer = bool (*)(const PAny&, const PAny&);
+    using EqFunctionPointer = Bool (*)(const PAny&, const PAny&);
     using EqTableKeyType = std::tuple<const type_info*, const type_info*>;
     using EqTableType = std::map<EqTableKeyType, EqFunctionPointer>;
     template<typename> struct EqJumpTable;
@@ -163,54 +171,54 @@ public:
         }
     };
 
-    bool operator == (const PAny& other) const {
+    Bool operator == (const PAny& other) const {
         return EqJumpTable<product<List, DECL_TYPES, DECL_TYPES>::type>::table().at(make_tuple(type, other.type))(*this, other);
         return false;
     }
 
-    bool operator != (const PAny& other) const {
+    Bool operator != (const PAny& other) const {
         return !(*this == other);
     }
 
     const type_info* type;
-    int i;
-    bool b;
-    PMachine* m;
-    shared_ptr<PTypePtr> ptr;
+    Int i;
+    Bool b;
+    Ptr<PMachine> m;
+    AnyDataPoInter ptr;
 };
 
 template<> 
-struct PAny::EqHelperFunctor<int, int> {
-    static bool impl(const PAny& a, const PAny& b) {
+struct PAny::EqHelperFunctor<Int, Int> {
+    static Bool impl(const PAny& a, const PAny& b) {
         return a.i == b.i;
     }
 };
 
 template<> 
-struct PAny::EqHelperFunctor<bool, bool> {
-    static bool impl(const PAny& a, const PAny& b) {
+struct PAny::EqHelperFunctor<Bool, Bool> {
+    static Bool impl(const PAny& a, const PAny& b) {
         return a.b == b.b;
     }
 };
 
 template<> 
-struct PAny::EqHelperFunctor<PMachine*, PMachine*> {
-    static bool impl(const PAny& a, const PAny& b) {
+struct PAny::EqHelperFunctor<Ptr<PMachine>, Ptr<PMachine>> {
+    static Bool impl(const PAny& a, const PAny& b) {
     return a.m == b.m;
     }
 };
 
 template<typename A, typename B> 
 struct PAny::EqHelperFunctor<A, B, typename std::enable_if<!IsCastable<A, B>::value>::type> {
-    static bool impl(const PAny& a, const PAny& b) {
+    static Bool impl(const PAny& a, const PAny& b) {
         return false;
     }
 };
 
 template<typename A, typename B>
 struct PAny::EqHelperFunctor<A, B, typename std::enable_if<IsCastable<A, B>::value && !IsSimpleType<A>::value>::type> {
-    static bool impl(const PAny& a, const PAny& b) {
-        return *(A*)a.ptr.get() == static_cast<A>(*(B*)b.ptr.get());
+    static Bool impl(const PAny& a, const PAny& b) {
+        return get<A>(a.ptr) == getCast<B, A>(b.ptr);
     }
 };
 

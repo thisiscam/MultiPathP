@@ -1,10 +1,10 @@
 #ifndef pingpong_H
 #define pingpong_H
 
-#define DECL_TYPES List<PMachine*, int, int, PList<PMachine*>, bool, PTuple<int, PMachine*>>
+#define DECL_TYPES List<Ptr<PMachine>, int, int, PList<Ptr<PMachine>>, bool, PTuple<int, Ptr<PMachine>>>
 #include "basic_cpp_runtime.h"
 
-using namespace basic_cpp_runtime;
+using namespace RUNTIME_NAMESPACE;
 
 namespace pingpong {
 
@@ -30,7 +30,7 @@ namespace pingpong {
 class Controller {
 public:
 
-	static inline PMachine* createMainMachine(ExecutionEngine& engine) {
+	static inline Ptr<PMachine> createMainMachine(ExecutionEngine& engine) {
 		return new MachineMain(engine);
 	}
 

@@ -3,7 +3,7 @@
 
 #include <type_traits>
 
-namespace basic_cpp_runtime {
+namespace RUNTIME_NAMESPACE {
 
 class PAny;
 class PMachine;
@@ -18,6 +18,18 @@ template<typename ...> struct List { };
 
 #ifndef DECL_TYPES
 #error "Must declare all usable before using PTypes! "
+#endif
+
+#ifdef USE_VALUE_SUMMARY
+template<typename T>
+using Ptr = ValueSummary<T*>;
+using Int = ValueSummary<int>;
+using Bool = ValueSummary<bool>;
+#else
+template<typename T>
+using Ptr = T*;
+using Int = int;
+using Bool = bool;
 #endif
 
 #include "PAny.hpp"

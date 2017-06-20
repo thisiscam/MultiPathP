@@ -12,7 +12,7 @@
 
 using namespace std;
 
-namespace basic_cpp_runtime {
+namespace RUNTIME_NAMESPACE {
 
 const int EXECUTE_FINISHED = 0;
 const int RAISED_EVENT = 1;
@@ -42,9 +42,9 @@ public:
 
     virtual void start(const PAny& payload) = 0;
 
-    inline int canServeEvent(int e) {
-        for(int i=states.size() - 1; i >= 0; i--) {
-            int state = states.get(i);
+    inline Int canServeEvent(Int e) {
+        for(Int i = states.size() - 1; i >= 0; i--) {
+            Int state = states.get(i);
             if(isDefered(state, e)) {
                 return -1;
             } else if(getTransition(state, e) != NULL) {
@@ -54,10 +54,10 @@ public:
         throw runtime_error("Unhandled event");
     }
 
-    inline void step(int stateIndex, int e, const PAny& payload = PAny()) {
-        int state = states.get(stateIndex);
+    inline void step(Int stateIndex, Int e, const PAny& payload = PAny()) {
+        Int state = states.get(stateIndex);
         if(isGotoTransition(state, e)) {
-            for(int i=states.size() - 1; i > stateIndex; i--) {
+            for(Int i = states.size() - 1; i > stateIndex; i--) {
                 popState();
             }
         }
@@ -70,20 +70,20 @@ public:
 
 protected:
 
-    inline void send(PMachine* other, int e, const PAny& payload = PAny()) {
+    inline void send(Ptr<PMachine> other, Int e, const PAny& payload = PAny()) {
         sendQueue.add(SendQueueItem(other, e, payload));
     }
 
     template<typename M>
-    PMachine* create(const PAny& payload = PAny()) {
-        PMachine* machine = PMachine::alloc<M>(engine);
+    Ptr<PMachine> create(const PAny& payload = PAny()) {
+        Ptr<PMachine> machine = PMachine::alloc<M>(engine);
         sendQueue.add(SendQueueItem(machine, EVENT_NEW_MACHINE, payload));
         return machine;
     }
 
-    inline void raise(int e, const PAny& payload = PAny()) {
-        for(int i = states.size() - 1; i >= 0; i--) {
-            int state = states.get(i);
+    inline void raise(Int e, const PAny& payload = PAny()) {
+        for(Int i = states.size() - 1; i >= 0; i--) {
+            Int state = states.get(i);
             TransitionFunction f = getTransition(state, e);
             if(f != NULL) {
                 (this->*f)(payload);
@@ -98,8 +98,8 @@ protected:
     }
 
     inline void popState() {
-        int last = states.size() - 1;
-        int current_state = states.get(last);
+        Int last = states.size() - 1;
+        Int current_state = states.get(last);
         states.removeRange(last);
         ExitFunction eF = getExitFunction(current_state);
         if(eF != NULL) {
@@ -107,9 +107,9 @@ protected:
         }
     }
 
-    inline bool randomBool();
+    inline Bool randomBool();
 
-    inline void assert(bool cond, const string& message) {
+    inline void passert(Bool cond, const string& message) {
         if(!cond) {
             throw runtime_error(message);
         }
@@ -124,28 +124,28 @@ protected:
     inline void emptyEntry(const PAny& payload) { }
 
     inline void haltEntry(const PAny& payload) {
-        states = PList<int>();
+        states = PList<Int>();
         states.add(STATE_HALT);
     }
 
     inline void emptyExit() { }
 
-    int retcode;
-    PList<int> states;
+    Int retcode;
+    PList<Int> states;
 
 private:
     ExecutionEngine& engine;
 
     PList<SendQueueItem> sendQueue;
 
-    virtual bool isDefered(int state, int event) const = 0;
-    virtual bool isGotoTransition(int state, int event) const = 0;
-    virtual ExitFunction getExitFunction(int state) const = 0;
-    virtual TransitionFunction getTransition(int state, int event) const = 0;
-    virtual EntryFunction getTransitionEntry(int state, int event) const = 0;
+    virtual Bool isDefered(Int state, Int event) const = 0;
+    virtual Bool isGotoTransition(Int state, Int event) const = 0;
+    virtual ExitFunction getExitFunction(Int state) const = 0;
+    virtual TransitionFunction getTransition(Int state, Int event) const = 0;
+    virtual EntryFunction getTransitionEntry(Int state, Int event) const = 0;
 
     template<typename M>
-    static PMachine* alloc(ExecutionEngine& engine) {
+    static Ptr<PMachine> alloc(ExecutionEngine& engine) {
         return new M(engine);
     }
 };

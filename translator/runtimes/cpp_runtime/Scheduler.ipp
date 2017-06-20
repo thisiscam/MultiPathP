@@ -3,14 +3,14 @@
 
 #include "PMachine.hpp"
 
-namespace basic_cpp_runtime {
+namespace RUNTIME_NAMESPACE {
 
 inline PList<SendQueueItem>&
-Scheduler::getSendQueue(PMachine* machine) {
+Scheduler::getSendQueue(Ptr<PMachine> machine) {
     return machine->sendQueue;
 }
 
-inline bool 
+inline Bool 
 Scheduler::step() {
     SchedulerChoice&& chosen = chooseMachine();
     if(chosen.machine == NULL) {

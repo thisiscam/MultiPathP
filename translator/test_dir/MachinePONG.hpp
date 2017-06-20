@@ -23,7 +23,7 @@ private:
 
     inline void Pong_SendPongEntry(const PAny& payload) {
         states.setTop(Pong_SendPong);
-        Pong_SendPongEntryImpl(static_cast<PMachine*>(payload));
+        Pong_SendPongEntryImpl(static_cast<Ptr<PMachine>>(payload));
     }
     /* end Entry Methods */
 
@@ -35,7 +35,7 @@ private:
 
     }
 
-    inline void Pong_SendPongEntryImpl(PMachine* payload) {
+    inline void Pong_SendPongEntryImpl(Ptr<PMachine> payload) {
         auto&& tmp9 = payload;
         auto&& tmp10 = Pong;
         send(tmp9, tmp10);

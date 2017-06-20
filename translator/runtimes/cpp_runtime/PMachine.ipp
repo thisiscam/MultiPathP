@@ -3,9 +3,9 @@
 
 #include "ExecutionEngine.hpp"
 
-namespace basic_cpp_runtime {
+namespace RUNTIME_NAMESPACE {
 
-inline bool 
+inline Bool 
 PMachine::randomBool() {
     return engine.randomBool();
 }

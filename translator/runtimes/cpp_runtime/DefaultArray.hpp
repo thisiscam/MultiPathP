@@ -7,13 +7,13 @@
 
 using namespace std;
 
-namespace basic_cpp_runtime {
+namespace RUNTIME_NAMESPACE {
 
 template<typename T>
 class DefaultArray 
 {
 public:
-    T get(const int index) const
+    T get(const Int& index) const
     {
         if(index > data.size()) {
             return T();
@@ -22,7 +22,7 @@ public:
         }
     }
 
-    Ref<T> getl(const int index)
+    Ref<T> getl(const Int& index)
     {
         resizeIfNeeded(index + 1);
         return Ref<T>(data[index]);
@@ -31,7 +31,7 @@ public:
 private:
 
     vector<T> data;
-    void resizeIfNeeded(int length) {
+    void resizeIfNeeded(const Int& length) {
         if(length >= data.size()) {
             data.resize(length + 1);
         }

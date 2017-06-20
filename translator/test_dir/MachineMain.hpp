@@ -26,7 +26,7 @@ private:
 
     /* region Function Implementations */
     inline void InitEntryImpl() {
-        PMachine* coor;
+        Ptr<PMachine> coor;
         int index;
         coor = create<MachineCoordinateMachine>();
         index = 0;

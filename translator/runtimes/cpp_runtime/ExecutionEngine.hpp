@@ -1,7 +1,7 @@
 #ifndef EXECUTION_ENGINE_HPP
 #define EXECUTION_ENGINE_HPP
 
-namespace basic_cpp_runtime {
+namespace RUNTIME_NAMESPACE {
 
 class Scheduler;
 
@@ -11,11 +11,11 @@ public:
         maxIteration(maxIteration)
     { }
 
-    inline void run(Scheduler& scheduler, PMachine* machine);
+    inline void run(Scheduler& scheduler, Ptr<PMachine> machine);
 
-    bool randomBool();
+    Bool randomBool();
 
-    int randomInt(int max);
+    Int randomInt(Int max);
     
 private:
     int maxIteration;

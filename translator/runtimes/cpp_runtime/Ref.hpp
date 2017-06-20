@@ -1,7 +1,7 @@
 #ifndef REF_HPP
 #define REF_HPP
 
-namespace basic_cpp_runtime {
+namespace RUNTIME_NAMESPACE {
 
 #define REF_BODY(T...)                                  \
                                                         \

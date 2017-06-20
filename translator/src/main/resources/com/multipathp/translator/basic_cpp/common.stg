@@ -3,7 +3,7 @@ typeMap ::= [
     "$bool$": "bool",
     "$null$": "PAny",
     "$event$": "int",
-    "$machine$": "PMachine*",
+    "$machine$": "Ptr<PMachine>",
     "$void$": "void",
     "$seq$": {PList\<<type(t.indexedInnerType)>>},
     "$map$": {PMap\<<type(t.keyType)>, <type(t.valueType)>>},
@@ -68,7 +68,7 @@ Controller::announce(<EventPayloadArguments()>);
 >>
 
 AssertStmt(node) ::= <<
-assert(<Render(node.exp)>, "<node.message>");
+passert(<Render(node.exp)>, "<node.message>");
 >>
 
 AssignStmt(node) ::= <<

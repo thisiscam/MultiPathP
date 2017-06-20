@@ -3,7 +3,7 @@
 
 #include "Scheduler.hpp"
 
-namespace basic_cpp_runtime {
+namespace RUNTIME_NAMESPACE {
 
 class PMachine;
 
@@ -13,7 +13,7 @@ protected:
 
     inline SchedulerChoice chooseMachine() override;
 
-    inline void startMachine(PMachine* machine, const PAny& payload) override;
+    inline void startMachine(Ptr<PMachine> machine, const PAny& payload) override;
 
 
 public:

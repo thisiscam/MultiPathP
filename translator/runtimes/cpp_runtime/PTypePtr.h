@@ -1,7 +1,7 @@
 #ifndef PTYPEPTR_H
 #define PTYPEPTR_H
 
-namespace basic_cpp_runtime {
+namespace RUNTIME_NAMESPACE {
 
 class PTypePtr {
 public:

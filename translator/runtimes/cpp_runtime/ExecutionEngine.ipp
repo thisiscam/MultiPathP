@@ -3,10 +3,10 @@
 
 #include "Scheduler.hpp"
 
-namespace basic_cpp_runtime {
+namespace RUNTIME_NAMESPACE {
 
 inline void 
-ExecutionEngine::run(Scheduler& scheduler, PMachine* machine) {
+ExecutionEngine::run(Scheduler& scheduler, Ptr<PMachine> machine) {
     scheduler.startMachine(machine);
     for(int i = 0; i < maxIteration; i++) {
         if(!scheduler.step()) {
@@ -15,16 +15,16 @@ ExecutionEngine::run(Scheduler& scheduler, PMachine* machine) {
     }
 }
 
-inline bool
+inline Bool
 ExecutionEngine::randomBool() {
     return true;
 }
 
-inline int
-ExecutionEngine::randomInt(int max) {
+inline Int
+ExecutionEngine::randomInt(Int max) {
     return 0;
 }
 
-}
+};
 
 #endif
