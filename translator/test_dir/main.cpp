@@ -12,13 +12,13 @@
 // }
 
 #include <iostream>
-#define DECL_TYPES List<int, PTuple<int, int>, PList<PTuple<int, int>>>
+#define DECL_TYPES List<Int, PTuple<Int, Int>, PList<PTuple<Int, Int>>, PMap<Int, Int>>
 #define USE_VALUE_SUMMARY
 #include "basic_cpp_runtime.h"
 
 using namespace RUNTIME_NAMESPACE;
 
-FUNCTION_DECL(ValueSummary<int>, fib, (ValueSummary<int> x), {
+FUNCTION_DECL(Int, fib, (Int x), {
     IF(x <= 1)
     THEN({
         RETURN(1);

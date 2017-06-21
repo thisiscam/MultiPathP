@@ -9,7 +9,7 @@ inline void
 ExecutionEngine::run(Scheduler& scheduler, Ptr<PMachine> machine) {
     scheduler.startMachine(machine);
     for(int i = 0; i < maxIteration; ++i) {
-        if(!scheduler.step()) {
+        if(!IfBranch::onlyTrue(scheduler.step())) {
             break;
         }
     }

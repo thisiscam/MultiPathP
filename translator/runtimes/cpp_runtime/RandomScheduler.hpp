@@ -2,12 +2,16 @@
 #define RANDOM_SCHEDULER
 
 #include "Scheduler.hpp"
+#include "Set.hpp"
 
 namespace RUNTIME_NAMESPACE {
 
 class PMachine;
 
 class RandomScheduler final : public Scheduler {
+
+private:
+	Set<PMachine*> machines;
 
 protected:
 

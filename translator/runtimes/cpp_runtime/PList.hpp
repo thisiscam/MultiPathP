@@ -25,6 +25,7 @@ public:
         FOR(Int i = 0, i < other.size(), ++i, {
             data.getl(i) = other.data.get(i);
         })
+        ENDFOR_NC()
     }
 
     inline const Int& size() const {
@@ -35,6 +36,7 @@ public:
         FOR(Int i = 0, i < other.size(), ++i, {
             data.getl(i) = other.data.get(i);
         })
+        ENDFOR_NC()
         _size = other.size();
         return *this;
     }
@@ -45,6 +47,7 @@ public:
         FOR(Int i = 0, i < size(), ++i, {
             ret.add(static_cast<U>(data.get(i)));
         })
+        ENDFOR_NC()
         return ret;
     }
 
@@ -57,6 +60,7 @@ public:
         FOR(Int i = size(), i > idx, --i, {
             data.getl(i) = data.get(i - 1);
         })
+        ENDFOR_NC()
         data.getl(idx) = item;
         ++_size;
     }
@@ -69,6 +73,7 @@ public:
         FOR(Int i = idx + 1, i < size(), ++i, {
             data.getl(i - 1) = data.get(i);
         })
+        ENDFOR_NC()
         --_size;
     }
 
@@ -76,6 +81,7 @@ public:
         FOR(Int i = start + count, i < size(), ++i, {
             data.getl(i - count) = data.get(i);
         })
+        ENDFOR_NC()
         _size = _size - count;
     }
 
@@ -114,6 +120,7 @@ public:
                 })
                 ENDIF()
             })
+            ENDFOR()
             RETURN(true);
         }) 
         ELSE({

@@ -25,7 +25,7 @@ public:
     }
 
     inline Bool operator == (const PTuple<T0, T1>& other) const {
-        return _v0 == other._v0 && _v1 == other._v1;
+        return _v0 == other._v0 & _v1 == other._v1;
     }
 
     inline Bool operator != (const PTuple<T0, T1>& other) const {
@@ -58,7 +58,7 @@ public:
     }
 
     inline Bool operator == (const PTuple<T0, T1, T2>& other) const {
-        return _v0 == other._v0 && _v1 == other._v1 && _v2 == other._v2;
+        return _v0 == other._v0 & _v1 == other._v1 & _v2 == other._v2;
     }
 
     inline Bool operator != (const PTuple<T0, T1, T2>& other) const {

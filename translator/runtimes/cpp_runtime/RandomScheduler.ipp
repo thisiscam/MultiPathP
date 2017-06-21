@@ -7,8 +7,7 @@ namespace RUNTIME_NAMESPACE {
 
 inline FUNCTION_DECL(SchedulerChoice, RandomScheduler::chooseMachine, (), {
     PList<SchedulerChoice> choices;
-    FOR(Int i = 0, i < machines.size(), ++i, {
-        Ptr<PMachine> machine = machines.get(i);
+    machines.foreach([&](PMachine* machine) {
         // Collect from send queue
         PList<SendQueueItem>& sendQueue = getSendQueue(machine);
         FOR(Int j = 0, j < sendQueue.size(), ++j, {
@@ -19,7 +18,7 @@ inline FUNCTION_DECL(SchedulerChoice, RandomScheduler::chooseMachine, (), {
                 BREAK();
             }) 
             ELSE({
-                Int stateIdx = item.target->canServeEvent(item.e);
+                Int stateIdx = INVOKE(item.target, Int, canServeEvent, (item.e));
                 IF(stateIdx >= 0) 
                 THEN({
                     choices.add(SchedulerChoice(machine, j, stateIdx));
@@ -29,6 +28,7 @@ inline FUNCTION_DECL(SchedulerChoice, RandomScheduler::chooseMachine, (), {
             })
             ENDIF()
         })
+        ENDFOR()
         // Machine is state that can serve null event?
         Int nullStateIdx = machine->canServeEvent(EVENT_NULL);
         IF(nullStateIdx >= 0) 
@@ -36,7 +36,7 @@ inline FUNCTION_DECL(SchedulerChoice, RandomScheduler::chooseMachine, (), {
             choices.add(SchedulerChoice(machine, -1, nullStateIdx));
         })
         ENDIF()
-    })
+    });
     IF(choices.size() == 0) 
     THEN({
         RETURN(SchedulerChoice(NULL, -1, -1));
@@ -50,7 +50,7 @@ inline FUNCTION_DECL(SchedulerChoice, RandomScheduler::chooseMachine, (), {
 inline void 
 RandomScheduler::startMachine(Ptr<PMachine> machine, const PAny& payload) {
     machines.add(machine);
-    machine->start(payload);
+    INVOKE(machine, void, start, (payload));
 }
 
 };

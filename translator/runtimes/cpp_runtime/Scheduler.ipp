@@ -6,8 +6,23 @@
 namespace RUNTIME_NAMESPACE {
 
 inline PList<SendQueueItem>&
-Scheduler::getSendQueue(Ptr<PMachine> machine) {
+Scheduler::getSendQueue(PMachine* machine) {
     return machine->sendQueue;
+}
+
+inline SendQueueItem 
+Scheduler::popSendQueueItem(Ptr<PMachine> machine, Int index) {
+#ifdef USE_VALUE_SUMMARY
+    return unaryOp<SendQueueItem>(machine, [&](PMachine* machine) {
+        SendQueueItem item = machine->sendQueue.get(index);
+        machine->sendQueue.removeAt(index);
+        return item;
+    });
+#else
+        SendQueueItem item = machine->sendQueue.get(index);
+        machine->sendQueue.removeAt(index);
+        return item;
+#endif
 }
 
 inline FUNCTION_DECL(Bool, Scheduler::step, (), {
@@ -17,14 +32,13 @@ inline FUNCTION_DECL(Bool, Scheduler::step, (), {
         RETURN(false);
     }) 
     ELSE({
-        IF(chosen.queueIdx < 0) 
+        IF(chosen.queueIdx < 0)
         THEN({
             std::cout << chosen.machine << " executes null event" << std::endl;
-            chosen.machine->step(chosen.stateIdx, EVENT_NULL);
+            INVOKE(chosen.machine, void, step, (chosen.stateIdx, EVENT_NULL));
         }) 
         ELSE({
-            SendQueueItem item = getSendQueue(chosen.machine).get(chosen.queueIdx);
-            getSendQueue(chosen.machine).removeAt(chosen.queueIdx);
+            SendQueueItem item = popSendQueueItem(chosen.machine, chosen.queueIdx);
             IF(item.e == EVENT_NEW_MACHINE) 
             THEN({
                 std::cout << chosen.machine << " creates " << item.target << std::endl;
@@ -32,7 +46,7 @@ inline FUNCTION_DECL(Bool, Scheduler::step, (), {
             }) 
             ELSE({
                 std::cout << chosen.machine << " sends event " << item.e << " to " << item.target << std::endl;
-                item.target->step(chosen.stateIdx, item.e, item.payload);
+                INVOKE(item.target, void, step, (chosen.stateIdx, item.e, item.payload));
             })
             ENDIF()
         })

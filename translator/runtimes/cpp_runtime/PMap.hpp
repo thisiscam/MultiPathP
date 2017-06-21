@@ -29,82 +29,96 @@ public:
     }
 
     inline void insert(const K& k, const V& v) {
-        for (Int i = 0; i < data.size(); ++i) {
-            if (k == data.get(i).v0()) {
+        FOR(Int i = 0, i < data.size(), ++i, {
+            IF_ONLY(k == data.get(i).v0()) {
                 throw runtime_error("Reinsertion of key into PMap");
             }
-        }
+        })
+        ENDFOR_NC()
         data.add(PTuple<K, V>(k, v));
     }
 
-    inline Bool containsKey(const K& k) const {
-        for (Int i = 0; i < data.size(); ++i) {
-            if (k == data.get(i).v0()) {
-                return true;
-            }
-        }
-        return false;
-    }
+    inline FUNCTION_DECL(Bool, containsKey, (const K& k) const, {
+        FOR(Int i = 0, i < data.size(), ++i, {
+            IF(k == data.get(i).v0()) 
+            THEN({
+                RETURN(true);
+            })
+            ENDIF()
+        })
+        ENDFOR()
+        RETURN(false);
+    })
 
-    inline V get(const K& k) const {
-        for (Int i = 0; i < data.size(); ++i) {
-            if (k == data.get(i).v0()) {
-                return data.get(i).v1();
-            }
-        }
+    inline FUNCTION_DECL(V, get, (const K& k) const, {
+        FOR(Int i = 0, i < data.size(), ++i, {
+            IF(k == data.get(i).v0()) 
+            THEN({
+                RETURN(data.get(i).v1());
+            })
+            ENDIF()
+        })
+        ENDFOR()
         throw runtime_error("Key does not exist in dictionary");
-    }
+    })
 
-    inline Ref<V> getl(const K& k) {
-        for (Int i = 0; i < data.size(); ++i) {
+    inline FUNCTION_DECL(Ref<V>, getl, (const K& k), {
+        FOR(Int i = 0, i < data.size(), ++i, {
             if (k == data.get(i).v0()) {
-                return data.getl(i).v1l();
+                RETURN(data.getl(i).v1l());
             }
-        }
+        })
+        ENDFOR()
         throw runtime_error("Key does not exist in dictionary");
-    }
+    })
 
-    inline void set(const K& k, const V& v) {
-        for (Int i = 0; i < data.size(); ++i) {
-            if (k == data.get(i).v0()) {
+    inline FUNCTION_DECL(void, set, (const K& k, const V& v), {
+        FOR(Int i = 0, i < data.size(), ++i, {
+            IF(k == data.get(i).v0()) 
+            THEN({
                 data.getl(i).v1l() = v;
-                return;
-            }
-        }
+                RETURN();
+            })
+            ENDIF()
+        })
+        ENDFOR()
         insert(k, v);
-    }
+    })
 
 
-    inline PList<K> keys() 
-    {
+    inline PList<K> keys() {
         PList<K> ret;
-        for(Int i = 0; i < data.size(); ++i)
-        {
+        FOR(Int i = 0, i < data.size(), ++i, {
             ret.add(data.get(i).v0());
-        }
+        })
+        ENDFOR_NC()
         return ret;
     }
 
-    inline PList<V> values() 
-    {
+    inline PList<V> values() {
         PList<K> ret;
-        for(Int i = 0; i < data.size(); ++i)
-        {
+        FOR(Int i = 0, i < data.size(), ++i, {
             ret.add(data.get(i).v1());
-        }
+        })
+        ENDFOR_NC()
         return ret;
     }
 
-    inline Bool operator == (const PMap<K, V>& other) const {
-        if(size() == other.size()) {
-            for(Int i = 0; i < size(); ++i) {
-                if(other.containsEntry(data.get(i).v0(), data.get(i).v1())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+    inline FUNCTION_DECL(Bool, operator ==, (const PMap<K, V>& other) const, {
+        IF(size() == other.size()) 
+        THEN({
+            FOR(Int i = 0, i < size(), ++i, {
+                IF(other.containsEntry(data.get(i).v0(), data.get(i).v1())) 
+                THEN({
+                    RETURN(true);
+                })
+                ENDIF()
+            })
+            ENDFOR()
+        })
+        ENDIF()
+        RETURN(false);
+    })
 
     inline Bool operator != (const PMap<K, V>& other) const {
         return !(*this == other);
@@ -114,14 +128,17 @@ public:
 private:
     PMap(const PList<PTuple<K, V>> data):data(data) { }
 
-    inline Bool containsEntry(const K& k, const V& v) const {
-        for(Int i = 0; i < size(); ++i) {
-            if (k == data.get(i).v0()) {
-                return v == data.get(i).v1();
-            }
-        }
-        return false;
-    }
+    inline FUNCTION_DECL(Bool, containsEntry, (const K& k, const V& v) const, {
+        FOR(Int i = 0, i < size(), ++i, {
+            IF(k == data.get(i).v0()) 
+            THEN({
+                RETURN(v == data.get(i).v1());
+            })
+            ENDIF()
+        })
+        ENDFOR()
+        RETURN(false);
+    })
 
     PList<PTuple<K, V>> data;
 };

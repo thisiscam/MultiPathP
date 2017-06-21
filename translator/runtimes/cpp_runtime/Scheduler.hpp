@@ -23,9 +23,7 @@ protected:
 
     virtual SchedulerChoice chooseMachine() = 0;
 
-    inline PList<SendQueueItem>& getSendQueue(Ptr<PMachine> machine);
-
-    PList<Ptr<PMachine>> machines;
+    inline PList<SendQueueItem>& getSendQueue(PMachine* machine);
     
     ExecutionEngine& engine;
 
@@ -36,6 +34,8 @@ public:
 
     inline Bool step();
 
+private:
+    SendQueueItem popSendQueueItem(Ptr<PMachine> machine, Int index);
 };
 
 };

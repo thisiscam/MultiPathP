@@ -7,6 +7,9 @@ using namespace sylvan;
 
 namespace RUNTIME_NAMESPACE {
 
+template<typename>
+class ValueSummary;
+
 class PathConstraint final {
 
 public:

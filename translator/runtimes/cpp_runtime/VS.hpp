@@ -52,6 +52,12 @@ public:
         return binaryOp<ValueSummary<bool>>(*this, b, [](T a, T b) { return a != b; });
     }
 
+    template<typename, bool, typename, typename, typename>
+    friend struct BinaryOpFunctor;
+
+    template<typename, bool, typename, typename>
+    friend struct UnaryOpFunctor;
+    
 private:
 
     std::list<Guard<T>> values;

@@ -206,6 +206,17 @@ std::ostream& operator<<(std::ostream& os, const ValueSummary<P*>& v)
     return os;  
 }
 
+template<typename>
+struct ExtractVSParam;
+
+template<typename T>
+struct ExtractVSParam<ValueSummary<T>> {
+    using type = T;
+};
+
+#define INVOKE(ptr, t, method, args) \
+    unaryOp<t>((ptr), [&](typename ExtractVSParam<decltype(ptr)>::type p) { return p->method args; })
+
 };
 
 #endif

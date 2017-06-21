@@ -1,6 +1,8 @@
 #ifndef INTRUMENTATION_HPP
 #define INTRUMENTATION_HPP
 
+#ifdef USE_VALUE_SUMMARY
+
 #include "PathConstraint.hpp"
 #include "ValueSummary.hpp"
 
@@ -26,41 +28,55 @@ ReturnType functionName args {                              \
     RET_IF_NOT_VOID(ReturnType);                            \
 }
 
-#define IF(condition)               \
-    {                               \
-        if(IfBranch::eval(condition
+#define IF(condition)                           \
+    {                                           \
+        bool terminated =                       \
+            IfBranch::eval(condition            \
 
-#define THEN(block)                 \
-        ,                           \
-        [&](){                      \
-            block;                  \
+#define THEN(block)                             \
+        ,                                       \
+        [&](){                                  \
+            block;                              \
         }
 
-#define ELSE(block)                 \
-        ,                           \
-        [&](){                      \
-            block;                  \
+#define ELSE(block)                             \
+        ,                                       \
+        [&](){                                  \
+            block;                              \
         }
 
-#define ENDIF()                     \
-        )) {                        \
-            return;                 \
-        }                           \
+#define ENDIF()                                 \
+        );                                      \
+        if(terminated) {                        \
+            return;                             \
+        }                                       \
     }
 
-#define IF_ONLY(condition)              \
+#define ENDIF_NC()                              \
+        );                                      \
+    }
+
+#define IF_ONLY(condition)                      \
     if(IfBranch::onlyTrue(condition))          
+
 
 #define WHILE(condition, block)                 \
     {                                           \
         Bdd loopMergePointPc;                   \
-        if(LoopBranch::eval(                    \
+        bool terminated =                       \
+            LoopBranch::eval(                   \
         [&] { return condition; },              \
         [&] {                                   \
             block                               \
-        }, loopMergePointPc)) {                 \
+        }, loopMergePointPc);
+
+#define ENDWHILE()                              \
+        if(terminated) {                        \
             return;                             \
         }                                       \
+    }
+
+#define ENDWHILE_NC()                            \
     }
 
 #define FOR(initializer, condition, increment, block)   \
@@ -69,7 +85,14 @@ ReturnType functionName args {                              \
         WHILE(condition, {                              \
             block;                                      \
             increment;                                  \
-        });                                             \
+        })
+
+#define ENDFOR()                                        \
+        ENDWHILE()                                      \
+    }
+
+#define ENDFOR_NC()                                     \
+        ENDWHILE_NC()                                   \
     }
 
 #define BREAK()                                     \
@@ -166,4 +189,51 @@ public:
 };
 
 };
+
+#else
+
+#define FUNCTION_DECL(ReturnType, functionName, args, body) \
+ReturnType functionName args {                              \
+    body;                                                   \
+}
+
+#define IF(condition)               \
+    if(condition)                   \
+
+#define THEN(block)                 \
+    {                               \
+        block;                      \
+    }
+
+#define ELSE(block)                 \
+    {                               \
+        block;                      \
+    }
+
+#define ENDIF()
+
+#define IF_ONLY(condition)          \
+    if(condition)          
+
+#define WHILE(condition, block)     \
+    while(condition) {              \
+        block;                      \
+    }
+
+#define FOR(initializer, condition, increment, block)   \
+    for(initializer; condition; increment) {            \
+        block;                                          \
+    }
+
+#define BREAK() break;
+
+/* WARNING: the following macro is not portable */
+#define GET_MACRO(_0, _1, NAME, ...) NAME
+#define RETURN(...) GET_MACRO(_0, ##__VA_ARGS__, RETURN1, RETURN0)(__VA_ARGS__)
+
+#define RETURN0() return;
+
+#define RETURN1(val) return val;
+
+#endif
 #endif

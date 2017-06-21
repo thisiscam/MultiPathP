@@ -9,7 +9,7 @@ struct BinaryOpFunctor;
 
 template<typename ReturnType, bool constraintPc, typename A, typename B, typename BinOp>
 struct BinaryOpFunctor {
-inline static ReturnType 
+    inline static ReturnType 
     impl(const ValueSummary<A>& a, const ValueSummary<B>& b, BinOp&& binOp) {
         ReturnType r;
         for(const auto& gvA : a.values) {
@@ -23,6 +23,23 @@ inline static ReturnType
             }
         }
         return r;
+    }
+};
+
+template<bool constraintPc, typename A, typename B, typename BinOp>
+struct BinaryOpFunctor<void, constraintPc, A, B, BinOp> {
+    inline static void 
+    impl(const ValueSummary<A>& a, const ValueSummary<B>& b, BinOp&& binOp) {
+        for(const auto& gvA : a.values) {
+            for(const auto& gvB : b.values) {            
+                Bdd oldPc = PathConstraint::pc();
+                PathConstraint::pc() &= gvA.second & gvB.second;
+                if(PathConstraint::isNotZero()) {
+                    binOp(gvA.first, gvB.first);
+                }
+                PathConstraint::pc() = oldPc;
+            }
+        }
     }
 };
 
@@ -75,6 +92,21 @@ struct UnaryOpFunctor {
             PathConstraint::pc() = oldPc;
         }
         return r;
+    }
+};
+
+template<bool constraintPc, typename A, typename UnaryOp>
+struct UnaryOpFunctor<void, constraintPc, A, UnaryOp> {
+    static void
+    impl(const ValueSummary<A>& a, UnaryOp&& uOp) {
+        for(const auto& gv : a.values) {
+            Bdd oldPc = PathConstraint::pc();
+            PathConstraint::pc() &= gv.second & gv.second;
+            if(PathConstraint::isNotZero()) {
+                uOp(gv.first);
+            }
+            PathConstraint::pc() = oldPc;
+        }
     }
 };
 

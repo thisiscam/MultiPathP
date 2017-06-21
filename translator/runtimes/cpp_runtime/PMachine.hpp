@@ -58,6 +58,7 @@ public:
             })
             ENDIF()
         })
+        ENDFOR()
         throw runtime_error("Unhandled event");
     })
 
@@ -68,6 +69,7 @@ public:
             FOR(Int i = states.size() - 1, i > stateIndex, --i, {
                 popState();
             })
+            ENDFOR_NC()
         })
         ENDIF()
         retcode = EXECUTE_FINISHED;
@@ -106,6 +108,7 @@ protected:
             })
             ENDIF()
         })
+        ENDFOR()
         throw runtime_error("Unhandled event");
     })
 
