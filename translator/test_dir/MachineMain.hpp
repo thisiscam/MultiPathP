@@ -25,18 +25,20 @@ private:
     /* end Transition Methods */
 
     /* region Function Implementations */
-    inline void InitEntryImpl() {
+    inline FUNCTION_DECL(void, InitEntryImpl, (), {
         Ptr<PMachine> coor;
         Int index;
         coor = create<MachineCoordinateMachine>();
         index = 0;
-        while(index < 5) {
-            if(randomBool("0")) {
+        WHILE(index < 5) {
+            IF(randomBool("0")) 
+            THEN({
                 send(coor, eTransaction, index);
-            }
+            })ENDIF()
             index = index + 1;
         }
-    }
+        ENDWHILE()
+    })
     /* end Function Implementations */
 
     /* region Machine Fields */

@@ -36,39 +36,44 @@ private:
     /* end Transition Methods */
 
     /* region Function Implementations */
-    inline void InitEntryImpl() {
+    inline FUNCTION_DECL(void, InitEntryImpl, (), {
         Int index;
         Ptr<PMachine> temp;
         index = 0;
-        while(index < 3) {
-            temp = create<MachineParticipantMachine>(this);
+        WHILE(index < 3) {
+            temp = create<MachineParticipantMachine>(self());
             participants.insert(PTuple<Int, Ptr<PMachine>>(index, temp));
             index = index + 1;
         }
-        raise(eUnit); retcode = RAISED_EVENT; return;
-    }
+        ENDWHILE()
+        raise(eUnit); retcode = RAISED_EVENT; RETURN();
+    })
 
-    inline Ptr<PMachine> ChooseParticipantNonDet() {
+    inline FUNCTION_DECL(Ptr<PMachine>, ChooseParticipantNonDet, (), {
         Int index;
         index = 0;
-        while(index < participants.size()) {
-            if(randomBool("1")) {
-                return participants.get(index);
-            }
+        WHILE(index < participants.size()) {
+            IF(randomBool("1")) 
+            THEN({
+                RETURN( participants.get(index));
+            })ENDIF()
             index = index + 1;
         }
-        return participants.get(0);
-    }
+        ENDWHILE()
+        RETURN( participants.get(0));
+    })
 
-    inline void TransactionStateEntryImpl() {
+    inline FUNCTION_DECL(void, TransactionStateEntryImpl, (), {
         Ptr<PMachine> p;
         p = ChooseParticipantNonDet();
-        if(randomBool("2")) {
+        IF(randomBool("2")) 
+        THEN({
             send(p, eCommit);
-        } else {
+        }) 
+        ELSE({
             send(p, eAbort);
-        }
-    }
+        })ENDIF()
+    })
     /* end Function Implementations */
 
     /* region Machine Fields */

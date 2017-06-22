@@ -4,7 +4,6 @@
 namespace RUNTIME_NAMESPACE {
 
 #define REF_BODY(T...)                                  \
-                                                        \
 public:                                                 \
     Ref():value(NULL) { }                               \
     Ref(T& value):value(&value) { }                     \
@@ -14,9 +13,8 @@ public:                                                 \
         *value = other;                                 \
         return *this;                                   \
     }                                                   \
-                                                        \
 private:                                                \
-    Ptr<T> value;                                       \
+    T* value;                                           \
 public:
 
 #define END_REF() };

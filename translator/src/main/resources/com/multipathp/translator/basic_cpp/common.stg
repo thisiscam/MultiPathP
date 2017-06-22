@@ -44,9 +44,9 @@ FunctionParams(params) ::= <<
 >>
 
 FunctionImplementation(function) ::= <<
-inline <type(function.retType)> <function.name>(<FunctionParams(function.params)>) {
+inline FUNCTION_DECL(<type(function.retType)>, <function.name>, (<FunctionParams(function.params)>), {
     <Render(function.stmtBlock)>
-}
+})
 >>
 
 StmtBlock(node) ::= <<
@@ -76,16 +76,19 @@ AssignStmt(node) ::= <<
 >>
 
 ConditionalStmt(node) ::= <<
-if(<Render(node.condition)>) {
+IF(<Render(node.condition)>) 
+THEN({
     <Render(node.thenBranch)>
-}<if(node.elseBranch)> else {
+})<if(node.elseBranch)> 
+ELSE({
     <Render(node.elseBranch)>
-}<endif>
+})<endif>
+ENDIF()
 >>
 
 ExpStmt(node) ::= <<
 <Render(node.expression)>;<//>
-<if(node.expression.canRaiseEvent)>if(retcode == RAISED_EVENT) { return<if(function.retType)> <typeDefaultValue(function.retType)><endif>; }<endif>
+<if(node.expression.canRaiseEvent)>if(retcode == RAISED_EVENT) { RETURN(<if(function.retType)> <typeDefaultValue(function.retType)><endif>); }<endif>
 >>
 
 InsertStmt(node) ::= <<
@@ -97,7 +100,7 @@ print("<node.string>");
 >>
 
 RaiseStmt(node) ::= <<
-raise(<EventPayloadArguments()>); retcode = RAISED_EVENT; return;
+raise(<EventPayloadArguments()>); retcode = RAISED_EVENT; RETURN();
 >>
 
 RemoveStmt(node) ::= <<
@@ -105,7 +108,7 @@ RemoveStmt(node) ::= <<
 >>
 
 ReturnStmt(node) ::= <<
-return<if(node.expression)> <Render(node.expression)><endif>;
+RETURN(<if(node.expression)> <Render(node.expression)><endif>);
 >>
 
 SendStmt(node) ::= <<
@@ -117,9 +120,10 @@ StmtListStmt(node) ::= <<
 >>
 
 WhileStmt(node) ::= <<
-while(<Render(node.condition)>) {
+WHILE(<Render(node.condition)>) {
     <Render(node.stmt)>
 }
+ENDWHILE()
 >>
 
 ArithmeticExpKindMap ::= [
@@ -252,7 +256,7 @@ SizeofExp(node) ::= <<
 >>
 
 ThisExp(node) ::= <<
-this
+self()
 >>
 
 TupleExp(node) ::= <<

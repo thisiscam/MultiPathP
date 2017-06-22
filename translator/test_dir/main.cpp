@@ -1,4 +1,4 @@
-// // #define USE_VALUE_SUMMARY
+// #define USE_VALUE_SUMMARY
 // #include "header.h"
 
 // using namespace pingpong;
@@ -33,7 +33,6 @@ FUNCTION_DECL(Int, fib, (Int x), {
 
 FUNCTION_DECL(Int, sum, (Int x), {
     Int s = 0;
-   	std::cout << x << std::endl;
     FOR(int i = 0, i < x, ++i, {
     	s = s + i;
     })
@@ -43,24 +42,33 @@ FUNCTION_DECL(Int, sum, (Int x), {
 
 FUNCTION_DECL(void, entrance, (), {
    	ExecutionEngine engine = ExecutionEngine();
-	Int x;
+	PList<PTuple<Int, Int>> list;
+	list.add(PTuple<Int, Int>(20, 10));
     IF(engine.randomBool("0"))
     THEN({
-    	x = 10;
+    	IF(engine.randomBool("0"))
+    	THEN({
+    		list.getl(0).v0l() = 10;
+    	})
+    	ELSE({
+    		list.getl(0).v0l() = 20;
+    	})
+    	ENDIF()
     })
     ELSE({
-    	x = 11;
+    	list.getl(0).v0l() = 30;
     })
     ENDIF();
-    std::cout << fib(x) << std::endl;
-    std::cout << fib(x) << std::endl;
-    std::cout << sum(x) << std::endl;
+    std::cout << list.get(0).v0() << std::endl;
+    // std::cout << fib(x.v0()) << std::endl;
+    // std::cout << fib(x.v0()) << std::endl;
+    // std::cout << sum(x.v0()) << std::endl;
 })
 
 int main(int argc, char const *argv[])
 {
     PathConstraint::init();
-    entrance();
+	entrance();
     PathConstraint::quit();
     return 0;
 }

@@ -33,18 +33,20 @@ private:
     /* end Transition Methods */
 
     /* region Function Implementations */
-    inline void InitEntryImpl(Ptr<PMachine> payload) {
+    inline FUNCTION_DECL(void, InitEntryImpl, (Ptr<PMachine> payload), {
         coor = payload;
-        raise(eUnit); retcode = RAISED_EVENT; return;
-    }
+        raise(eUnit); retcode = RAISED_EVENT; RETURN();
+    })
 
-    inline void HandlerImpl0() {
-        if(randomBool("3")) {
+    inline FUNCTION_DECL(void, HandlerImpl0, (), {
+        IF(randomBool("3")) 
+        THEN({
             send(coor, eSuccess);
-        } else {
+        }) 
+        ELSE({
             send(coor, eFailure);
-        }
-    }
+        })ENDIF()
+    })
     /* end Function Implementations */
 
     /* region Machine Fields */

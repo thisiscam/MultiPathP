@@ -73,7 +73,7 @@ public:
         return binaryOp<ValueSummary<bool>>(*this, b, [](P* a, P* b) { return a != b; });
     }
 
-    inline ValueSummary<P> operator *() const {
+    inline const ValueSummary<P> operator *() const {
         return unaryOp<P>(*this, [](P* a) { return *a; });
     }
 
@@ -113,20 +113,24 @@ public:
     class Builder {
     public:
         void addValue(const Bdd& pred, P* value) {
-            values.push_back({pred, value});
+            values[value] |= pred;
         }
 
-        void addValue(const Bdd& pred, const ValueSummary<P*>& values) {
-            for(const auto& v : values.values) {
+        void addValue(const Bdd& pred, const ValueSummary<P*>& v) {
+            for(const auto& v : v.values) {
                 addValue(v.second, v.first);
             }
         }
 
         ValueSummary<P*> build() {
-            return ValueSummary<P*>(values);
+            std::list<Guard<P*>> _values;
+            for(const auto& pair : values) {
+                _values.push_back({pair.second, pair.first});
+            }
+            return ValueSummary<P*>(_values);
         }
 
-        std::list<Guard<P*>> values;
+        std::unordered_map<P*, Bdd> values;
     };
 };
 
@@ -205,14 +209,6 @@ std::ostream& operator<<(std::ostream& os, const ValueSummary<P*>& v)
     os << "]";
     return os;  
 }
-
-template<typename>
-struct ExtractVSParam;
-
-template<typename T>
-struct ExtractVSParam<ValueSummary<T>> {
-    using type = T;
-};
 
 };
 

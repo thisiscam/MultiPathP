@@ -94,6 +94,10 @@ public:
 
 protected:
 
+    inline Ptr<PMachine> self() {
+        return this;
+    }
+
     inline void send(Ptr<PMachine> other, Int e, const PAny& payload = PAny()) {
         sendQueue.add(SendQueueItem(other, e, payload));
     }

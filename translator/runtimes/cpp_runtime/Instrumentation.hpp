@@ -13,7 +13,7 @@
 
 #define RET_IF_NOT_VOID(ReturnType) IF_TYPE_MATCH_VOID( ReturnType , , return __ret; )
 
-#define FUNCTION_BODY(body)                                 \
+#define FUNCTION_BODY(body...)                              \
     Bdd __oldPc = PathConstraint::pc();                     \
     auto __body = [&](){                                    \
         body;                                               \
@@ -21,25 +21,25 @@
     __body();                                               \
     PathConstraint::pc() = __oldPc;                         \
 
-#define FUNCTION_DECL(ReturnType, functionName, args, body) \
-ReturnType functionName args {                              \
-    DECL_RET_IF_NOT_VOID(ReturnType);                       \
-    FUNCTION_BODY(body)                                     \
-    RET_IF_NOT_VOID(ReturnType);                            \
+#define FUNCTION_DECL(ReturnType, functionName, args, body...)  \
+ReturnType functionName args {                                  \
+    DECL_RET_IF_NOT_VOID(ReturnType);                           \
+    FUNCTION_BODY(body)                                         \
+    RET_IF_NOT_VOID(ReturnType);                                \
 }
 
-#define IF(condition)                           \
+#define IF(condition...)                        \
     {                                           \
         bool terminated =                       \
             IfBranch::eval(condition            \
 
-#define THEN(block)                             \
+#define THEN(block...)                          \
         ,                                       \
         [&](){                                  \
             block;                              \
         }
 
-#define ELSE(block)                             \
+#define ELSE(block...)                          \
         ,                                       \
         [&](){                                  \
             block;                              \
@@ -56,36 +56,37 @@ ReturnType functionName args {                              \
         );                                      \
     }
 
-#define IF_ONLY(condition)                      \
+#define IF_ONLY(condition...)                   \
     if(IfBranch::onlyTrue(condition))          
 
 
-#define WHILE(condition, block)                 \
+#define WHILE(condition...)                     \
     {                                           \
         Bdd loopMergePointPc;                   \
         bool terminated =                       \
             LoopBranch::eval(                   \
         [&] { return condition; },              \
         [&] {                                   \
-            block                               \
-        }, loopMergePointPc);
+
 
 #define ENDWHILE()                              \
+        }, loopMergePointPc);                   \
         if(terminated) {                        \
             return;                             \
         }                                       \
     }
 
-#define ENDWHILE_NC()                            \
+#define ENDWHILE_NC()                           \
+        }, loopMergePointPc);                   \
     }
 
-#define FOR(initializer, condition, increment, block)   \
-    {                                                   \
-        initializer;                                    \
-        WHILE(condition, {                              \
-            block;                                      \
-            increment;                                  \
-        })
+#define FOR(initializer, condition, increment, block...)    \
+    {                                                       \
+        initializer;                                        \
+        WHILE(condition) {                                  \
+            block;                                          \
+            increment;                                      \
+        }
 
 #define ENDFOR()                                        \
         ENDWHILE()                                      \
@@ -192,46 +193,46 @@ public:
 
 #else
 
-#define FUNCTION_DECL(ReturnType, functionName, args, body) \
-ReturnType functionName args {                              \
-    body;                                                   \
+#define FUNCTION_DECL(ReturnType, functionName, args, body...)  \
+ReturnType functionName args {                                  \
+    body;                                                       \
 }
 
-#define IF(condition)               \
+#define IF(condition...)            \
     if(condition)                   \
 
-#define THEN(block)                 \
+#define THEN(block...)              \
     {                               \
         block;                      \
     }
 
-#define ELSE(block)                 \
+#define ELSE(block...)              \
     else {                          \
         block;                      \
     }
 
 #define ENDIF()
 
-#define IF_ONLY(condition)          \
+#define IF_ONLY(condition...)       \
     if(condition)          
 
-#define WHILE(condition, block)     \
+#define WHILE(condition...)         \
     while(condition) {              \
-        block;                      \
+
+#define ENDWHILE()                  \
     }
 
-#define ENDWHILE()
+#define ENDWHILE_NC()               \
+    }
 
-#define ENDWHILE_NC()
-
-#define FOR(initializer, condition, increment, block)   \
-    for(initializer; condition; increment) {            \
-        block;                                          \
+#define FOR(initializer, condition, increment, block...)    \
+    for(initializer; condition; increment) {                \
+        block;                                              \
     }
 
 #define ENDFOR()
 
-#define ENDFOR_NC()
+#define ENDFOR_NC()  
 
 #define BREAK() break;
 
