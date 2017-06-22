@@ -39,7 +39,7 @@ private:
     }
 
     inline void HandlerImpl0() {
-        if(randomBool()) {
+        if(randomBool("3")) {
             send(coor, eSuccess);
         } else {
             send(coor, eFailure);
@@ -52,34 +52,34 @@ private:
     /* end Machine Fields  */
 
     /* region Jump Tables */
-    inline bool isDefered(int state, int event) const override {
+    inline Bool isDefered(Int state, Int event) const override {
         static const bool _isDefered[3][8] = 
             {
                 { true, true, true, true, true, true, true, true} /* halt */,
                 { true,false,false,false,false,false,false,false} /* Init */,
                 { true,false,false,false,false,false,false,false} /* WaitForRequest */
             };
-        return _isDefered[state][event];
+        return getIndex2D(_isDefered, state, event);
     }
 
-    inline bool isGotoTransition(int state, int event) const override {
+    inline Bool isGotoTransition(Int state, Int event) const override {
         static const bool _isGotoTransition[3][8] =
             {
                 {false,false,false,false,false,false,false,false} /* halt */,
                 {false, true, true,false,false,false,false,false} /* Init */,
                 {false, true,false,false,false,false,false,false} /* WaitForRequest */
             };
-        return _isGotoTransition[state][event];
+        return getIndex2D(_isGotoTransition, state, event);
     }
 
-    inline ExitFunction getExitFunction(int state) const override {
+    inline ExitFunctionPtr getExitFunction(Int state) const override {
         #define E(f) ((ExitFunction)&MachineParticipantMachine::f)
         static ExitFunction _exitFunctions[] = {&MachineParticipantMachine::emptyExit,&MachineParticipantMachine::emptyExit,&MachineParticipantMachine::emptyExit};
         #undef E
-        return _exitFunctions[state];
+        return getIndex1D(_exitFunctions, state);
     }
 
-    inline TransitionFunction getTransition(int state, int event) const override {
+    inline TransitionFunctionPtr getTransition(Int state, Int event) const override {
         #define E(f) ((TransitionFunction)&MachineParticipantMachine::f)
         static TransitionFunction _transitions[3][8] = 
             {
@@ -88,10 +88,10 @@ private:
                 {NULL,E(emptyTransition),NULL,NULL,E(HandlerImpl0),E(HandlerImpl0),NULL,NULL}
             };
         #undef E
-        return _transitions[state][event];
+        return getIndex2D(_transitions, state, event);
     }
 
-    inline EntryFunction getTransitionEntry(int state, int event) const override {
+    inline EntryFunctionPtr getTransitionEntry(Int state, Int event) const override {
         #define E(f) ((TransitionFunction)&MachineParticipantMachine::f)
         static TransitionFunction _entries[3][8] = 
             {
@@ -100,7 +100,7 @@ private:
                 {NULL,E(haltEntry),NULL,NULL,E(emptyEntry),E(emptyEntry),NULL,NULL}
             };
         #undef E
-        return _entries[state][event];
+        return getIndex2D(_entries, state, event);
     }
     /* end Jump Tables */
 };

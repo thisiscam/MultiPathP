@@ -17,6 +17,7 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
     private PMachine.Builder machine;
     private PFunction.Builder function;
 
+    private int randomSiteCount = 0;
 
     public ParseTreeToPAST(ParseTreeSetParser.ParseTreeSet set) {
         super(set);
@@ -632,12 +633,12 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
 
             @Override
             public Exp visitExp_nondet(pParser.Exp_nondetContext ctx) {
-                return new NondetExp.Builder().setFair(false).build();
+                return new NondetExp.Builder().setFair(false).setSite(randomSiteCount++).build();
             }
 
             @Override
             public Exp visitExp_fairnondet(pParser.Exp_fairnondetContext ctx) {
-                return new NondetExp.Builder().setFair(true).build();
+                return new NondetExp.Builder().setFair(true).setSite(randomSiteCount++).build();
             }
 
             @Override

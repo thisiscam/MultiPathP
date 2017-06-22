@@ -2,6 +2,7 @@
 #define SCHEDULE_IPP
 
 #include "PMachine.hpp"
+#include "Helpers.h"
 
 namespace RUNTIME_NAMESPACE {
 

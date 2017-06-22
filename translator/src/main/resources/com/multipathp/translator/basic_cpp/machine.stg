@@ -78,17 +78,17 @@ private:
     /* end Machine Fields  */
 
     /* region Jump Tables */
-    inline bool isDefered(int state, int event) const override {
+    inline Bool isDefered(Int state, Int event) const override {
         static const bool _isDefered[<length(machine.stateDecls)>][<length(program.eventDecls)>] = 
             {
                 <machine.stateDecls:
                 {state | {<program.eventDecls: 
                     {e | <if(state.deferedEvents.(e.name))> true<else>false<endif>}; separator=",">\} /* <state.name> */}; separator=",\n">
             };
-        return _isDefered[state][event];
+        return getIndex2D(_isDefered, state, event);
     }
 
-    inline bool isGotoTransition(int state, int event) const override {
+    inline Bool isGotoTransition(Int state, Int event) const override {
         static const bool _isGotoTransition[<length(machine.stateDecls)>][<length(program.eventDecls)>] =
             {
                 <machine.stateDecls:
@@ -96,30 +96,30 @@ private:
                     {e | <if(state.transitionsMap.(e).toStateName)> true<else>false<endif>}; separator=",">\} /* <state.name> */};
                     separator=",\n">
             };
-        return _isGotoTransition[state][event];
+        return getIndex2D(_isGotoTransition, state, event);
     }
 
-    inline ExitFunction getExitFunction(int state) const override {
+    inline ExitFunctionPtr getExitFunction(Int state) const override {
         #define E(f) ((ExitFunction)&<machineName(machine)>::f)
         static ExitFunction _exitFunctions[] = {<machine.stateDecls: {state | &<machineName(machine)>::<if(state.exitFunction)>E(<state.exitFunction>)<else>emptyExit<endif>}; separator=",">};
         #undef E
-        return _exitFunctions[state];
+        return getIndex1D(_exitFunctions, state);
     }
 
-    inline TransitionFunction getTransition(int state, int event) const override {
+    inline TransitionFunctionPtr getTransition(Int state, Int event) const override {
         #define E(f) ((TransitionFunction)&<machineName(machine)>::f)
         static TransitionFunction _transitions[<length(machine.stateDecls)>][<length(program.eventDecls)>] = 
             <JumpTable("TransitionJumpTableInner")>;
         #undef E
-        return _transitions[state][event];
+        return getIndex2D(_transitions, state, event);
     }
 
-    inline EntryFunction getTransitionEntry(int state, int event) const override {
+    inline EntryFunctionPtr getTransitionEntry(Int state, Int event) const override {
         #define E(f) ((TransitionFunction)&<machineName(machine)>::f)
         static TransitionFunction _entries[<length(machine.stateDecls)>][<length(program.eventDecls)>] = 
             <JumpTable("EntryJumpTableInner")>;
         #undef E
-        return _entries[state][event];
+        return getIndex2D(_entries, state, event);
     }
     /* end Jump Tables */
 };

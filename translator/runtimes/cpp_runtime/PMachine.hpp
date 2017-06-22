@@ -4,11 +4,14 @@
 #include <vector>
 #include <stdexcept>
 #include <string>
+#include <typeinfo>
 
 #include "PList.hpp"
 #include "PAny.hpp"
 #include "PTuple.hpp"
 #include "SendQueueItem.hpp"
+#include "Allocator.hpp"
+#include "Helpers.h"
 
 using namespace std;
 
@@ -34,6 +37,16 @@ protected:
     using TransitionFunction = void (PMachine::*)(const PAny& any);
     using EntryFunction  = void (PMachine::*)(const PAny& any);
     using ExitFunction = void (PMachine::*)();
+
+#ifdef USE_VALUE_SUMMARY
+    using TransitionFunctionPtr = ValueSummary<TransitionFunction>;
+    using EntryFunctionPtr  = ValueSummary<EntryFunction>;
+    using ExitFunctionPtr = ValueSummary<ExitFunction>;
+#else
+    using TransitionFunctionPtr = TransitionFunction;
+    using EntryFunctionPtr  = EntryFunction;
+    using ExitFunctionPtr = ExitFunction;
+#endif
 
 public:
     PMachine(ExecutionEngine& engine):engine(engine) { 
@@ -73,10 +86,10 @@ public:
         })
         ENDIF()
         retcode = EXECUTE_FINISHED;
-        TransitionFunction transitionFn = getTransition(state, e);
-        (this->*transitionFn)(payload);
-        EntryFunction entryFn = getTransitionEntry(state, e);
-        (this->*entryFn)(payload);
+        TransitionFunctionPtr transitionFn = getTransition(state, e);
+        INVOKE_PTR_ON_THIS(transitionFn, void, (payload));
+        EntryFunctionPtr entryFn = getTransitionEntry(state, e);
+        INVOKE_PTR_ON_THIS(entryFn, void, (payload));
     })
 
 protected:
@@ -95,12 +108,12 @@ protected:
     inline FUNCTION_DECL(void, raise, (Int e, const PAny& payload = PAny()), {
         FOR(Int i = states.size() - 1, i >= 0, --i, {
             Int state = states.get(i);
-            TransitionFunction f = getTransition(state, e);
+            TransitionFunctionPtr f = getTransition(state, e);
             IF(f != NULL)
             THEN({
-                (this->*f)(payload);
-                EntryFunction entryFn = getTransitionEntry(state, e);
-                (this->*entryFn)(payload);
+                INVOKE_PTR_ON_THIS(f, void, (payload));
+                EntryFunctionPtr entryFn = getTransitionEntry(state, e);
+                INVOKE_PTR_ON_THIS(entryFn, void, (payload));
                 RETURN();
             })
             ELSE({
@@ -116,15 +129,15 @@ protected:
         Int last = states.size() - 1;
         Int current_state = states.get(last);
         states.removeRange(last);
-        ExitFunction eF = getExitFunction(current_state);
+        ExitFunctionPtr eF = getExitFunction(current_state);
         IF(eF != NULL) 
         THEN({
-            (this->*eF)();
+            INVOKE_PTR_ON_THIS(eF, void, ());
         })
         ENDIF()
     })
 
-    inline Bool randomBool();
+    inline Bool randomBool(const std::string&);
 
     inline void passert(Bool cond, const string& message) {
         IF_ONLY(!cond) {
@@ -157,13 +170,22 @@ private:
 
     virtual Bool isDefered(Int state, Int event) const = 0;
     virtual Bool isGotoTransition(Int state, Int event) const = 0;
-    virtual ExitFunction getExitFunction(Int state) const = 0;
-    virtual TransitionFunction getTransition(Int state, Int event) const = 0;
-    virtual EntryFunction getTransitionEntry(Int state, Int event) const = 0;
+    virtual ExitFunctionPtr getExitFunction(Int state) const = 0;
+    virtual TransitionFunctionPtr getTransition(Int state, Int event) const = 0;
+    virtual EntryFunctionPtr getTransitionEntry(Int state, Int event) const = 0;
+
+    static std::map<const type_info*, Allocator<Ptr<PMachine>>>& allocators() { 
+        static std::map<const type_info*, Allocator<Ptr<PMachine>>> allocators;
+        return allocators;
+    }
 
     template<typename M>
     static Ptr<PMachine> alloc(ExecutionEngine& engine) {
-        return new M(engine);
+        if(allocators().count(&typeid(M)) == 0) {
+            //TODO better engine logic 
+            allocators().insert({&typeid(M), Allocator<Ptr<PMachine>>([&]() { return new M(engine); })});
+        }
+        return allocators().at(&typeid(M)).allocate();
     }
 };
 

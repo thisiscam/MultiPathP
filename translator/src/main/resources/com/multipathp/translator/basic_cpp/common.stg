@@ -1,8 +1,8 @@
 typeMap ::= [
-    "$int$": "int",
-    "$bool$": "bool",
+    "$int$": "Int",
+    "$bool$": "Bool",
     "$null$": "PAny",
-    "$event$": "int",
+    "$event$": "Int",
     "$machine$": "Ptr<PMachine>",
     "$void$": "void",
     "$seq$": {PList\<<type(t.indexedInnerType)>>},
@@ -236,7 +236,7 @@ create\<<prefixMachineName(node.machineIdentifier)>\>(<Render(node.payloadExpres
 >>
 
 NondetExp(node) ::= <<
-randomBool()
+randomBool("<node.site>")
 >>
 
 NotExp(node) ::= <<

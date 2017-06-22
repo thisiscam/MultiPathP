@@ -136,8 +136,8 @@ inline ValueSummary<bool> operator>(const ValueSummary<P*>& a, P* b) {
 }
 
 template<typename P>
-inline ValueSummary<bool> operator>(P* b, const ValueSummary<P*>& a) {
-    return unaryOp<ValueSummary<bool>>(a, [=](P* a) { return a > b; });
+inline ValueSummary<bool> operator>(P* a, const ValueSummary<P*>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](P* b) { return a > b; });
 }
 
 template<typename P>
@@ -146,8 +146,8 @@ inline ValueSummary<bool> operator>=(const ValueSummary<P*>& a, P* b) {
 }
 
 template<typename P>
-inline ValueSummary<bool> operator>=(P* b, const ValueSummary<P*>& a) {
-    return unaryOp<ValueSummary<bool>>(a, [=](P* a) { return a >= b; });
+inline ValueSummary<bool> operator>=(P* a, const ValueSummary<P*>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](P* b) { return a >= b; });
 }
 
 template<typename P>
@@ -156,8 +156,8 @@ inline ValueSummary<bool> operator<(const ValueSummary<P*>& a, P* b) {
 }
 
 template<typename P>
-inline ValueSummary<bool> operator<(P* b, const ValueSummary<P*>& a) {
-    return unaryOp<ValueSummary<bool>>(a, [=](P* a) { return a < b; });
+inline ValueSummary<bool> operator<(P* a, const ValueSummary<P*>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](P* b) { return a < b; });
 }
 
 template<typename P>
@@ -166,8 +166,8 @@ inline ValueSummary<bool> operator<=(const ValueSummary<P*>& a, P* b) {
 }
 
 template<typename P>
-inline ValueSummary<bool> operator<=(P* b, const ValueSummary<P*>& a) {
-    return unaryOp<ValueSummary<bool>>(a, [=](P* a) { return a <= b; });
+inline ValueSummary<bool> operator<=(P* a, const ValueSummary<P*>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](P* b) { return a <= b; });
 }
 
 template<typename P>
@@ -176,8 +176,8 @@ inline ValueSummary<bool> operator==(const ValueSummary<P*>& a, P* b) {
 }
 
 template<typename P>
-inline ValueSummary<bool> operator==(P* b, const ValueSummary<P*>& a) {
-    return unaryOp<ValueSummary<bool>>(a, [=](P* a) { return a == b; });
+inline ValueSummary<bool> operator==(P* a, const ValueSummary<P*>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](P* b) { return a == b; });
 }
 
 template<typename P>
@@ -186,8 +186,8 @@ inline ValueSummary<bool> operator!=(const ValueSummary<P*>& a, P* b) {
 }
 
 template<typename P>
-inline ValueSummary<bool> operator!=(P* b, const ValueSummary<P*>& a) {
-    return unaryOp<ValueSummary<bool>>(a, [=](P* a) { return a != b; });
+inline ValueSummary<bool> operator!=(P* a, const ValueSummary<P*>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](P* b) { return a != b; });
 }
 
 template<typename P>
@@ -213,9 +213,6 @@ template<typename T>
 struct ExtractVSParam<ValueSummary<T>> {
     using type = T;
 };
-
-#define INVOKE(ptr, t, method, args) \
-    unaryOp<t>((ptr), [&](typename ExtractVSParam<decltype(ptr)>::type p) { return p->method args; })
 
 };
 

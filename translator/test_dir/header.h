@@ -1,7 +1,7 @@
 #ifndef pingpong_H
 #define pingpong_H
 
-#define DECL_TYPES List<Ptr<PMachine>, int, int, PList<Ptr<PMachine>>, bool, PTuple<int, Ptr<PMachine>>>
+#define DECL_TYPES List<Ptr<PMachine>, Int, Int, PList<Ptr<PMachine>>, Bool, PTuple<Int, Ptr<PMachine>>>
 #include "basic_cpp_runtime.h"
 
 using namespace RUNTIME_NAMESPACE;

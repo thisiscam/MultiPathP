@@ -1,3 +1,4 @@
+// // #define USE_VALUE_SUMMARY
 // #include "header.h"
 
 // using namespace pingpong;
@@ -29,13 +30,37 @@ FUNCTION_DECL(Int, fib, (Int x), {
     ENDIF()
 })
 
+
+FUNCTION_DECL(Int, sum, (Int x), {
+    Int s = 0;
+   	std::cout << x << std::endl;
+    FOR(int i = 0, i < x, ++i, {
+    	s = s + i;
+    })
+    ENDFOR()
+    RETURN(s);
+})
+
+FUNCTION_DECL(void, entrance, (), {
+   	ExecutionEngine engine = ExecutionEngine();
+	Int x;
+    IF(engine.randomBool("0"))
+    THEN({
+    	x = 10;
+    })
+    ELSE({
+    	x = 11;
+    })
+    ENDIF();
+    std::cout << fib(x) << std::endl;
+    std::cout << fib(x) << std::endl;
+    std::cout << sum(x) << std::endl;
+})
+
 int main(int argc, char const *argv[])
 {
     PathConstraint::init();
-    fib(1);
+    entrance();
     PathConstraint::quit();
-    ValueSummary<int*> x;
-    // test<2>();
-    // sum(10);
     return 0;
 }

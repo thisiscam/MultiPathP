@@ -64,17 +64,17 @@ public:
     class Builder {
 
     public: 
-        inline void addValue(const Bdd& pred, bool value) {
+        inline Builder& addValue(const Bdd& pred, bool value) {
             if(value) {
                 T |= pred;
             } else {
                 F |= pred;
             }
+            return *this;
         }
 
-        void addValue(const Bdd& pred, const ValueSummary<bool>& values) {
-            addValue(values.T, true);
-            addValue(values.F, false);
+        inline Builder& addValue(const Bdd& pred, const ValueSummary<bool>& values) {
+            return addValue(values.T, true).addValue(values.F, false);
         }
 
         inline ValueSummary<bool> build() {

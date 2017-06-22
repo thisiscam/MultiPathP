@@ -206,7 +206,7 @@ ReturnType functionName args {                              \
     }
 
 #define ELSE(block)                 \
-    {                               \
+    else {                          \
         block;                      \
     }
 
@@ -220,10 +220,18 @@ ReturnType functionName args {                              \
         block;                      \
     }
 
+#define ENDWHILE()
+
+#define ENDWHILE_NC()
+
 #define FOR(initializer, condition, increment, block)   \
     for(initializer; condition; increment) {            \
         block;                                          \
     }
+
+#define ENDFOR()
+
+#define ENDFOR_NC()
 
 #define BREAK() break;
 

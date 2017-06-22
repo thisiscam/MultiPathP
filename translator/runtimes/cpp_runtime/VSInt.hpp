@@ -45,6 +45,7 @@ public:
                     if(gvLhs->first == gvRhs.first) {
                         gvLhs->second |= pred;
                         found = true;
+                        ++gvLhs;
                     } else {
                         gvLhs->second &= !pred;
                         if (gvLhs->second.isZero()) {
@@ -186,88 +187,88 @@ inline ValueSummary<int> operator+(const ValueSummary<int>& a, int b) {
     return unaryOp<ValueSummary<int>>(a, [=](int a) { return a + b; });
 }
 
-inline ValueSummary<int> operator+(int b, const ValueSummary<int>& a) {
-    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a + b; });
+inline ValueSummary<int> operator+(int a, const ValueSummary<int>& b) {
+    return unaryOp<ValueSummary<int>>(b, [=](int b) { return a + b; });
 }
 
 inline ValueSummary<int> operator-(const ValueSummary<int>& a, int b) {
     return unaryOp<ValueSummary<int>>(a, [=](int a) { return a - b; });
 }
 
-inline ValueSummary<int> operator-(int b, const ValueSummary<int>& a) {
-    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a - b; });
+inline ValueSummary<int> operator-(int a, const ValueSummary<int>& b) {
+    return unaryOp<ValueSummary<int>>(b, [=](int b) { return a - b; });
 }
 
 inline ValueSummary<int> operator*(const ValueSummary<int>& a, int b) {
     return unaryOp<ValueSummary<int>>(a, [=](int a) { return a * b; });
 }
 
-inline ValueSummary<int> operator*(int b, const ValueSummary<int>& a) {
-    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a * b; });
+inline ValueSummary<int> operator*(int a, const ValueSummary<int>& b) {
+    return unaryOp<ValueSummary<int>>(b, [=](int b) { return a * b; });
 }
 
 inline ValueSummary<int> operator/(const ValueSummary<int>& a, int b) {
     return unaryOp<ValueSummary<int>>(a, [=](int a) { return a / b; });
 }
 
-inline ValueSummary<int> operator/(int b, const ValueSummary<int>& a) {
-    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a / b; });
+inline ValueSummary<int> operator/(int a, const ValueSummary<int>& b) {
+    return unaryOp<ValueSummary<int>>(b, [=](int b) { return a / b; });
 }
 
 inline ValueSummary<int> operator%(const ValueSummary<int>& a, int b) {
     return unaryOp<ValueSummary<int>>(a, [=](int a) { return a % b; });
 }
 
-inline ValueSummary<int> operator%(int b, const ValueSummary<int>& a) {
-    return unaryOp<ValueSummary<int>>(a, [=](int a) { return a % b; });
+inline ValueSummary<int> operator%(int a, const ValueSummary<int>& b) {
+    return unaryOp<ValueSummary<int>>(b, [=](int b) { return a % b; });
 }
 
 inline ValueSummary<bool> operator>(const ValueSummary<int>& a, int b) {
     return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a > b; });
 }
 
-inline ValueSummary<bool> operator>(int b, const ValueSummary<int>& a) {
-    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a > b; });
+inline ValueSummary<bool> operator>(int a, const ValueSummary<int>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](int b) { return a > b; });
 }
 
 inline ValueSummary<bool> operator>=(const ValueSummary<int>& a, int b) {
     return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a >= b; });
 }
 
-inline ValueSummary<bool> operator>=(int b, const ValueSummary<int>& a) {
-    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a >= b; });
+inline ValueSummary<bool> operator>=(int a, const ValueSummary<int>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](int b) { return a >= b; });
 }
 
 inline ValueSummary<bool> operator<(const ValueSummary<int>& a, int b) {
     return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a < b; });
 }
 
-inline ValueSummary<bool> operator<(int b, const ValueSummary<int>& a) {
-    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a < b; });
+inline ValueSummary<bool> operator<(int a, const ValueSummary<int>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](int b) { return a < b; });
 }
 
 inline ValueSummary<bool> operator<=(const ValueSummary<int>& a, int b) {
     return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a <= b; });
 }
 
-inline ValueSummary<bool> operator<=(int b, const ValueSummary<int>& a) {
-    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a <= b; });
+inline ValueSummary<bool> operator<=(int a, const ValueSummary<int>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](int b) { return a <= b; });
 }
 
 inline ValueSummary<bool> operator==(const ValueSummary<int>& a, int b) {
     return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a == b; });
 }
 
-inline ValueSummary<bool> operator==(int b, const ValueSummary<int>& a) {
-    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a == b; });
+inline ValueSummary<bool> operator==(int a, const ValueSummary<int>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](int b) { return a == b; });
 }
 
 inline ValueSummary<bool> operator!=(const ValueSummary<int>& a, int b) {
     return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a != b; });
 }
 
-inline ValueSummary<bool> operator!=(int b, const ValueSummary<int>& a) {
-    return unaryOp<ValueSummary<bool>>(a, [=](int a) { return a != b; });
+inline ValueSummary<bool> operator!=(int a, const ValueSummary<int>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](int b) { return a != b; });
 }
 
 std::ostream& operator<<(std::ostream& os, const ValueSummary<int>& v)  

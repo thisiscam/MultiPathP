@@ -37,22 +37,22 @@ private:
 
     /* region Function Implementations */
     inline void InitEntryImpl() {
-        int index;
+        Int index;
         Ptr<PMachine> temp;
         index = 0;
         while(index < 3) {
             temp = create<MachineParticipantMachine>(this);
-            participants.insert(PTuple<int, Ptr<PMachine>>(index, temp));
+            participants.insert(PTuple<Int, Ptr<PMachine>>(index, temp));
             index = index + 1;
         }
         raise(eUnit); retcode = RAISED_EVENT; return;
     }
 
     inline Ptr<PMachine> ChooseParticipantNonDet() {
-        int index;
+        Int index;
         index = 0;
         while(index < participants.size()) {
-            if(randomBool()) {
+            if(randomBool("1")) {
                 return participants.get(index);
             }
             index = index + 1;
@@ -63,7 +63,7 @@ private:
     inline void TransactionStateEntryImpl() {
         Ptr<PMachine> p;
         p = ChooseParticipantNonDet();
-        if(randomBool()) {
+        if(randomBool("2")) {
             send(p, eCommit);
         } else {
             send(p, eAbort);
@@ -76,7 +76,7 @@ private:
     /* end Machine Fields  */
 
     /* region Jump Tables */
-    inline bool isDefered(int state, int event) const override {
+    inline Bool isDefered(Int state, Int event) const override {
         static const bool _isDefered[4][8] = 
             {
                 { true, true, true, true, true, true, true, true} /* halt */,
@@ -84,10 +84,10 @@ private:
                 { true,false,false,false,false,false,false,false} /* WaitForRequest */,
                 { true,false,false, true,false,false,false,false} /* TransactionState */
             };
-        return _isDefered[state][event];
+        return getIndex2D(_isDefered, state, event);
     }
 
-    inline bool isGotoTransition(int state, int event) const override {
+    inline Bool isGotoTransition(Int state, Int event) const override {
         static const bool _isGotoTransition[4][8] =
             {
                 {false,false,false,false,false,false,false,false} /* halt */,
@@ -95,17 +95,17 @@ private:
                 {false, true,false, true,false,false,false,false} /* WaitForRequest */,
                 {false, true,false,false,false,false, true, true} /* TransactionState */
             };
-        return _isGotoTransition[state][event];
+        return getIndex2D(_isGotoTransition, state, event);
     }
 
-    inline ExitFunction getExitFunction(int state) const override {
+    inline ExitFunctionPtr getExitFunction(Int state) const override {
         #define E(f) ((ExitFunction)&MachineCoordinateMachine::f)
         static ExitFunction _exitFunctions[] = {&MachineCoordinateMachine::emptyExit,&MachineCoordinateMachine::emptyExit,&MachineCoordinateMachine::emptyExit,&MachineCoordinateMachine::emptyExit};
         #undef E
-        return _exitFunctions[state];
+        return getIndex1D(_exitFunctions, state);
     }
 
-    inline TransitionFunction getTransition(int state, int event) const override {
+    inline TransitionFunctionPtr getTransition(Int state, Int event) const override {
         #define E(f) ((TransitionFunction)&MachineCoordinateMachine::f)
         static TransitionFunction _transitions[4][8] = 
             {
@@ -115,10 +115,10 @@ private:
                 {NULL,E(emptyTransition),NULL,NULL,NULL,NULL,E(emptyTransition),E(emptyTransition)}
             };
         #undef E
-        return _transitions[state][event];
+        return getIndex2D(_transitions, state, event);
     }
 
-    inline EntryFunction getTransitionEntry(int state, int event) const override {
+    inline EntryFunctionPtr getTransitionEntry(Int state, Int event) const override {
         #define E(f) ((TransitionFunction)&MachineCoordinateMachine::f)
         static TransitionFunction _entries[4][8] = 
             {
@@ -128,7 +128,7 @@ private:
                 {NULL,E(haltEntry),NULL,NULL,NULL,NULL,E(WaitForRequestEntry),E(WaitForRequestEntry)}
             };
         #undef E
-        return _entries[state][event];
+        return getIndex2D(_entries, state, event);
     }
     /* end Jump Tables */
 };

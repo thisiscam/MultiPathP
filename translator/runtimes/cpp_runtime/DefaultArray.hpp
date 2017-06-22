@@ -13,6 +13,11 @@ template<typename T>
 class DefaultArray 
 {
 public:
+    DefaultArray():allocator([]() { return T(); }) { }
+
+    DefaultArray(std::function<T(void)> allocator):allocator(allocator) 
+    { }
+
     T get(const Int& index) const
     {
 #ifdef USE_VALUE_SUMMARY
@@ -30,11 +35,11 @@ public:
     {
 #ifdef USE_VALUE_SUMMARY
         return unaryOp<Ref<T>>(index, [&](int index) {
-            resizeIfNeeded(index + 1);
+            resizeIfNeeded(index);
             return Ref<T>(data[index]);
         });
 #else
-        resizeIfNeeded(index + 1);
+        resizeIfNeeded(index);
         return Ref<T>(data[index]);
 #endif
     }
@@ -44,9 +49,11 @@ private:
     vector<T> data;
     void resizeIfNeeded(int length) const {
         if(length >= data.size()) {
-            const_cast<vector<T>*>(&data)->resize(length + 1);
+            const_cast<vector<T>*>(&data)->resize(length + 1, allocator());
         }
     }
+
+    std::function<T(void)> allocator;
 };
 
 };

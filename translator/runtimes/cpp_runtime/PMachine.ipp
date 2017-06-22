@@ -6,8 +6,8 @@
 namespace RUNTIME_NAMESPACE {
 
 inline Bool 
-PMachine::randomBool() {
-    return engine.randomBool();
+PMachine::randomBool(const string& id) {
+    return engine.randomBool(id);
 }
 
 };

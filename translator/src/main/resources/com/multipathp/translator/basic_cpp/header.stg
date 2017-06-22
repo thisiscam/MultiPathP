@@ -31,7 +31,7 @@ namespace <projectName> {
 class Controller {
 public:
 	
-	static inline Ptr<PMachine> createMainMachine(ExecutionEngine& engine) {
+	static inline Ptr\<PMachine> createMainMachine(ExecutionEngine& engine) {
 		return new <machineName(program.mainMachine)>(engine);
 	}
 

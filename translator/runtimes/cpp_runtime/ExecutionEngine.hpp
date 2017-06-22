@@ -1,6 +1,8 @@
 #ifndef EXECUTION_ENGINE_HPP
 #define EXECUTION_ENGINE_HPP
 
+#include <string>
+
 namespace RUNTIME_NAMESPACE {
 
 class Scheduler;
@@ -13,7 +15,7 @@ public:
 
     inline void run(Scheduler& scheduler, Ptr<PMachine> machine);
 
-    Bool randomBool();
+    Bool randomBool(const std::string& id);
 
     Int randomInt(Int max);
     

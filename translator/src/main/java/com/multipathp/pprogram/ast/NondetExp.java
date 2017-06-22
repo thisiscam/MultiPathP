@@ -8,6 +8,7 @@ import org.inferred.freebuilder.FreeBuilder;
  */
 @FreeBuilder
 public abstract class NondetExp extends Exp {
+    public abstract int getSite();
     public abstract boolean isFair();
 
     @Override
