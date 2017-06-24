@@ -34,7 +34,7 @@ public:
 		return new MachineMain(engine);
 	}
 
-	static inline void announce(int event, const PAny& payload) {
+	static inline void announce(const Int& event, const PAny& payload) {
 
 	}
 };

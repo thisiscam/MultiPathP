@@ -12,7 +12,7 @@ namespace RUNTIME_NAMESPACE {
 static Bool newBoolVar(const std::string& id) {
 	static std::list<std::tuple<const std::string, Bool>> allocatedBools;
 #ifdef USE_VALUE_SUMMARY
-	Bdd T = Bdd((uint32_t)allocatedBools.size());
+	Bdd T = Bdd::bddVar(allocatedBools.size());
 	ValueSummary<bool>::Builder builder;
 	builder.addValue(T, true).addValue(!T, false);
 	Bool ret = builder.build();

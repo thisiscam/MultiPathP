@@ -35,8 +35,13 @@ public:
         for(const auto& gvRhs : rhs.values) {
             Bdd pred = PathConstraint::pc() & gvRhs.second;
             if(!pred.isZero()) {
-                for(auto& gvLhs : values) {
-                    gvLhs.second &= !pred;
+                for(auto gvLhs = begin(values); gvLhs != end(values); ) {
+                    gvLhs->second &= !pred;
+                    if (gvLhs->second.isZero()) {
+                        gvLhs = values.erase(gvLhs);
+                    } else {
+                        ++gvLhs;
+                    }
                 }
                 values.push_back({pred, gvRhs.first});
             }

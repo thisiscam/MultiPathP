@@ -4,6 +4,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <cassert>
+#include <climits>
 
 #include "ValueSummaryOperations.h"
 
@@ -156,6 +157,12 @@ public:
     template<typename, bool, typename, typename>
     friend struct UnaryOpFunctor;
 
+    void printDot(const std::string& fname) const {
+        for(const auto& gv : values) {
+            RUNTIME_NAMESPACE::printDot(gv.second, fname + std::to_string(gv.first) + ".dot");
+        }
+    }
+
 private:
 
     ValueSummary(const std::unordered_map<int, Bdd>& values):values(values) { }
@@ -163,6 +170,15 @@ private:
     std::unordered_map<int, Bdd> values;
 
 public:
+
+    inline int maxValue() const {
+        int m = INT_MIN;
+        for(auto && gv : values) {
+            m = std::max(gv.first, m);
+        }
+        return m;
+    }
+
     class Builder {
     public:
         void addValue(const Bdd& pred, int value) {

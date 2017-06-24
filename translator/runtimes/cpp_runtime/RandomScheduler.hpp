@@ -17,7 +17,7 @@ protected:
 
     inline SchedulerChoice chooseMachine() override;
 
-    inline void startMachine(Ptr<PMachine> machine, const PAny& payload) override;
+    inline void startMachine(const Ptr<PMachine>& machine, const PAny& payload) override;
 
 
 public:

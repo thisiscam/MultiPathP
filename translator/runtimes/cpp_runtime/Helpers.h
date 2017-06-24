@@ -13,11 +13,21 @@ struct ExtractVSParam<ValueSummary<T>> {
     using type = T;
 };
 
-#define INVOKE(ptr, t, method, args) \
-    unaryOp<t>((ptr), [&](typename ExtractVSParam<decltype(ptr)>::type p) { return p->method args; })
+template<typename T>
+struct ExtractVSParam<const ValueSummary<T>&> {
+    using type = T;
+};
+
+#define INVOKE(ptr, t, method, args) 										         \
+    unaryOp<t, true>((ptr), [&](typename ExtractVSParam<decltype(ptr)>::type p) {	 \
+    	if(p == NULL) {														         \
+    		throw runtime_error("null pointer exception");					         \
+    	}																	         \
+    	return p->method args;												         \
+    })
 
 #define INVOKE_PTR_ON_THIS(fPtr, t, args) \
-    unaryOp<t>((fPtr), [&](typename ExtractVSParam<decltype(fPtr)>::type fPtr) { return (this->*fPtr) args; })
+    unaryOp<t, true>((fPtr), [&](typename ExtractVSParam<decltype(fPtr)>::type fPtr) { return (this->*fPtr) args; })
 
 template<typename T, size_t d1>
 typename std::remove_const<T>::type getIndex1D(T (&array)[d1], Int i1) {

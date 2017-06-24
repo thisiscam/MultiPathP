@@ -2,8 +2,9 @@
 #define VS_PTR_HPP
 
 #include <iostream>
-#include <list>
+#include <unordered_map>
 #include <cassert>
+#include <climits>
 
 #include "ValueSummaryOperations.h"
 
@@ -15,10 +16,10 @@ class ValueSummary<P*> final {
 public:
 
     ValueSummary():
-        ValueSummary(NULL)
+        ValueSummary(0)
     { }
 
-    ValueSummary(P* v):values(std::list<Guard<P*>>(1, {PathConstraint::pc(), v}))
+    ValueSummary(P* i):values(std::unordered_map<P*, Bdd>({{i, PathConstraint::pc()}}))
     { }
 
     ValueSummary(const ValueSummary<P*>& other)
@@ -27,7 +28,7 @@ public:
         for(const auto& gv : other.values) {
             Bdd pred = PathConstraint::pc() & gv.second;
             if (!pred.isZero()) {
-                values.push_back({pred, gv.first});
+                values.insert({gv.first, pred});
             }
         }
     }
@@ -40,10 +41,24 @@ public:
         for(const auto& gvRhs : rhs.values) {
             Bdd pred = PathConstraint::pc() & gvRhs.second;
             if(!pred.isZero()) {
-                for(auto& gvLhs : values) {
-                    gvLhs.second &= !pred;
+                bool found = false;
+                for(auto gvLhs = begin(values); gvLhs != end(values); ) {
+                    if(gvLhs->first == gvRhs.first) {
+                        gvLhs->second |= pred;
+                        found = true;
+                        ++gvLhs;
+                    } else {
+                        gvLhs->second &= !pred;
+                        if (gvLhs->second.isZero()) {
+                            gvLhs = values.erase(gvLhs);
+                        } else {
+                            ++gvLhs;
+                        }
+                    }
                 }
-                values.push_back({pred, gvRhs.first});
+                if(!found) {
+                    values.insert({gvRhs.first, pred});
+                }
             }
         }
         return *this;
@@ -73,27 +88,50 @@ public:
         return binaryOp<ValueSummary<bool>>(*this, b, [](P* a, P* b) { return a != b; });
     }
 
-    inline const ValueSummary<P> operator *() const {
-        return unaryOp<P>(*this, [](P* a) { return *a; });
+    inline ValueSummary<P*> operator -() {
+        return unaryOp<ValueSummary<P*>>(*this, [](P* a) { return -a; });
     }
 
-    friend ValueSummary<bool> operator >(const ValueSummary<P*>&, P*);
-    friend ValueSummary<bool> operator >(int, const ValueSummary<P*>&);
+    inline ValueSummary<P*>& operator ++() {
+        return *this = *this + 1;
+    }
 
-    friend ValueSummary<bool> operator >=(const ValueSummary<P*>&, P*);
-    friend ValueSummary<bool> operator >=(int, const ValueSummary<P*>&);
+    inline ValueSummary<P*>& operator --() {
+        return *this = *this - 1;
+    }
 
-    friend ValueSummary<bool> operator <(const ValueSummary<P*>&, P*);
-    friend ValueSummary<bool> operator <(int, const ValueSummary<P*>&);
+    template<typename T>
+    friend ValueSummary<bool> operator >(const ValueSummary<T*>&, T*);
+    template<typename T>
+    friend ValueSummary<bool> operator >(T*, const ValueSummary<T*>&);
 
-    friend ValueSummary<bool> operator <=(const ValueSummary<P*>&, P*);
-    friend ValueSummary<bool> operator <=(int, const ValueSummary<P*>&);
+    template<typename T>
+    friend ValueSummary<bool> operator >=(const ValueSummary<T*>&, T*);
+    template<typename T>
+    friend ValueSummary<bool> operator >=(T*, const ValueSummary<T*>&);
 
-    friend ValueSummary<bool> operator ==(const ValueSummary<P*>&, P*);
-    friend ValueSummary<bool> operator ==(int, const ValueSummary<P*>&);
+    template<typename T>
+    friend ValueSummary<bool> operator <(const ValueSummary<T*>&, T*);
+    template<typename T>
+    friend ValueSummary<bool> operator <(T*, const ValueSummary<T*>&);
 
-    friend ValueSummary<bool> operator !=(const ValueSummary<P*>&, P*);
-    friend ValueSummary<bool> operator !=(int, const ValueSummary<P*>&);
+    template<typename T>
+    friend ValueSummary<bool> operator <=(const ValueSummary<T*>&, T*);
+    template<typename T>
+    friend ValueSummary<bool> operator <=(T*, const ValueSummary<T*>&);
+
+    template<typename T>
+    friend ValueSummary<bool> operator ==(const ValueSummary<T*>&, T*);
+    template<typename T>
+    friend ValueSummary<bool> operator ==(T*, const ValueSummary<T*>&);
+
+    template<typename T>
+    friend ValueSummary<bool> operator !=(const ValueSummary<T*>&, T*);
+    template<typename T>
+    friend ValueSummary<bool> operator !=(T*, const ValueSummary<T*>&);
+
+    template<typename T>
+    friend std::ostream& operator<<(std::ostream&, const ValueSummary<T*>&);
 
     template<typename, bool, typename, typename, typename>
     friend struct BinaryOpFunctor;
@@ -101,33 +139,34 @@ public:
     template<typename, bool, typename, typename>
     friend struct UnaryOpFunctor;
 
-    friend std::ostream& operator<<(std::ostream&, const ValueSummary<P*>&);
+    void printDot(const std::string& fname) const {
+        for(const auto& gv : values) {
+            RUNTIME_NAMESPACE::printDot(gv.second, fname + std::to_string((long)gv.first) + ".dot");
+        }
+    }
 
 private:
 
-    ValueSummary(const std::list<Guard<P*>>& values):values(values) { }
+    ValueSummary(const std::unordered_map<P*, Bdd>& values):values(values) { }
 
-    std::list<Guard<P*>> values;
+    std::unordered_map<P*, Bdd> values;
 
 public:
+
     class Builder {
     public:
         void addValue(const Bdd& pred, P* value) {
             values[value] |= pred;
         }
 
-        void addValue(const Bdd& pred, const ValueSummary<P*>& v) {
-            for(const auto& v : v.values) {
+        void addValue(const Bdd& pred, const ValueSummary<P*>& values) {
+            for(const auto& v : values.values) {
                 addValue(v.second, v.first);
             }
         }
 
         ValueSummary<P*> build() {
-            std::list<Guard<P*>> _values;
-            for(const auto& pair : values) {
-                _values.push_back({pair.second, pair.first});
-            }
-            return ValueSummary<P*>(_values);
+            return ValueSummary<P*>(values);
         }
 
         std::unordered_map<P*, Bdd> values;
@@ -203,7 +242,7 @@ std::ostream& operator<<(std::ostream& os, const ValueSummary<P*>& v)
         if(i != 0) {
             os << ",";
         }
-        os << gv.value;
+        os << gv.first;
         ++i;
     }
     os << "]";

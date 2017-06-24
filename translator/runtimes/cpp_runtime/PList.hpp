@@ -23,7 +23,7 @@ public:
 
     PList(const PList& other):_size(other.size()) {
         FOR(Int i = 0, i < other.size(), ++i, {
-            data.getl(i) = other.data.get(i);
+            data.set(other.data.get(i), i);
         })
         ENDFOR_NC()
     }
@@ -34,7 +34,7 @@ public:
 
     inline const PList& operator=(const PList& other) {
         FOR(Int i = 0, i < other.size(), ++i, {
-            data.getl(i) = other.data.get(i);
+            data.set(other.data.get(i), i);
         })
         ENDFOR_NC()
         _size = other.size();
@@ -52,16 +52,16 @@ public:
     }
 
     inline void add(const T& item) {
-        data.getl(size()) = item;
+        data.set(item, size());
         ++_size;
     }
 
     inline void insert(const Int& idx, const T& item) {
         FOR(Int i = size(), i > idx, --i, {
-            data.getl(i) = data.get(i - 1);
+            data.set(data.get(i - 1), i);
         })
         ENDFOR_NC()
-        data.getl(idx) = item;
+        data.set(item, idx);
         ++_size;
     }
 
@@ -71,7 +71,7 @@ public:
 
     inline void removeAt(const Int& idx) {
         FOR(Int i = idx + 1, i < size(), ++i, {
-            data.getl(i - 1) = data.get(i);
+            data.set(data.get(i), i - 1);
         })
         ENDFOR_NC()
         --_size;
@@ -79,7 +79,7 @@ public:
 
     inline void removeRange(const Int& start, const Int& count) {
         FOR(Int i = start + count, i < size(), ++i, {
-            data.getl(i - count) = data.get(i);
+            data.set(data.get(i), i - count);
         })
         ENDFOR_NC()
         _size = _size - count;
@@ -87,7 +87,7 @@ public:
 
     inline void removeRange(const Int& start) {
         IF_ONLY(start >= size()) {
-            throw new out_of_range("PList::removeRange");
+            throw out_of_range("PList::removeRange");
         }
         _size = start;
     }
@@ -99,15 +99,16 @@ public:
         return data.get(idx);
     }
 
-    inline Ref<T> getl(const Int& idx) {
+    template<typename V, typename ...Rest>
+    inline void set(const V& value, const Int& idx, Rest... rest) {
         IF_ONLY(idx >= size()) {
             throw out_of_range("PList::get");
         }
-        return data.getl(idx);
+        return data.set(value, idx, rest...);
     }
 
     inline void setTop(const T& value) {
-        data.getl(size() - 1) = value;
+        data.set(value, size() - 1);
     }
 
     inline FUNCTION_DECL(Bool, operator==, (const PList<T>& other) const, {
@@ -133,16 +134,38 @@ public:
         return !(*this == other);
     }
 
+    template<typename P>
+    friend void operator<<(std::ostream&, const PList<P>&);
+
 private:
     Int _size = 0;
     DefaultArray<T> data;
 };
 
 template<typename T>
-class Ref<PList<T>> final {
-    REF_BODY(PList<T>)
-    Ref<T> getl(const Int& idx) { return value->getl(idx); }
-};
+void operator<<(std::ostream& os, const PList<T>& list) {
+#ifdef USE_VALUE_SUMMARY
+    Bdd oldPc = PathConstraint::pc();
+    PathConstraint::pc() = Bdd::bddOne();
+    os << "PList[";
+    for(int i = 0; i < list.size().maxValue(); ++i) {
+        if(i != 0) {
+            os << ",";
+        }
+        os << list.get(i);
+    }
+    os << "]";
+    PathConstraint::pc() = oldPc;
+#else
+    for(int i = 0; i < list.size(); ++i) {
+        if(i != 0) {
+            os << ",";
+        }
+        os << list.get(i);
+    }
+#endif
+}
+
 
 };
 

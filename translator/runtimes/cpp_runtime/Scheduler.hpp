@@ -9,7 +9,7 @@ struct SchedulerChoice {
 public:
     SchedulerChoice() = default;
 
-    SchedulerChoice(Ptr<PMachine> machine, const Int& queueIdx, const Int& stateIdx):
+    SchedulerChoice(const Ptr<PMachine>& machine, const Int& queueIdx, const Int& stateIdx):
         machine(machine),queueIdx(queueIdx),stateIdx(stateIdx) { }
 
     Ptr<PMachine> machine;
@@ -30,12 +30,12 @@ protected:
 public:
     Scheduler(ExecutionEngine& engine):engine(engine) { }
 
-    virtual void startMachine(Ptr<PMachine> machine, const PAny& payload = PAny()) = 0;
+    virtual void startMachine(const Ptr<PMachine>& machine, const PAny& payload = PAny()) = 0;
 
     inline Bool step();
 
 private:
-    SendQueueItem popSendQueueItem(Ptr<PMachine> machine, Int index);
+    SendQueueItem popSendQueueItem(const Ptr<PMachine>& machine, Int index);
 };
 
 };

@@ -37,7 +37,9 @@ Render(node) ::= <<
 <if(node)><(node:{t | <t.class.superclass.simpleName>})(node)><endif>
 >>
 
-LValue(node) ::= "<(node:{t | <t.class.superclass.simpleName>LValue})(node)>"
+LValueTop(node, rhs) ::= "<(node:{t | <t.class.superclass.simpleName>LValueTop})(node, rhs)>"
+LValueIndex(node) ::= "<(node:{t | <t.class.superclass.simpleName>LValueIndex})(node)>"
+LValueId(node) ::= "<(node:{t | <t.class.superclass.simpleName>LValueId})(node)>"
 
 FunctionParams(params) ::= <<
 <params.keys: {id | <type(params.(id))> <id>}; separator=", ">
@@ -72,7 +74,7 @@ passert(<Render(node.exp)>, "<node.message>");
 >>
 
 AssignStmt(node) ::= <<
-<LValue(node.target)> = <Render(node.expression)>;
+<LValueTop(node.target, Render(node.expression))>;
 >>
 
 ConditionalStmt(node) ::= <<
@@ -82,7 +84,8 @@ THEN({
 })<if(node.elseBranch)> 
 ELSE({
     <Render(node.elseBranch)>
-})<endif>
+})
+<endif>
 ENDIF()
 >>
 
@@ -178,25 +181,48 @@ GetAttributeExp(node) ::= <<
 <Render(node.targetExpression)>.v<node.index>()
 >>
 
-GetAttributeExpLValue(node) ::= <<
-<LValue(node.targetExpression)>.v<node.index>l()
+GetAttributeExpLValueTop(node, rhs) ::= <<
+<LValueId(node)>.set(<rhs><LValueIndex(node)>)
+>>
+
+GetAttributeExpLValueIndex(node) ::= <<
+<LValueIndex(node.targetExpression)>, PTupleIndexer::V<node.index>()
+>>
+
+GetAttributeExpLValueId(node) ::= <<
+<LValueId(node.targetExpression)>
 >>
 
 GetIndexExp(node) ::= <<
-<Render(node.targetExpression)>
 <Render(node.targetExpression)>.v<node.index>()
 >>
 
-GetIndexExpLValue(node) ::= <<
-<LValue(node.targetExpression)>.v<node.index>l()
+GetIndexExpLValueTop(node, rhs) ::= <<
+<LValueId(node)>.set(<rhs><LValueIndex(node)>)
+>>
+
+GetIndexExpLValueTopIndex(node) ::= <<
+<LValueIndex(node.targetExpression)>, PTupleIndexer::V<node.index>()
+>>
+
+GetIndexExpLValueId(node) ::= <<
+<LValueId(node.targetExpression)>
 >>
 
 GetItemExp(node) ::= <<
 <Render(node.targetExpression)>.get(<Render(node.indexerExpression)>)
 >>
 
-GetItemExpLValue(node) ::= <<
-<Render(node.targetExpression)>.getl(<Render(node.indexerExpression)>)
+GetItemExpLValueTop(node, rhs) ::= <<
+<LValueId(node)>.set(<rhs><LValueIndex(node)>)
+>>
+
+GetItemExpLValueIndex(node) ::= <<
+<LValueIndex(node.targetExpression)>, Render(node.indexerExpression)
+>>
+
+GetItemExpLValueId(node) ::= <<
+<LValueId(node.targetExpression)>
 >>
 
 GroupExp(node) ::= <<
@@ -211,7 +237,13 @@ IdExp(node) ::= <<
 <node.name>
 >>
 
-IdExpLValue(node) ::= <<
+IdExpLValueTop(node, rhs) ::= <<
+<node.name> = <rhs>
+>>
+
+IdExpLValueIndex(node) ::= ""
+
+IdExpLValueId(node) ::= <<
 <node.name>
 >>
 

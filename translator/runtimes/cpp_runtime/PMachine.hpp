@@ -28,6 +28,10 @@ const int STATE_HALT = 0;
 
 class ExecutionEngine;
 
+        bool& blah() {
+    static bool x = false;
+    return x;
+}
 class PMachine
 {
     friend class Scheduler;
@@ -98,7 +102,8 @@ protected:
         return this;
     }
 
-    inline void send(Ptr<PMachine> other, Int e, const PAny& payload = PAny()) {
+    inline void send(const Ptr<PMachine>& other, Int e, const PAny& payload = PAny()) {
+        blah() = true;
         sendQueue.add(SendQueueItem(other, e, payload));
     }
 
@@ -172,17 +177,18 @@ private:
 
     PList<SendQueueItem> sendQueue;
 
-    virtual Bool isDefered(Int state, Int event) const = 0;
-    virtual Bool isGotoTransition(Int state, Int event) const = 0;
-    virtual ExitFunctionPtr getExitFunction(Int state) const = 0;
-    virtual TransitionFunctionPtr getTransition(Int state, Int event) const = 0;
-    virtual EntryFunctionPtr getTransitionEntry(Int state, Int event) const = 0;
+    virtual Bool isDefered(const Int& state, const Int& event) const = 0;
+    virtual Bool isGotoTransition(const Int& state, const Int& event) const = 0;
+    virtual ExitFunctionPtr getExitFunction(const Int& state) const = 0;
+    virtual TransitionFunctionPtr getTransition(const Int& state, const Int& event) const = 0;
+    virtual EntryFunctionPtr getTransitionEntry(const Int& state, const Int& event) const = 0;
 
     static std::map<const type_info*, Allocator<Ptr<PMachine>>>& allocators() { 
         static std::map<const type_info*, Allocator<Ptr<PMachine>>> allocators;
         return allocators;
     }
 
+public:
     template<typename M>
     static Ptr<PMachine> alloc(ExecutionEngine& engine) {
         if(allocators().count(&typeid(M)) == 0) {

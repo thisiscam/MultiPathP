@@ -7,6 +7,13 @@ using namespace sylvan;
 
 namespace RUNTIME_NAMESPACE {
 
+
+static inline void printDot(Bdd bdd, const std::string& fname) {
+    FILE* f = fopen(fname.c_str(), "w+");
+    bdd.PrintDot(f);
+    fclose(f);
+}
+
 template<typename>
 class ValueSummary;
 
@@ -57,6 +64,10 @@ public:
 
     static inline bool isZero() {
         return pc().isZero();
+    }
+
+    static inline void printDot(const std::string& fname) {
+        vs_cpp_runtime::printDot(pc(), fname);
     }
 };
 

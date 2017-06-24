@@ -12,11 +12,16 @@ Scheduler::getSendQueue(PMachine* machine) {
 }
 
 inline SendQueueItem 
-Scheduler::popSendQueueItem(Ptr<PMachine> machine, Int index) {
+Scheduler::popSendQueueItem(const Ptr<PMachine>& machine, Int index) {
 #ifdef USE_VALUE_SUMMARY
+    std::cout << "what";
     return unaryOp<SendQueueItem>(machine, [&](PMachine* machine) {
         SendQueueItem item = machine->sendQueue.get(index);
+        std::cout << machine->sendQueue;
+        std::cout << std::endl;
         machine->sendQueue.removeAt(index);
+        std::cout << machine->sendQueue;
+        std::cout << std::endl;
         return item;
     });
 #else

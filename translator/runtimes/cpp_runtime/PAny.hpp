@@ -18,7 +18,7 @@ namespace RUNTIME_NAMESPACE {
 template<typename T>
 struct IsSimpleType
 {
-    static constexpr bool value = std::is_same<T, int>::value || std::is_same<T, bool>::value || std::is_same<T, Ptr<PMachine>>::value;
+    static constexpr bool value = std::is_same<T, int>::value || std::is_same<T, bool>::value || std::is_same<T, PMachine*>::value;
 };
 
 template<typename, typename> struct IsCastable {

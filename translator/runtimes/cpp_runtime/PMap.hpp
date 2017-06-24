@@ -62,21 +62,25 @@ public:
         throw runtime_error("Key does not exist in dictionary");
     })
 
-    inline FUNCTION_DECL(Ref<V>, getl, (const K& k), {
+    template<typename Vp, typename Head, typename ...Rest>
+    inline FUNCTION_DECL(void, set, (const Vp& v, const K& k, Head head, Rest... rest), {
         FOR(Int i = 0, i < data.size(), ++i, {
-            if (k == data.get(i).v0()) {
-                RETURN(data.getl(i).v1l());
-            }
+            IF(k == data.get(i).v0()) 
+            THEN({
+                data.set(v, i, PTupleIndexer::V0(), head, rest...);
+                RETURN();
+            })
+            ENDIF()
         })
         ENDFOR()
         throw runtime_error("Key does not exist in dictionary");
     })
 
-    inline FUNCTION_DECL(void, set, (const K& k, const V& v), {
+    inline FUNCTION_DECL(void, set, (const V& v, const K& k), {
         FOR(Int i = 0, i < data.size(), ++i, {
             IF(k == data.get(i).v0()) 
             THEN({
-                data.getl(i).v1l() = v;
+                data.set(v, i, PTupleIndexer::V1());
                 RETURN();
             })
             ENDIF()

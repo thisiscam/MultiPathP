@@ -83,11 +83,11 @@ struct UnaryOpFunctor {
     static ReturnType
     impl(const ValueSummary<A>& a, UnaryOp&& uOp) {
         ReturnType r;
-        for(const auto& gv : a.values) {
+        for(const auto& gvA : a.values) {
             Bdd oldPc = PathConstraint::pc();
-            PathConstraint::pc() &= gv.second & gv.second;
+            PathConstraint::pc() &= gvA.second;
             if(PathConstraint::isNotZero()) {
-                r = uOp(gv.first);
+                r = uOp(gvA.first);
             }
             PathConstraint::pc() = oldPc;
         }
@@ -95,15 +95,17 @@ struct UnaryOpFunctor {
     }
 };
 
+extern bool& blah();
+
 template<bool constraintPc, typename A, typename UnaryOp>
 struct UnaryOpFunctor<void, constraintPc, A, UnaryOp> {
     static void
     impl(const ValueSummary<A>& a, UnaryOp&& uOp) {
-        for(const auto& gv : a.values) {
+        for(const auto& gvA : a.values) {
             Bdd oldPc = PathConstraint::pc();
-            PathConstraint::pc() &= gv.second & gv.second;
+            PathConstraint::pc() &= gvA.second;
             if(PathConstraint::isNotZero()) {
-                uOp(gv.first);
+                uOp(gvA.first);
             }
             PathConstraint::pc() = oldPc;
         }

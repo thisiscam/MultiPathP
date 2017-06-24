@@ -19,7 +19,7 @@ inline FUNCTION_DECL(SchedulerChoice, RandomScheduler::chooseMachine, (), {
             }) 
             ELSE({
                 Int stateIdx = INVOKE(item.target, Int, canServeEvent, (item.e));
-                IF(stateIdx >= 0) 
+                IF(stateIdx >= 0)
                 THEN({
                     choices.add(SchedulerChoice(machine, j, stateIdx));
                     BREAK();
@@ -47,8 +47,8 @@ inline FUNCTION_DECL(SchedulerChoice, RandomScheduler::chooseMachine, (), {
     RETURN(choices.get(idx));
 })
 
-inline void 
-RandomScheduler::startMachine(Ptr<PMachine> machine, const PAny& payload) {
+inline void
+RandomScheduler::startMachine(const Ptr<PMachine>& machine, const PAny& payload) {
     machines.add(machine);
     INVOKE(machine, void, start, (payload));
 }

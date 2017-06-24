@@ -45,7 +45,7 @@ private:
     /* end Machine Fields  */
 
     /* region Jump Tables */
-    inline Bool isDefered(Int state, Int event) const override {
+    inline Bool isDefered(const Int& state, const Int& event) const override {
         static const bool _isDefered[2][8] = 
             {
                 { true, true, true, true, true, true, true, true} /* halt */,
@@ -54,7 +54,7 @@ private:
         return getIndex2D(_isDefered, state, event);
     }
 
-    inline Bool isGotoTransition(Int state, Int event) const override {
+    inline Bool isGotoTransition(const Int& state, const Int& event) const override {
         static const bool _isGotoTransition[2][8] =
             {
                 {false,false,false,false,false,false,false,false} /* halt */,
@@ -63,14 +63,14 @@ private:
         return getIndex2D(_isGotoTransition, state, event);
     }
 
-    inline ExitFunctionPtr getExitFunction(Int state) const override {
+    inline ExitFunctionPtr getExitFunction(const Int& state) const override {
         #define E(f) ((ExitFunction)&MachineMain::f)
         static ExitFunction _exitFunctions[] = {&MachineMain::emptyExit,&MachineMain::emptyExit};
         #undef E
         return getIndex1D(_exitFunctions, state);
     }
 
-    inline TransitionFunctionPtr getTransition(Int state, Int event) const override {
+    inline TransitionFunctionPtr getTransition(const Int& state, const Int& event) const override {
         #define E(f) ((TransitionFunction)&MachineMain::f)
         static TransitionFunction _transitions[2][8] = 
             {
@@ -81,7 +81,7 @@ private:
         return getIndex2D(_transitions, state, event);
     }
 
-    inline EntryFunctionPtr getTransitionEntry(Int state, Int event) const override {
+    inline EntryFunctionPtr getTransitionEntry(const Int& state, const Int& event) const override {
         #define E(f) ((TransitionFunction)&MachineMain::f)
         static TransitionFunction _entries[2][8] = 
             {

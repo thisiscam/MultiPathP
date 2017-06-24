@@ -2,9 +2,14 @@
 #define PTUPLE_HPP
 
 #include "PTypePtr.h"
-#include "Ref.hpp"
 
 namespace RUNTIME_NAMESPACE {
+
+struct PTupleIndexer {
+    struct V0 { };
+    struct V1 { };
+    struct V2 { };
+};
 
 template<typename ...Ts>
 class PTuple;
@@ -32,11 +37,16 @@ public:
         return !(*this == other);
     }
 
+    template<typename V, typename Head, typename ...Rest>
+    inline void set(const V& val, PTupleIndexer::V0 _unused, Head head, Rest... rest) { _v0.set(val, head, rest...); }
+    template<typename V, typename Head, typename ...Rest>
+    inline void set(const V& val, PTupleIndexer::V1 _unused, Head head, Rest... rest) { _v1.set(val, head, rest...); }
+
     inline const T0& v0() const { return _v0; }
     inline const T1& v1() const { return _v1; }
 
-    inline Ref<T0> v0l() { return _v0; }
-    inline Ref<T1> v1l() { return _v1; }
+    inline void set(const T0& val, PTupleIndexer::V0 _unused) { _v0 = val; }
+    inline void set(const T1& val, PTupleIndexer::V1 _unused) { _v1 = val; }
 
     T0 _v0;
     T1 _v1;
@@ -69,30 +79,22 @@ public:
     inline const T1& v1() const { return _v1; }
     inline const T2& v2() const { return _v2; }
 
-    inline Ref<T0> v0l() { return _v0; }
-    inline Ref<T1> v1l() { return _v1; }
-    inline Ref<T2> v2l() { return _v2; }
+    template<typename V, typename Head, typename ...Rest>
+    inline void set(const V& val, PTupleIndexer::V0 _unused, Head head, Rest... rest) { _v0.set(val, head, rest...); }
+    template<typename V, typename Head, typename ...Rest>
+    inline void set(const V& val, PTupleIndexer::V1 _unused, Head head, Rest... rest) { _v1.set(val, head, rest...); }
+    template<typename V, typename Head, typename ...Rest>
+    inline void set(const V& val, PTupleIndexer::V2 _unused, Head head, Rest... rest) { _v2.set(val, head, rest...); }
+
+    inline void set(const T0& val, PTupleIndexer::V0 _unused) { _v0 = val; }
+    inline void set(const T1& val, PTupleIndexer::V1 _unused) { _v1 = val; }
+    inline void set(const T2& val, PTupleIndexer::V2 _unused) { _v2 = val; }
 
     T0 _v0;
     T1 _v1;
     T2 _v2;
 };
 
-
-template<typename T0, typename T1>
-class Ref<PTuple<T0, T1>> final {
-    REF_BODY(PTuple<T0, T1>)
-    Ref<T0> v0l() { return value->v0l(); }
-    Ref<T1> v1l() { return value->v1l(); }
-};
-
-template<typename T0, typename T1, typename T2>
-class Ref<PTuple<T0, T1, T2>> final {
-    REF_BODY(PTuple<T0, T1, T2>)
-    Ref<T0> v0l() { return value->v0l(); }
-    Ref<T1> v1l() { return value->v1l(); }
-    Ref<T2> v2l() { return value->v2l(); }
-};
 
 };
 
