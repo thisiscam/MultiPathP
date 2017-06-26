@@ -4,7 +4,7 @@ PrefixEntryFunctionName(stateName) ::= "<stateName>Entry"
 EntryFunctionName(state) ::= "<PrefixEntryFunctionName(state.name)>"
 
 InvokeAuxFunction(function) ::= <<
-<if(function.name)><function.name>(<if(function.params)><cast(first(function.params.values), "payload")><endif>);<endif>
+<if(function.name)><function.name>(<if(function.params)>payload<endif>);<endif>
 >>
 
 EntryFunction(state) ::= <<
@@ -14,7 +14,8 @@ inline void <EntryFunctionName(state)>(const PAny& payload) {
 }
 >>
 
-TransitionFunctionWrapperName(function) ::= "<function.name>_Wrap"
+TransitionFunctionWrapperSuffix(functionName) ::= "<functionName>_Wrap"
+TransitionFunctionWrapperName(function) ::= "<TransitionFunctionWrapperSuffix(function.name)>"
 
 TransitionFunction(function) ::= <<
 inline void <TransitionFunctionWrapperName(function)>(const PAny& payload) {
@@ -37,7 +38,7 @@ JumpTable(functionNameTemplate) ::= <<
 >>
 
 TransitionJumpTableInner() ::= <<
-<if(state.transitionsMap.(e).isPush)>pushTransition<elseif(state.transitionsMap.(e).functionName)><state.transitionsMap.(e).functionName><else>emptyTransition<endif>
+<if(state.transitionsMap.(e).isPush)>pushTransition<elseif(state.transitionsMap.(e).functionName)><TransitionFunctionWrapperSuffix(state.transitionsMap.(e).functionName)><else>emptyTransition<endif>
 >>
 
 EntryJumpTableInner() ::= <<

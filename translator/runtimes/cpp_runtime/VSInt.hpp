@@ -159,7 +159,7 @@ public:
 
     void printDot(const std::string& fname) const {
         for(const auto& gv : values) {
-            RUNTIME_NAMESPACE::printDot(gv.second, fname + std::to_string(gv.first) + ".dot");
+            RUNTIME_NAMESPACE::printDot(gv.second, fname + std::to_string(gv.first));
         }
     }
 

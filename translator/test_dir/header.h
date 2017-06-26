@@ -1,7 +1,7 @@
 #ifndef pingpong_H
 #define pingpong_H
 
-#define DECL_TYPES List<Ptr<PMachine>, Int, Int, PList<Ptr<PMachine>>, Bool, PTuple<Int, Ptr<PMachine>>>
+#define DECL_TYPES List<Ptr<PMachine>, Int, Bool>
 #include "basic_cpp_runtime.h"
 
 using namespace RUNTIME_NAMESPACE;
@@ -11,9 +11,8 @@ namespace pingpong {
 const int eUnit = 2;
 const int eTransaction = 3;
 const int eCommit = 4;
-const int eAbort = 5;
-const int eSuccess = 6;
-const int eFailure = 7;
+const int eSuccess = 5;
+const int eFailure = 6;
 
 class MachineMain;
 class MachineCoordinateMachine;

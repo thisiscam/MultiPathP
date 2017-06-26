@@ -3,16 +3,11 @@
 
 #include <sylvan_obj.hpp>
 
+#include "BddUtils.h"
+
 using namespace sylvan;
 
 namespace RUNTIME_NAMESPACE {
-
-
-static inline void printDot(Bdd bdd, const std::string& fname) {
-    FILE* f = fopen(fname.c_str(), "w+");
-    bdd.PrintDot(f);
-    fclose(f);
-}
 
 template<typename>
 class ValueSummary;

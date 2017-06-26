@@ -9,24 +9,11 @@
 
 namespace RUNTIME_NAMESPACE {
 
-static Bool newBoolVar(const std::string& id) {
-	static std::list<std::tuple<const std::string, Bool>> allocatedBools;
-#ifdef USE_VALUE_SUMMARY
-	Bdd T = Bdd::bddVar(allocatedBools.size());
-	ValueSummary<bool>::Builder builder;
-	builder.addValue(T, true).addValue(!T, false);
-	Bool ret = builder.build();
-#else
-	Bool ret = rand() % 2 == 0;
-#endif
-	allocatedBools.push_back(std::make_tuple(id, ret));
-	return ret;
-}
-
 inline void 
 ExecutionEngine::run(Scheduler& scheduler, Ptr<PMachine> machine) {
     scheduler.startMachine(machine);
     for(int i = 0; i < maxIteration; ++i) {
+    	std::cout << "======== Step " << std::to_string(i) << "=======" << std::endl;
         IF_ONLY(!scheduler.step()) {
             break;
         }
@@ -35,19 +22,18 @@ ExecutionEngine::run(Scheduler& scheduler, Ptr<PMachine> machine) {
 
 inline Bool
 ExecutionEngine::randomBool(const std::string& id) {
-	static std::map<const std::string, Allocator<Bool>> allocators;
+	static std::map<const std::string, Allocator<bool>*> allocators;
 	if(allocators.count(id) == 0) {
-		allocators.insert({id, Allocator<Bool>([&](){ 
-			static int count = 0;
-			return newBoolVar(id + std::to_string(count++)); 
-		})});
+		allocators.insert({id, Allocator<bool>::create(id)});
 	}
-	return allocators.at(id).allocate();
+	Bool&& ret = allocators.at(id)->allocate();
+	return ret;
 }
 
 inline Int
 ExecutionEngine::randomInt(Int max) {
 #ifdef USE_VALUE_SUMMARY
+	return 0;
 #else
     return rand() % max;
 #endif

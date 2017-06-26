@@ -64,8 +64,8 @@ public:
     friend std::ostream& operator<<(std::ostream&, const ValueSummary<bool>&);
 
     void printDot(const std::string& fname) const {
-        RUNTIME_NAMESPACE::printDot(T, fname + "T.dot");
-        RUNTIME_NAMESPACE::printDot(F, fname + "F.dot");
+        RUNTIME_NAMESPACE::printDot(T, fname + "T");
+        RUNTIME_NAMESPACE::printDot(F, fname + "F");
     }
 
     class Builder {

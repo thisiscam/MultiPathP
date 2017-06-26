@@ -1,6 +1,7 @@
 #ifndef SCHEDULE_IPP
 #define SCHEDULE_IPP
 
+#include <typeinfo>
 #include "PMachine.hpp"
 #include "Helpers.h"
 
@@ -11,17 +12,15 @@ Scheduler::getSendQueue(PMachine* machine) {
     return machine->sendQueue;
 }
 
-inline SendQueueItem 
+inline SendQueueItem
 Scheduler::popSendQueueItem(const Ptr<PMachine>& machine, Int index) {
 #ifdef USE_VALUE_SUMMARY
-    std::cout << "what";
     return unaryOp<SendQueueItem>(machine, [&](PMachine* machine) {
+        if(std::string(typeid(*machine).name()).find("Participant") != std::string::npos) {
+            std::cout << (machine->sendQueue.size() == 1) << std::endl;
+        }
         SendQueueItem item = machine->sendQueue.get(index);
-        std::cout << machine->sendQueue;
-        std::cout << std::endl;
         machine->sendQueue.removeAt(index);
-        std::cout << machine->sendQueue;
-        std::cout << std::endl;
         return item;
     });
 #else
@@ -31,36 +30,37 @@ Scheduler::popSendQueueItem(const Ptr<PMachine>& machine, Int index) {
 #endif
 }
 
-inline FUNCTION_DECL(Bool, Scheduler::step, (), {
+inline FUNCTION_DECL(Bool, Scheduler::step, ()) {
     SchedulerChoice&& chosen = chooseMachine();
     IF(chosen.machine == NULL) 
-    THEN({
+    THEN() {
         RETURN(false);
-    }) 
-    ELSE({
+    }
+    ELSE() {
         IF(chosen.queueIdx < 0)
-        THEN({
+        THEN() {
             std::cout << chosen.machine << " executes null event" << std::endl;
             INVOKE(chosen.machine, void, step, (chosen.stateIdx, EVENT_NULL));
-        }) 
-        ELSE({
+        }
+        ELSE() {
             SendQueueItem item = popSendQueueItem(chosen.machine, chosen.queueIdx);
-            IF(item.e == EVENT_NEW_MACHINE) 
-            THEN({
+            IF(item.e == EVENT_NEW_MACHINE)
+            THEN() {
                 std::cout << chosen.machine << " creates " << item.target << std::endl;
                 startMachine(item.target, item.payload);
-            }) 
-            ELSE({
+            }
+            ELSE() {
                 std::cout << chosen.machine << " sends event " << item.e << " to " << item.target << std::endl;
                 INVOKE(item.target, void, step, (chosen.stateIdx, item.e, item.payload));
-            })
+            }
             ENDIF()
-        })
+        }
         ENDIF()
         RETURN(true);
-    })
+    }
     ENDIF()
-})
+}
+END_FUNCTION()
 
 }
 

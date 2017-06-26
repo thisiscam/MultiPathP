@@ -83,7 +83,7 @@ public:
     template<template<typename ...> class Container, typename ...Ts>
     PAny(const Container<Ts...>& v):
         type(&typeid(Container<Ts...>)), 
-        ptr(new Container<Ts...>(v))
+        ptr(shared_ptr<PTypePtr const>(new Container<Ts...>(v)))
     { }
 
     PAny(const Int& v):
@@ -139,7 +139,7 @@ public:
     };
 
     template<template<typename ...> class Container, typename ...Ts>
-    operator Container<Ts...>() {
+    operator Container<Ts...> () const {
 #ifdef USE_VALUE_SUMMARY
         return unaryOp<Container<Ts...>>(type, [&](const type_info* type) {
             return CastJumpTable<DECL_TYPES, Container<Ts...>>::table().at(type)(*this);

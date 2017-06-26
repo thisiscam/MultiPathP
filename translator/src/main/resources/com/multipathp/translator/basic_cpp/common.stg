@@ -4,7 +4,6 @@ typeMap ::= [
     "$null$": "PAny",
     "$event$": "Int",
     "$machine$": "Ptr<PMachine>",
-    "$void$": "void",
     "$seq$": {PList\<<type(t.indexedInnerType)>>},
     "$map$": {PMap\<<type(t.keyType)>, <type(t.valueType)>>},
     "$tuple$": {PTuple\<<t.innerTypes:type(); separator=", ">>},
@@ -45,10 +44,19 @@ FunctionParams(params) ::= <<
 <params.keys: {id | <type(params.(id))> <id>}; separator=", ">
 >>
 
+FunctionDeclMacro(function) ::= <<
+<if(!function.retType.isVoid)>FUNCTION_DECL<else>VOID_FUNCTION_DECL<endif>
+>>
+
+EndFunctionDeclMacro(function) ::= <<
+<if(!function.retType.isVoid)>END_FUNCTION<else>END_VOID_FUNCTION<endif>
+>>
+
 FunctionImplementation(function) ::= <<
-inline FUNCTION_DECL(<type(function.retType)>, <function.name>, (<FunctionParams(function.params)>), {
+inline <FunctionDeclMacro(function)>(<if(!function.retType.isVoid)><type(function.retType)>, <endif><function.name>, (<FunctionParams(function.params)>)) {
     <Render(function.stmtBlock)>
-})
+}
+<EndFunctionDeclMacro(function)>()
 >>
 
 StmtBlock(node) ::= <<
@@ -79,12 +87,12 @@ AssignStmt(node) ::= <<
 
 ConditionalStmt(node) ::= <<
 IF(<Render(node.condition)>) 
-THEN({
+THEN() {
     <Render(node.thenBranch)>
-})<if(node.elseBranch)> 
-ELSE({
+}
+<if(node.elseBranch)>ELSE() {
     <Render(node.elseBranch)>
-})
+}
 <endif>
 ENDIF()
 >>

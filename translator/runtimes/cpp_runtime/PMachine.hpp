@@ -59,42 +59,44 @@ public:
 
     virtual void start(const PAny& payload) = 0;
 
-    inline FUNCTION_DECL(Int, canServeEvent, (Int e), {
+    inline FUNCTION_DECL(Int, canServeEvent, (Int e)) {
         FOR(Int i = states.size() - 1, i >= 0, --i, {
             Int state = states.get(i);
-            IF(isDefered(state, e)) 
-            THEN({
+            IF(isDefered(state, e))
+            THEN() {
                 RETURN(-1);
-            }) 
-            ELSE({
+            }
+            ELSE() {
                 IF(getTransition(state, e) != NULL) 
-                THEN({
+                THEN() {
                     RETURN(i);
-                })
+                }
                 ENDIF()
-            })
+            }
             ENDIF()
         })
         ENDFOR()
         throw runtime_error("Unhandled event");
-    })
+    }
+    END_FUNCTION()
 
-    inline FUNCTION_DECL(void, step, (Int stateIndex, Int e, const PAny& payload = PAny()), {
+    inline VOID_FUNCTION_DECL(step, (Int stateIndex, Int e, const PAny& payload = PAny())) {
         Int state = states.get(stateIndex);
-        IF(isGotoTransition(state, e)) 
-        THEN({
+        IF(isGotoTransition(state, e))
+        THEN() {
             FOR(Int i = states.size() - 1, i > stateIndex, --i, {
                 popState();
             })
             ENDFOR_NC()
-        })
+        }
         ENDIF()
         retcode = EXECUTE_FINISHED;
         TransitionFunctionPtr transitionFn = getTransition(state, e);
         INVOKE_PTR_ON_THIS(transitionFn, void, (payload));
         EntryFunctionPtr entryFn = getTransitionEntry(state, e);
         INVOKE_PTR_ON_THIS(entryFn, void, (payload));
-    })
+    }
+    END_VOID_FUNCTION()
 
 protected:
 
@@ -114,37 +116,40 @@ protected:
         return machine;
     }
 
-    inline FUNCTION_DECL(void, raise, (Int e, const PAny& payload = PAny()), {
+    inline VOID_FUNCTION_DECL(raise, (Int e, const PAny& payload = PAny())) {
         FOR(Int i = states.size() - 1, i >= 0, --i, {
             Int state = states.get(i);
             TransitionFunctionPtr f = getTransition(state, e);
             IF(f != NULL)
-            THEN({
+            THEN() {
                 INVOKE_PTR_ON_THIS(f, void, (payload));
                 EntryFunctionPtr entryFn = getTransitionEntry(state, e);
                 INVOKE_PTR_ON_THIS(entryFn, void, (payload));
                 RETURN();
-            })
-            ELSE({
+            }
+            ELSE() {
                 popState();
-            })
+            }
             ENDIF()
         })
         ENDFOR()
+        PathConstraint::printDot("pc");
         throw runtime_error("Unhandled event");
-    })
+    }
+    END_VOID_FUNCTION()
 
-    inline FUNCTION_DECL(void, popState, (), {
+    inline VOID_FUNCTION_DECL(popState, ()) {
         Int last = states.size() - 1;
         Int current_state = states.get(last);
         states.removeRange(last);
         ExitFunctionPtr eF = getExitFunction(current_state);
         IF(eF != NULL) 
-        THEN({
+        THEN() {
             INVOKE_PTR_ON_THIS(eF, void, ());
-        })
+        }
         ENDIF()
-    })
+    }
+    END_VOID_FUNCTION()
 
     inline Bool randomBool(const std::string&);
 
@@ -172,10 +177,10 @@ protected:
     Int retcode;
     PList<Int> states;
 
+    PList<SendQueueItem> sendQueue;
+
 private:
     ExecutionEngine& engine;
-
-    PList<SendQueueItem> sendQueue;
 
     virtual Bool isDefered(const Int& state, const Int& event) const = 0;
     virtual Bool isGotoTransition(const Int& state, const Int& event) const = 0;
@@ -183,8 +188,8 @@ private:
     virtual TransitionFunctionPtr getTransition(const Int& state, const Int& event) const = 0;
     virtual EntryFunctionPtr getTransitionEntry(const Int& state, const Int& event) const = 0;
 
-    static std::map<const type_info*, Allocator<Ptr<PMachine>>>& allocators() { 
-        static std::map<const type_info*, Allocator<Ptr<PMachine>>> allocators;
+    static std::map<const type_info*, Allocator<PMachine>*>& allocators() { 
+        static std::map<const type_info*, Allocator<PMachine>*> allocators;
         return allocators;
     }
 
@@ -193,9 +198,9 @@ public:
     static Ptr<PMachine> alloc(ExecutionEngine& engine) {
         if(allocators().count(&typeid(M)) == 0) {
             //TODO better engine logic 
-            allocators().insert({&typeid(M), Allocator<Ptr<PMachine>>([&]() { return new M(engine); })});
+            allocators().insert({&typeid(M), Allocator<PMachine>::create([&](int count) { return new M(engine); })});
         }
-        return allocators().at(&typeid(M)).allocate();
+        return allocators().at(&typeid(M))->allocate();
     }
 };
 

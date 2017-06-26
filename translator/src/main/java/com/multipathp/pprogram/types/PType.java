@@ -19,6 +19,10 @@ public class PType {
         return typename;
     }
 
+    public boolean getIsVoid() {
+        return this == VOID;
+    }
+
     PType(String typename, boolean clonable) {
         this.typename = typename;
         this.clonable = clonable;

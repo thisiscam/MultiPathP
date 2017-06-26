@@ -23,7 +23,7 @@ private:
 
     inline void Pong_SendPongEntry(const PAny& payload) {
         states.setTop(Pong_SendPong);
-        Pong_SendPongEntryImpl(static_cast<Ptr<PMachine>>(payload));
+        Pong_SendPongEntryImpl(payload);
     }
     /* end Entry Methods */
 
@@ -31,21 +31,23 @@ private:
     /* end Transition Methods */
 
     /* region Function Implementations */
-    inline void Pong_WaitPingEntryImpl() {
+    inline VOID_FUNCTION_DECL(Pong_WaitPingEntryImpl, ()) {
 
     }
+    END_VOID_FUNCTION()
 
-    inline void Pong_SendPongEntryImpl(Ptr<PMachine> payload) {
+    inline VOID_FUNCTION_DECL(Pong_SendPongEntryImpl, (Ptr<PMachine> payload)) {
         send(payload, Pong);
-        raise(Success); retcode = RAISED_EVENT; return;
+        raise(Success); retcode = RAISED_EVENT; RETURN();
     }
+    END_VOID_FUNCTION()
     /* end Function Implementations */
 
     /* region Machine Fields */
     /* end Machine Fields  */
 
     /* region Jump Tables */
-    inline Bool isDefered(Int state, Int event) const override {
+    inline Bool isDefered(const Int& state, const Int& event) const override {
         static const bool _isDefered[3][5] = 
             {
                 { true, true, true, true, true} /* halt */,
@@ -55,7 +57,7 @@ private:
         return getIndex2D(_isDefered, state, event);
     }
 
-    inline Bool isGotoTransition(Int state, Int event) const override {
+    inline Bool isGotoTransition(const Int& state, const Int& event) const override {
         static const bool _isGotoTransition[3][5] =
             {
                 {false,false,false,false,false} /* halt */,
@@ -65,14 +67,14 @@ private:
         return getIndex2D(_isGotoTransition, state, event);
     }
 
-    inline ExitFunctionPtr getExitFunction(Int state) const override {
+    inline ExitFunctionPtr getExitFunction(const Int& state) const override {
         #define E(f) ((ExitFunction)&MachinePONG::f)
         static ExitFunction _exitFunctions[] = {&MachinePONG::emptyExit,&MachinePONG::emptyExit,&MachinePONG::emptyExit};
         #undef E
         return getIndex1D(_exitFunctions, state);
     }
 
-    inline TransitionFunctionPtr getTransition(Int state, Int event) const override {
+    inline TransitionFunctionPtr getTransition(const Int& state, const Int& event) const override {
         #define E(f) ((TransitionFunction)&MachinePONG::f)
         static TransitionFunction _transitions[3][5] = 
             {
@@ -84,7 +86,7 @@ private:
         return getIndex2D(_transitions, state, event);
     }
 
-    inline EntryFunctionPtr getTransitionEntry(Int state, Int event) const override {
+    inline EntryFunctionPtr getTransitionEntry(const Int& state, const Int& event) const override {
         #define E(f) ((TransitionFunction)&MachinePONG::f)
         static TransitionFunction _entries[3][5] = 
             {

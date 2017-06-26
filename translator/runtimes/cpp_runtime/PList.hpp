@@ -111,24 +111,25 @@ public:
         data.set(value, size() - 1);
     }
 
-    inline FUNCTION_DECL(Bool, operator==, (const PList<T>& other) const, {
+    inline FUNCTION_DECL(Bool, operator==, (const PList<T>& other) const) {
         IF(size() == other.size())
-        THEN({
+        THEN() {
             FOR(Int i = 0, i < size(), ++i, {
                 IF(data.get(i) != other.data.get(i))
-                THEN({
+                THEN() {
                     RETURN(false);
-                })
+                }
                 ENDIF()
             })
             ENDFOR()
             RETURN(true);
-        }) 
-        ELSE({
+        }
+        ELSE() {
             RETURN(false);
-        })
+        }
         ENDIF()
-    })
+    }
+    END_FUNCTION()
 
     inline Bool operator != (const PList<T>& other) const {
         return !(*this == other);
@@ -157,7 +158,7 @@ void operator<<(std::ostream& os, const PList<T>& list) {
     os << "]";
     PathConstraint::pc() = oldPc;
 #else
-    for(int i = 0; i < list.size(); ++i) {
+    for(int i = 0; i < list.size(); ++i, {
         if(i != 0) {
             os << ",";
         }

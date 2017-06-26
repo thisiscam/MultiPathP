@@ -1,244 +1,203 @@
 #ifndef INTRUMENTATION_HPP
 #define INTRUMENTATION_HPP
 
+
+/* WARNING: the following macro is not portable */
+#define GET_MACRO(_0, _1, NAME, ...) NAME
+#define RETURN(...) GET_MACRO(_0, ##__VA_ARGS__, RETURN1, RETURN0)(__VA_ARGS__)
+
 #ifdef USE_VALUE_SUMMARY
 
 #include "PathConstraint.hpp"
 #include "ValueSummary.hpp"
 
-#include "FunctionInstrumentationHelper.h"
 
-#define DECL_RET(ReturnType) ReturnType __ret
-#define DECL_RET_IF_NOT_VOID(ReturnType) IF_TYPE_MATCH_VOID( ReturnType , void __ret() , DECL_RET(ReturnType) )
+#define BEGIN_BLOCK()                                           \
+    do {
 
-#define RET_IF_NOT_VOID(ReturnType) IF_TYPE_MATCH_VOID( ReturnType , , return __ret; )
+#define END_BLOCK()                                             \
+    } while(false);
 
-#define FUNCTION_BODY(body...)                              \
-    Bdd __oldPc = PathConstraint::pc();                     \
-    auto __body = [&](){                                    \
-        body;                                               \
-    };                                                      \
-    __body();                                               \
-    PathConstraint::pc() = __oldPc;                         \
-
-#define FUNCTION_DECL(ReturnType, functionName, args, body...)  \
+#define FUNCTION_DECL(ReturnType, functionName, args)           \
 ReturnType functionName args {                                  \
-    DECL_RET_IF_NOT_VOID(ReturnType);                           \
-    FUNCTION_BODY(body)                                         \
-    RET_IF_NOT_VOID(ReturnType);                                \
+    ReturnType __ret;                                           \
+    Bdd __oldPc = PathConstraint::pc();                         \
+    BEGIN_BLOCK()
+
+#define END_FUNCTION()                                          \
+    END_BLOCK()                                                 \
+    PathConstraint::pc() = __oldPc;                             \
+    return __ret;                                               \
 }
 
-#define IF(condition...)                        \
-    {                                           \
-        bool terminated =                       \
-            IfBranch::eval(condition            \
+#define VOID_FUNCTION_DECL(functionName, args)                  \
+void functionName args {                                        \
+    Bdd __oldPc = PathConstraint::pc();                         \
+    BEGIN_BLOCK()
 
-#define THEN(block...)                          \
-        ,                                       \
-        [&](){                                  \
-            block;                              \
-        }
-
-#define ELSE(block...)                          \
-        ,                                       \
-        [&](){                                  \
-            block;                              \
-        }
-
-#define ENDIF()                                 \
-        );                                      \
-        if(terminated) {                        \
-            return;                             \
-        }                                       \
-    }
-
-#define ENDIF_NC()                              \
-        );                                      \
-    }
-
-#define IF_ONLY(condition...)                   \
-    if(IfBranch::onlyTrue(condition))          
-
-
-#define WHILE(condition...)                     \
-    {                                           \
-        Bdd loopMergePointPc;                   \
-        bool terminated =                       \
-            LoopBranch::eval(                   \
-        [&] { return condition; },              \
-        [&] {                                   \
-
-
-#define ENDWHILE()                              \
-        }, loopMergePointPc);                   \
-        if(terminated) {                        \
-            return;                             \
-        }                                       \
-    }
-
-#define ENDWHILE_NC()                           \
-        }, loopMergePointPc);                   \
-    }
-
-#define FOR(initializer, condition, increment, block...)    \
-    {                                                       \
-        initializer;                                        \
-        WHILE(condition) {                                  \
-            block;                                          \
-            increment;                                      \
-        }
-
-#define ENDFOR()                                        \
-        ENDWHILE()                                      \
-    }
-
-#define ENDFOR_NC()                                     \
-        ENDWHILE_NC()                                   \
-    }
-
-#define BREAK()                                     \
-    {                                               \
-        loopMergePointPc |= PathConstraint::pc();   \
-        PathConstraint::pc() = Bdd::bddZero();      \
-        return;                                     \
-    }
-
-/* WARNING: the following macro is not portable */
-#define GET_MACRO(_0, _1, NAME, ...) NAME
-#define RETURN(...) GET_MACRO(_0, ##__VA_ARGS__, RETURN1, RETURN0)(__VA_ARGS__)
-
-#define RETURN0()                               \
-    {                                           \
-        PathConstraint::pc() = Bdd::bddZero();  \
-        return;                                 \
-    }
-
-#define RETURN1(val)                            \
-    {                                           \
-        __ret = (val);                          \
-        PathConstraint::pc() = Bdd::bddZero();  \
-        return;                                 \
-    }
-
-namespace RUNTIME_NAMESPACE {
-
-static inline bool merge() {
-    return PathConstraint::isZero();
+#define END_VOID_FUNCTION()                                     \
+    END_BLOCK()                                                 \
+    PathConstraint::pc() = __oldPc;                             \
 }
 
-class IfBranch final {
+#define IF(_condition...)                                       \
+    {                                                           \
+        Bool&& condition = (_condition);                        \
+        Bdd&& falseBranch = PathConstraint::pc() & condition.F; \
+        Bdd mergePointPc = falseBranch;
 
-public:
+#define THEN()                                                  \
+        PathConstraint::pc() &= condition.T;                    \
+        if(PathConstraint::isNotZero()) {                       \
+            BEGIN_BLOCK();
 
-    template<typename Then, typename Else>
-    static inline bool eval(const ValueSummary<bool>& condition, Then&& thenBlock, Else&& elseBlock) {
-        Bdd falseBranch = PathConstraint::pc() & condition.F;
-        PathConstraint::pc() &= condition.T;
-        if(PathConstraint::isNotZero()) {
-            thenBlock();
-        }
-        Bdd mergePointPc = PathConstraint::pc();
-        PathConstraint::pc() = falseBranch;
-        if(PathConstraint::isNotZero()) {
-            elseBlock();
-        }
-        PathConstraint::pc() |= mergePointPc;
-        return merge();
+#define ELSE()                                                  \
+            END_BLOCK();                                        \
+        }                                                       \
+        mergePointPc = PathConstraint::pc();                    \
+        PathConstraint::pc() = falseBranch;                     \
+        if(PathConstraint::isNotZero()) {                       \
+            BEGIN_BLOCK();
+
+#define ENDIF()                                                 \
+            END_BLOCK();                                        \
+        }                                                       \
+        PathConstraint::pc() |= mergePointPc;                   \
+        if(PathConstraint::isZero()) {                          \
+            break;                                              \
+        }                                                       \
     }
 
-    template<typename Then>
-    static inline bool eval(const ValueSummary<bool>& condition, Then&& thenBlock) {
-        Bdd falseBranch = PathConstraint::pc() & condition.F;
-        PathConstraint::pc() &= condition.T;
-        if(PathConstraint::isNotZero()) {
-            thenBlock();
+#define IF_ONLY(condition...)                                   \
+    if(((PathConstraint::pc() & (condition).F).isZero()))       \
+
+
+#define WHILE(_condition...)                                    \
+    {                                                           \
+        Bdd loopMergePointPc;                                   \
+        while(true) {                                           \
+            Bool&& condition = (_condition);                    \
+            loopMergePointPc |= condition.F;                    \
+            if(condition.T.isZero()) {                          \
+                break;                                          \
+            } else {                                            \
+                PathConstraint::pc() = condition.T;             \
+                BEGIN_BLOCK();
+        
+
+#define ENDWHILE()                                              \
+                END_BLOCK();                                    \
+                if(PathConstraint::isZero()) {                  \
+                    break;                                      \
+                }                                               \
+            }                                                   \
+        }                                                       \
+        PathConstraint::pc() |= loopMergePointPc;               \
+        if(PathConstraint::isZero()) {                          \
+            break;                                              \
+        }                                                       \
+    }
+
+#define ENDWHILE_NC()                                           \
+                END_BLOCK();                                    \
+                if(PathConstraint::isZero()) {                  \
+                    break;                                      \
+                }                                               \
+            }                                                   \
+        }                                                       \
+        PathConstraint::pc() |= loopMergePointPc;               \
+    }
+
+#define FOR(initializer, condition, increment, block...)        \
+    {                                                           \
+        initializer;                                            \
+        WHILE(condition) {                                      \
+            block;                                              \
+            increment;                                          \
         }
-        PathConstraint::pc() |= falseBranch;
-        return merge();
+
+#define ENDFOR()                                                \
+        ENDWHILE()                                              \
     }
 
-    static inline bool onlyTrue(const ValueSummary<bool>& condition) {
-        Bdd falseBranch = PathConstraint::pc() & condition.F;
-        return falseBranch.isZero();
-    }
-};
-
-
-class LoopBranch final {
-
-public:
-
-    template<typename Condition, typename Body>
-    static inline bool eval(Condition&& conditionExp, Body&& block, Bdd& loopMergePointPc) {
-        while(true) {
-            ValueSummary<bool> condition = conditionExp();
-            loopMergePointPc |= condition.F;
-            if(condition.T.isZero()) {
-                break;
-            } else {
-                PathConstraint::pc() = condition.T;
-                block();
-                if(PathConstraint::isZero()) {
-                    break;
-                }
-            }
-        }
-        PathConstraint::pc() |= loopMergePointPc;
-        return merge();
+#define ENDFOR_NC()                                             \
+        ENDWHILE_NC()                                           \
     }
 
-};
 
-};
+#define BREAK()                                                 \
+    {                                                           \
+        loopMergePointPc |= PathConstraint::pc();               \
+        PathConstraint::pc() = Bdd::bddZero();                  \
+        break;                                                  \
+    }
+
+#define RETURN0()                                               \
+    {                                                           \
+        PathConstraint::pc() = Bdd::bddZero();                  \
+        break;                                                  \
+    }
+
+#define RETURN1(val)                                            \
+    {                                                           \
+        __ret = (val);                                          \
+        PathConstraint::pc() = Bdd::bddZero();                  \
+        break;                                                  \
+    }
+
 
 #else
 
-#define FUNCTION_DECL(ReturnType, functionName, args, body...)  \
+#define BEGIN_BLOCK()   {
+#define END_BLOCK()     }
+
+#define FUNCTION_DECL(ReturnType, functionName, args)           \
 ReturnType functionName args {                                  \
-    body;                                                       \
+
+#define END_FUNCTION()                                          \
 }
 
-#define IF(condition...)            \
-    if(condition)                   \
+#define VOID_FUNCTION_DECL(functionName, args)                  \
+void functionName args {
 
-#define THEN(block...)              \
-    {                               \
-        block;                      \
+
+#define END_VOID_FUNCTION()                                     \
+}
+
+#define IF(condition...)                                        \
+    if(condition)
+
+#define THEN()                                                  \
+    {
+
+#define ELSE()                                                  \
+    } else {   
+
+#define ENDIF()                                                 \
     }
 
-#define ELSE(block...)              \
-    else {                          \
-        block;                      \
-    }
-
-#define ENDIF()
-
-#define IF_ONLY(condition...)       \
+#define IF_ONLY(condition...)                                   \
     if(condition)          
 
-#define WHILE(condition...)         \
-    while(condition) {              \
+#define WHILE(condition...)                                     \
+    while(condition) {
 
-#define ENDWHILE()                  \
+#define ENDWHILE()                                              \
     }
 
-#define ENDWHILE_NC()               \
+#define ENDWHILE_NC()                                           \
     }
 
-#define FOR(initializer, condition, increment, block...)    \
-    for(initializer; condition; increment) {                \
-        block;                                              \
+#define FOR(initializer, condition, increment)                  \
+    for(initializer; condition; increment)  {                   \
+
+#define ENDFOR()                                                \
     }
 
-#define ENDFOR()
-
-#define ENDFOR_NC()  
+#define ENDFOR_NC()                                             \
+    }
 
 #define BREAK() break;
-
-/* WARNING: the following macro is not portable */
-#define GET_MACRO(_0, _1, NAME, ...) NAME
-#define RETURN(...) GET_MACRO(_0, ##__VA_ARGS__, RETURN1, RETURN0)(__VA_ARGS__)
 
 #define RETURN0() return;
 

@@ -41,15 +41,17 @@ private:
     /* end Transition Methods */
 
     /* region Function Implementations */
-    inline void Ping_InitEntryImpl() {
+    inline VOID_FUNCTION_DECL(Ping_InitEntryImpl, ()) {
         pongId = create<MachinePONG>();
-        raise(Success); retcode = RAISED_EVENT; return;
+        raise(Success); retcode = RAISED_EVENT; RETURN();
     }
+    END_VOID_FUNCTION()
 
-    inline void Ping_SendPingEntryImpl() {
-        send(pongId, Ping, this);
-        raise(Success); retcode = RAISED_EVENT; return;
+    inline VOID_FUNCTION_DECL(Ping_SendPingEntryImpl, ()) {
+        send(pongId, Ping, self());
+        raise(Success); retcode = RAISED_EVENT; RETURN();
     }
+    END_VOID_FUNCTION()
     /* end Function Implementations */
 
     /* region Machine Fields */
@@ -57,7 +59,7 @@ private:
     /* end Machine Fields  */
 
     /* region Jump Tables */
-    inline Bool isDefered(Int state, Int event) const override {
+    inline Bool isDefered(const Int& state, const Int& event) const override {
         static const bool _isDefered[5][5] = 
             {
                 { true, true, true, true, true} /* halt */,
@@ -69,7 +71,7 @@ private:
         return getIndex2D(_isDefered, state, event);
     }
 
-    inline Bool isGotoTransition(Int state, Int event) const override {
+    inline Bool isGotoTransition(const Int& state, const Int& event) const override {
         static const bool _isGotoTransition[5][5] =
             {
                 {false,false,false,false,false} /* halt */,
@@ -81,14 +83,14 @@ private:
         return getIndex2D(_isGotoTransition, state, event);
     }
 
-    inline ExitFunctionPtr getExitFunction(Int state) const override {
+    inline ExitFunctionPtr getExitFunction(const Int& state) const override {
         #define E(f) ((ExitFunction)&MachinePING::f)
         static ExitFunction _exitFunctions[] = {&MachinePING::emptyExit,&MachinePING::emptyExit,&MachinePING::emptyExit,&MachinePING::emptyExit,&MachinePING::emptyExit};
         #undef E
         return getIndex1D(_exitFunctions, state);
     }
 
-    inline TransitionFunctionPtr getTransition(Int state, Int event) const override {
+    inline TransitionFunctionPtr getTransition(const Int& state, const Int& event) const override {
         #define E(f) ((TransitionFunction)&MachinePING::f)
         static TransitionFunction _transitions[5][5] = 
             {
@@ -102,7 +104,7 @@ private:
         return getIndex2D(_transitions, state, event);
     }
 
-    inline EntryFunctionPtr getTransitionEntry(Int state, Int event) const override {
+    inline EntryFunctionPtr getTransitionEntry(const Int& state, const Int& event) const override {
         #define E(f) ((TransitionFunction)&MachinePING::f)
         static TransitionFunction _entries[5][5] = 
             {

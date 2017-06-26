@@ -38,56 +38,60 @@ public:
         data.add(PTuple<K, V>(k, v));
     }
 
-    inline FUNCTION_DECL(Bool, containsKey, (const K& k) const, {
+    inline FUNCTION_DECL(Bool, containsKey, (const K& k) const) {
         FOR(Int i = 0, i < data.size(), ++i, {
             IF(k == data.get(i).v0()) 
-            THEN({
+            THEN() {
                 RETURN(true);
-            })
+            }
             ENDIF()
         })
         ENDFOR()
         RETURN(false);
-    })
+    }
+    END_FUNCTION()
 
-    inline FUNCTION_DECL(V, get, (const K& k) const, {
+    inline FUNCTION_DECL(V, get, (const K& k) const) {
         FOR(Int i = 0, i < data.size(), ++i, {
             IF(k == data.get(i).v0()) 
-            THEN({
+            THEN() {
                 RETURN(data.get(i).v1());
-            })
+            }
             ENDIF()
         })
         ENDFOR()
         throw runtime_error("Key does not exist in dictionary");
-    })
+    }
+    END_FUNCTION()
 
     template<typename Vp, typename Head, typename ...Rest>
-    inline FUNCTION_DECL(void, set, (const Vp& v, const K& k, Head head, Rest... rest), {
+    inline VOID_FUNCTION_DECL(set, (const Vp& v, const K& k, Head head, Rest... rest)) {
         FOR(Int i = 0, i < data.size(), ++i, {
             IF(k == data.get(i).v0()) 
-            THEN({
+            THEN() {
                 data.set(v, i, PTupleIndexer::V0(), head, rest...);
                 RETURN();
-            })
+            }
             ENDIF()
         })
         ENDFOR()
         throw runtime_error("Key does not exist in dictionary");
-    })
+    }
+    END_VOID_FUNCTION()
 
-    inline FUNCTION_DECL(void, set, (const V& v, const K& k), {
+    inline VOID_FUNCTION_DECL(set, (const V& v, const K& k)) {
         FOR(Int i = 0, i < data.size(), ++i, {
             IF(k == data.get(i).v0()) 
-            THEN({
+            THEN() {
                 data.set(v, i, PTupleIndexer::V1());
                 RETURN();
-            })
+            }
             ENDIF()
         })
         ENDFOR()
         insert(k, v);
-    })
+    }
+    END_VOID_FUNCTION()
 
 
     inline PList<K> keys() {
@@ -108,21 +112,22 @@ public:
         return ret;
     }
 
-    inline FUNCTION_DECL(Bool, operator ==, (const PMap<K, V>& other) const, {
+    inline FUNCTION_DECL(Bool, operator ==, (const PMap<K, V>& other) const) {
         IF(size() == other.size()) 
-        THEN({
+        THEN() {
             FOR(Int i = 0, i < size(), ++i, {
                 IF(other.containsEntry(data.get(i).v0(), data.get(i).v1())) 
-                THEN({
+                THEN() {
                     RETURN(true);
-                })
+                }
                 ENDIF()
             })
             ENDFOR()
-        })
+        }
         ENDIF()
         RETURN(false);
-    })
+    }
+    END_FUNCTION()
 
     inline Bool operator != (const PMap<K, V>& other) const {
         return !(*this == other);
@@ -132,17 +137,18 @@ public:
 private:
     PMap(const PList<PTuple<K, V>> data):data(data) { }
 
-    inline FUNCTION_DECL(Bool, containsEntry, (const K& k, const V& v) const, {
+    inline FUNCTION_DECL(Bool, containsEntry, (const K& k, const V& v) const) {
         FOR(Int i = 0, i < size(), ++i, {
             IF(k == data.get(i).v0()) 
-            THEN({
+            THEN() {
                 RETURN(v == data.get(i).v1());
-            })
+            }
             ENDIF()
         })
         ENDFOR()
         RETURN(false);
-    })
+    }
+    END_FUNCTION()
 
     PList<PTuple<K, V>> data;
 };

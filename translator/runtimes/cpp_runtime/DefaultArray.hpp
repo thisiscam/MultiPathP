@@ -15,12 +15,12 @@ public:
         DefaultArray([]() { return T(); }) { }
 
     ~DefaultArray() {
-        // for(int i = 0; i < capacity; i++) {
-        //     if(data[i] != NULL) {
-        //         delete data[i];
-        //     }
-        // }
-        // free(data);
+        for(int i = 0; i < capacity; i++) {
+            if(data[i] != NULL) {
+                delete data[i];
+            }
+        }
+        free(data);
     }
 
     DefaultArray(const DefaultArray& other):
