@@ -36,19 +36,23 @@ struct ExtractVSParam<const ValueSummary<T>&> {
     })
 
 #define INVOKE_PTR(fPtr, t, args) \
-    unaryOp<t>((fPtr), [&](typename ExtractVSParam<decltype(fPtr)>::type fPtr) {  \
-        return (*fPtr) args;                                                           \
+    unaryOp<t>((fPtr), [&](typename ExtractVSParam<decltype(fPtr)>::type fPtr) {     \
+        return (*fPtr) args;                                                         \
     })
 
 template<typename T, size_t d1>
 ValueSummary<typename std::remove_const<T>::type> getIndex1D(T (&array)[d1], Int i1) {
-    return unaryOp<ValueSummary<typename std::remove_const<T>::type>>(i1, [&](int i1) { return array[i1]; });
+    return unaryOp<ValueSummary<typename std::remove_const<T>::type>>(i1, [&](int i1) { 
+        return array[i1]; 
+    });
 }
 
 template<typename T, size_t d1, size_t d2>
 ValueSummary<typename std::remove_const<T>::type> 
 getIndex2D(T (&array)[d1][d2], Int i1, Int i2) {
-    return binaryOp<ValueSummary<typename std::remove_const<T>::type>>(i1, i2, [&](int i1, int i2) { return array[i1][i2]; });
+    return binaryOp<ValueSummary<typename std::remove_const<T>::type>>(i1, i2, [&](int i1, int i2) { 
+        return array[i1][i2]; 
+    });
 }
 
 #else

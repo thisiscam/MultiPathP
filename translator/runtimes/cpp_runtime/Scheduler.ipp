@@ -16,9 +16,6 @@ inline SendQueueItem
 Scheduler::popSendQueueItem(const Ptr<PMachine>& machine, Int index) {
 #ifdef USE_VALUE_SUMMARY
     return unaryOp<SendQueueItem>(machine, [&](PMachine* machine) {
-        if(std::string(typeid(*machine).name()).find("Participant") != std::string::npos) {
-            std::cout << (machine->sendQueue.size() == 1) << std::endl;
-        }
         SendQueueItem item = machine->sendQueue.get(index);
         machine->sendQueue.removeAt(index);
         return item;

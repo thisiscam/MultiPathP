@@ -28,10 +28,6 @@ const int STATE_HALT = 0;
 
 class ExecutionEngine;
 
-        bool& blah() {
-    static bool x = false;
-    return x;
-}
 class PMachine
 {
     friend class Scheduler;
@@ -105,7 +101,6 @@ protected:
     }
 
     inline void send(const Ptr<PMachine>& other, Int e, const PAny& payload = PAny()) {
-        blah() = true;
         sendQueue.add(SendQueueItem(other, e, payload));
     }
 

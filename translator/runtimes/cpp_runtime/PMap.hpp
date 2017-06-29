@@ -150,7 +150,14 @@ public:
 #endif
 
 private:
-    PMap(const PList<PTuple<K, V>> data):data(data) { }
+
+    PMap(const PList<PTuple<K, V>>& data):
+        data(data) 
+    { }
+
+    PMap(PList<PTuple<K, V>>&& data):
+        data(std::move(data)) 
+    { }
 
     inline FUNCTION_DECL(Bool, containsEntry, (const K& k, const V& v) const) {
         FOR(Int i = 0, i < size(), ++i, {

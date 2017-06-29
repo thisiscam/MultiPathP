@@ -167,6 +167,11 @@ private:
         _size(_size),
         data(data)
     { }
+
+    PList(Int&& _size, DefaultArray<T>&& data):
+        _size(std::move(_size)),
+        data(std::move(data))
+    { }
 };
 
 template<typename T>

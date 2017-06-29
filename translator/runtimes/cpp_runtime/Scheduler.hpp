@@ -12,6 +12,12 @@ public:
     SchedulerChoice(const Ptr<PMachine>& machine, const Int& queueIdx, const Int& stateIdx):
         machine(machine),queueIdx(queueIdx),stateIdx(stateIdx) { }
 
+    SchedulerChoice(Ptr<PMachine>&& machine, Int&& queueIdx, Int&& stateIdx):
+        machine(std::move(machine)),
+        queueIdx(std::move(queueIdx)),
+        stateIdx(std::move(stateIdx)) 
+    { }
+
     Ptr<PMachine> machine;
     Int queueIdx;
     Int stateIdx;

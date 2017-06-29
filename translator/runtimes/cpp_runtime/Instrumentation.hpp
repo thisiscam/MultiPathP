@@ -20,14 +20,14 @@
 
 #define FUNCTION_DECL(ReturnType, functionName, args)           \
 ReturnType functionName args {                                  \
-    ReturnType __ret;                                           \
+    typename ReturnType::Builder __ret;                         \
     Bdd __oldPc = PathConstraint::pc();                         \
     BEGIN_BLOCK()
 
 #define END_FUNCTION()                                          \
     END_BLOCK()                                                 \
     PathConstraint::pc() = __oldPc;                             \
-    return __ret;                                               \
+    return __ret.build();                                       \
 }
 
 #define VOID_FUNCTION_DECL(functionName, args)                  \
@@ -140,7 +140,7 @@ void functionName args {                                        \
 
 #define RETURN1(val)                                            \
     {                                                           \
-        __ret = (val);                                          \
+        __ret.addValue(PathConstraint::pc(), std::move(val));   \
         PathConstraint::pc() = Bdd::bddZero();                  \
         break;                                                  \
     }
