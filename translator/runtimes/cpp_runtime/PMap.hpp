@@ -133,6 +133,21 @@ public:
         return !(*this == other);
     }
 
+#ifdef USE_VALUE_SUMMARY
+public:
+    class Builder {
+        typename PList<PTuple<K, V>>::Builder data; 
+        
+        inline Builder& addValue(const Bdd& pred, PMap<K, V>&& map) {
+            data.addValue(pred, std::move(map.data));
+            return *this;
+        }
+
+        PMap<K, V> build() {
+            return PMap<K, V>(data.build());
+        }
+    };
+#endif
 
 private:
     PMap(const PList<PTuple<K, V>> data):data(data) { }

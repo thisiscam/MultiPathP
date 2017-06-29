@@ -151,10 +151,10 @@ public:
 
     friend std::ostream& operator<<(std::ostream&, const ValueSummary<int>&);
 
-    template<typename, bool, typename, typename, typename>
+    template<typename, typename, typename, typename>
     friend struct BinaryOpFunctor;
 
-    template<typename, bool, typename, typename>
+    template<typename, typename, typename>
     friend struct UnaryOpFunctor;
 
     void printDot(const std::string& fname) const {
@@ -185,9 +185,9 @@ public:
             values[value] |= pred;
         }
 
-        void addValue(const Bdd& pred, const ValueSummary<int>& values) {
-            for(const auto& v : values.values) {
-                addValue(v.second, v.first);
+        void addValue(const Bdd& pred, ValueSummary<int>&& rhs) {
+            for(const auto& v : rhs.values) {
+                addValue(v.second, std::move(v.first));
             }
         }
 

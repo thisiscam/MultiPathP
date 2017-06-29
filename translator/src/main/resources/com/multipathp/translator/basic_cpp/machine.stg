@@ -4,12 +4,12 @@ PrefixEntryFunctionName(stateName) ::= "<stateName>Entry"
 EntryFunctionName(state) ::= "<PrefixEntryFunctionName(state.name)>"
 
 InvokeAuxFunction(function) ::= <<
-<if(function.name)><function.name>(<if(function.params)>payload<endif>);<endif>
+<if(function.name)>self-><function.name>(<if(function.params)>payload<endif>);<endif>
 >>
 
 EntryFunction(state) ::= <<
-inline void <EntryFunctionName(state)>(const PAny& payload) {
-    states.setTop(<state.name>);
+static inline void <EntryFunctionName(state)>(<machineName(machine)>* self, const PAny& payload) {
+    self->states.setTop(<state.name>);
     <InvokeAuxFunction(state.entryFunction)>
 }
 >>
@@ -18,7 +18,7 @@ TransitionFunctionWrapperSuffix(functionName) ::= "<functionName>_Wrap"
 TransitionFunctionWrapperName(function) ::= "<TransitionFunctionWrapperSuffix(function.name)>"
 
 TransitionFunction(function) ::= <<
-inline void <TransitionFunctionWrapperName(function)>(const PAny& payload) {
+static inline void <TransitionFunctionWrapperName(function)>(<machineName(machine)>* self, const PAny& payload) {
     <InvokeAuxFunction(function)>
 }
 >>
@@ -54,7 +54,7 @@ public:
     <machineName(machine)>(ExecutionEngine& engine):PMachine(engine) { }
 
     inline void start(const PAny& payload) override {
-        <EntryFunctionName(machine.startState)>(payload);
+        <EntryFunctionName(machine.startState)>(this, payload);
     }
 
 private:

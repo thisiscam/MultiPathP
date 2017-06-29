@@ -1,7 +1,13 @@
 #ifndef VS_HPP
 #define VS_HPP
 
-#include <list>
+#include <iostream>
+#include <functional>
+#include <unordered_map>
+#include <cassert>
+#include <climits>
+
+#include "ValueSummaryOperations.h"
 
 namespace RUNTIME_NAMESPACE {
 
@@ -9,11 +15,12 @@ template<typename T>
 class ValueSummary final {
 
 public:
+
     ValueSummary():
         ValueSummary(T())
     { }
 
-    ValueSummary(const T& v):values(std::list<Guard<T>>(1, {PathConstraint::pc(), v}))
+    ValueSummary(const T& i):values(std::unordered_map<T, Bdd>({{i, PathConstraint::pc()}}))
     { }
 
     ValueSummary(const ValueSummary<T>& other)
@@ -22,7 +29,7 @@ public:
         for(const auto& gv : other.values) {
             Bdd pred = PathConstraint::pc() & gv.second;
             if (!pred.isZero()) {
-                values.push_back({pred, gv.first});
+                values.insert({gv.first, pred});
             }
         }
     }
@@ -35,15 +42,24 @@ public:
         for(const auto& gvRhs : rhs.values) {
             Bdd pred = PathConstraint::pc() & gvRhs.second;
             if(!pred.isZero()) {
+                bool found = false;
                 for(auto gvLhs = begin(values); gvLhs != end(values); ) {
-                    gvLhs->second &= !pred;
-                    if (gvLhs->second.isZero()) {
-                        gvLhs = values.erase(gvLhs);
-                    } else {
+                    if(gvLhs->first == gvRhs.first) {
+                        gvLhs->second |= pred;
+                        found = true;
                         ++gvLhs;
+                    } else {
+                        gvLhs->second &= !pred;
+                        if (gvLhs->second.isZero()) {
+                            gvLhs = values.erase(gvLhs);
+                        } else {
+                            ++gvLhs;
+                        }
                     }
                 }
-                values.push_back({pred, gvRhs.first});
+                if(!found) {
+                    values.insert({gvRhs.first, pred});
+                }
             }
         }
         return *this;
@@ -57,16 +73,95 @@ public:
         return binaryOp<ValueSummary<bool>>(*this, b, [](T a, T b) { return a != b; });
     }
 
-    template<typename, bool, typename, typename, typename>
+    template<typename P>
+    friend ValueSummary<bool> operator ==(const ValueSummary<P>&, const P&);
+    template<typename P>
+    friend ValueSummary<bool> operator ==(const P&, const ValueSummary<P>&);
+
+    template<typename P>
+    friend ValueSummary<bool> operator !=(const ValueSummary<P>&, const P&);
+    template<typename P>
+    friend ValueSummary<bool> operator !=(const P&, const ValueSummary<P>&);
+
+    template<typename P>
+    friend std::ostream& operator<<(std::ostream&, const ValueSummary<P>&);
+
+    template<typename, typename, typename, typename>
     friend struct BinaryOpFunctor;
 
-    template<typename, bool, typename, typename>
+    template<typename, typename, typename>
     friend struct UnaryOpFunctor;
-    
+
+    void printDot(const std::string& fname) const {
+        for(const auto& gv : values) {
+            RUNTIME_NAMESPACE::printDot(gv.second, fname + std::to_string(gv.first));
+        }
+    }
+
 private:
 
-    std::list<Guard<T>> values;
+    ValueSummary(const std::unordered_map<T, Bdd>& values):values(values) { }
+
+    std::unordered_map<T, Bdd> values;
+
+public:
+
+    class Builder {
+    public:
+        void addValue(const Bdd& pred, T value) {
+            values[value] |= pred;
+        }
+
+        void addValue(const Bdd& pred, ValueSummary<T>&& rhs) {
+            for(const auto& v : rhs.values) {
+                addValue(v.second, std::move(v.first));
+            }
+        }
+
+        ValueSummary<T> build() {
+            return ValueSummary<T>(values);
+        }
+
+        std::unordered_map<T, Bdd> values;
+    };
 };
 
+template<typename P>
+inline ValueSummary<bool> operator==(const ValueSummary<P>& a, const P& b) {
+    return unaryOp<ValueSummary<bool>>(a, [=](const P& a) { return a == b; });
+}
+
+template<typename P>
+inline ValueSummary<bool> operator==(const P& a, const ValueSummary<P>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](const P& b) { return a == b; });
+}
+
+template<typename P>
+inline ValueSummary<bool> operator!=(const ValueSummary<P>& a, const P& b) {
+    return unaryOp<ValueSummary<bool>>(a, [=](const P& a) { return a != b; });
+}
+
+template<typename P>
+inline ValueSummary<bool> operator!=(const P& a, const ValueSummary<P>& b) {
+    return unaryOp<ValueSummary<bool>>(b, [=](const P& b) { return a != b; });
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const ValueSummary<T>& v)  
+{  
+    os << "VS[";
+    int i = 0;
+    for(const auto& gv : v.values) {
+        if(i != 0) {
+            os << ",";
+        }
+        os << gv.first;
+        ++i;
+    }
+    os << "]";
+    return os;  
+}
+
 };
+
 #endif

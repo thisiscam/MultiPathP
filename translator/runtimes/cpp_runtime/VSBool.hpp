@@ -80,8 +80,8 @@ public:
             return *this;
         }
 
-        inline Builder& addValue(const Bdd& pred, const ValueSummary<bool>& values) {
-            return addValue(values.T, true).addValue(values.F, false);
+        inline Builder& addValue(const Bdd& pred, ValueSummary<bool>&& rhs) {
+            return addValue(rhs.T, true).addValue(rhs.F, false);
         }
 
         inline ValueSummary<bool> build() {

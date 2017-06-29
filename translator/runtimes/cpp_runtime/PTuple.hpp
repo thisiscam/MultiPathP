@@ -50,6 +50,22 @@ public:
 
     T0 _v0;
     T1 _v1;
+
+#ifdef USE_VALUE_SUMMARY
+    class Builder {
+        typename T0::Builder _v0;
+        typename T1::Builder _v1;
+    public:
+        Builder& addValue(const Bdd& pred, PTuple<T0, T1>&& rhs) {
+            _v0.addValue(pred, std::move(rhs._v0));
+            _v1.addValue(pred, std::move(rhs._v1));
+            return *this;
+        }
+        PTuple<T0, T1> build() {
+            return PTuple<T0, T1>(_v0.build(), _v1.build());
+        }
+    };
+#endif
 };
 
 template <typename T0, typename T1, typename T2>
@@ -93,6 +109,25 @@ public:
     T0 _v0;
     T1 _v1;
     T2 _v2;
+
+#ifdef USE_VALUE_SUMMARY
+    class Builder {
+        typename T0::Builder _v0;
+        typename T1::Builder _v1;
+        typename T2::Builder _v2;
+    public:
+        inline Builder& addValue(const Bdd& pred, PTuple<T0, T1, T2>&& rhs) {
+            _v0.addValue(pred, std::move(rhs._v0));
+            _v1.addValue(pred, std::move(rhs._v1));
+            _v2.addValue(pred, std::move(rhs._v2));
+            return *this;
+        }
+        PTuple<T0, T1, T2> build() {
+            return PTuple<T0, T1, T2>(_v0.build(), _v1.build(), _v2.build());
+        }
+    };
+#endif
+
 };
 
 

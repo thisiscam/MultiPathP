@@ -38,9 +38,9 @@ class PMachine
 
 protected:
 
-    using TransitionFunction = void (PMachine::*)(const PAny& any);
-    using EntryFunction  = void (PMachine::*)(const PAny& any);
-    using ExitFunction = void (PMachine::*)();
+    using TransitionFunction = void (*)(PMachine*, const PAny& any);
+    using EntryFunction  = void (*)(PMachine*, const PAny& any);
+    using ExitFunction = void (*)(PMachine*);
 
 #ifdef USE_VALUE_SUMMARY
     using TransitionFunctionPtr = ValueSummary<TransitionFunction>;
@@ -67,7 +67,7 @@ public:
                 RETURN(-1);
             }
             ELSE() {
-                IF(getTransition(state, e) != NULL) 
+                IF(getTransition(state, e) != nullptr) 
                 THEN() {
                     RETURN(i);
                 }
@@ -92,9 +92,9 @@ public:
         ENDIF()
         retcode = EXECUTE_FINISHED;
         TransitionFunctionPtr transitionFn = getTransition(state, e);
-        INVOKE_PTR_ON_THIS(transitionFn, void, (payload));
+        INVOKE_PTR(transitionFn, void, (this, payload));
         EntryFunctionPtr entryFn = getTransitionEntry(state, e);
-        INVOKE_PTR_ON_THIS(entryFn, void, (payload));
+        INVOKE_PTR(entryFn, void, (this, payload));
     }
     END_VOID_FUNCTION()
 
@@ -120,11 +120,11 @@ protected:
         FOR(Int i = states.size() - 1, i >= 0, --i, {
             Int state = states.get(i);
             TransitionFunctionPtr f = getTransition(state, e);
-            IF(f != NULL)
+            IF(f != nullptr)
             THEN() {
-                INVOKE_PTR_ON_THIS(f, void, (payload));
+                INVOKE_PTR(f, void, (this, payload));
                 EntryFunctionPtr entryFn = getTransitionEntry(state, e);
-                INVOKE_PTR_ON_THIS(entryFn, void, (payload));
+                INVOKE_PTR(entryFn, void, (this, payload));
                 RETURN();
             }
             ELSE() {
@@ -143,9 +143,9 @@ protected:
         Int current_state = states.get(last);
         states.removeRange(last);
         ExitFunctionPtr eF = getExitFunction(current_state);
-        IF(eF != NULL) 
+        IF(eF != nullptr) 
         THEN() {
-            INVOKE_PTR_ON_THIS(eF, void, ());
+            INVOKE_PTR(eF, void, (this));
         }
         ENDIF()
     }
@@ -159,20 +159,20 @@ protected:
         }
     }
 
-    inline void emptyTransition(const PAny& payload) { }
+    static inline void emptyTransition(PMachine* self, const PAny& payload) { }
 
-    inline void transitionPushState(const PAny& payload) {
-        ++states._size;
+    static inline void transitionPushState(PMachine* self, const PAny& payload) {
+        ++self->states._size;
     }
 
-    inline void emptyEntry(const PAny& payload) { }
+    static inline void emptyEntry(PMachine* self, const PAny& payload) { }
 
-    inline void haltEntry(const PAny& payload) {
-        states = PList<Int>();
-        states.add(STATE_HALT);
+    static inline void haltEntry(PMachine* self, const PAny& payload) {
+        self->states = PList<Int>();
+        self->states.add(STATE_HALT);
     }
 
-    inline void emptyExit() { }
+    static inline void emptyExit(PMachine* self) { }
 
     Int retcode;
     PList<Int> states;

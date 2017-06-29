@@ -15,6 +15,23 @@ public:
     Ptr<PMachine> machine;
     Int queueIdx;
     Int stateIdx;
+
+    class Builder {
+        Ptr<PMachine>::Builder machine;
+        Int::Builder queueIdx;
+        Int::Builder stateIdx;
+    public:
+        inline Builder& addValue(const Bdd& pred, SchedulerChoice&& rhs) {
+            machine.addValue(pred, std::move(rhs.machine));
+            queueIdx.addValue(pred, std::move(rhs.queueIdx));
+            stateIdx.addValue(pred, std::move(rhs.stateIdx));
+            return *this;
+        }
+
+        inline SchedulerChoice build() {
+            return SchedulerChoice(machine.build(), queueIdx.build(), stateIdx.build());
+        }
+    };
 };
 
 class Scheduler {

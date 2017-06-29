@@ -1,6 +1,8 @@
 #ifndef ALLOCATOR_HPP
 #define ALLOCATOR_HPP
 
+#include <list>
+
 namespace RUNTIME_NAMESPACE {
 
 template<typename> class Allocator;

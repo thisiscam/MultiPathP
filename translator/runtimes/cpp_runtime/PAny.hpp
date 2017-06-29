@@ -197,6 +197,38 @@ public:
     Bool b;
     Ptr<PMachine> m;
     AnyDataPointer ptr;
+
+#ifdef USE_VALUE_SUMMARY
+    class Builder {
+        Ptr<const type_info>::Builder type;
+        Int::Builder i;
+        Bool::Builder b;
+        Ptr<PMachine>::Builder m;
+        AnyDataPointer::Builder ptr;
+    public:
+        inline Builder& addValue(const Bdd& pred, PAny&& other) {
+            type.addValue(pred, std::move(other.type));
+            i.addValue(pred, std::move(other.i));
+            b.addValue(pred, std::move(other.b));
+            m.addValue(pred, std::move(other.m));
+            ptr.addValue(pred, std::move(other.ptr));
+            return *this;
+        }
+
+        inline PAny build() {
+            return PAny(type.build(), i.build(), b.build(), m.build(), ptr.build());
+        }
+    };
+#endif
+
+private:
+    PAny(const Ptr<const type_info>& type, const Int& i, const Bool& b, const Ptr<PMachine>& m, const AnyDataPointer& ptr):
+        type(type),
+        i(i),
+        b(b),
+        m(m),
+        ptr(ptr)
+    { }
 };
 
 template<> 

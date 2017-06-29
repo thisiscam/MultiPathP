@@ -6,7 +6,7 @@ public:
     MachineMain(ExecutionEngine& engine):PMachine(engine) { }
 
     inline void start(const PAny& payload) override {
-        InitEntry(payload);
+        InitEntry(this, payload);
     }
 
 private:
@@ -15,9 +15,9 @@ private:
     };
 
     /* region Entry Methods */
-    inline void InitEntry(const PAny& payload) {
-        states.setTop(Init);
-        InitEntryImpl();
+    static inline void InitEntry(MachineMain* self, const PAny& payload) {
+        self->states.setTop(Init);
+        self->InitEntryImpl();
     }
     /* end Entry Methods */
 

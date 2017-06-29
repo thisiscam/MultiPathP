@@ -6,7 +6,7 @@ public:
     MachineParticipantMachine(ExecutionEngine& engine):PMachine(engine) { }
 
     inline void start(const PAny& payload) override {
-        InitEntry(payload);
+        InitEntry(this, payload);
     }
 
 private:
@@ -16,19 +16,19 @@ private:
     };
 
     /* region Entry Methods */
-    inline void InitEntry(const PAny& payload) {
-        states.setTop(Init);
-        InitEntryImpl(payload);
+    static inline void InitEntry(MachineParticipantMachine* self, const PAny& payload) {
+        self->states.setTop(Init);
+        self->InitEntryImpl(payload);
     }
 
-    inline void WaitForRequestEntry(const PAny& payload) {
-        states.setTop(WaitForRequest);
+    static inline void WaitForRequestEntry(MachineParticipantMachine* self, const PAny& payload) {
+        self->states.setTop(WaitForRequest);
     }
     /* end Entry Methods */
 
     /* region Transition Methods */
-    inline void HandlerImpl0_Wrap(const PAny& payload) {
-        HandlerImpl0();
+    static inline void HandlerImpl0_Wrap(MachineParticipantMachine* self, const PAny& payload) {
+        self->HandlerImpl0();
     }
     /* end Transition Methods */
 

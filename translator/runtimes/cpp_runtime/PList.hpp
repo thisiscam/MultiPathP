@@ -141,6 +141,32 @@ public:
 private:
     Int _size = 0;
     DefaultArray<T> data;
+
+#ifdef USE_VALUE_SUMMARY
+public:
+    class Builder {
+        Int::Builder _size;
+        typename DefaultArray<T>::Builder data;
+
+    public:
+        inline Builder& addValue(const Bdd& pred, PList&& list) {
+            _size.addValue(pred, std::move(list._size));
+            data.addValue(pred, std::move(list.data));
+            return *this;
+        }
+
+        inline PList<T> build() {
+            return PList<T>(_size, data);
+        }
+    };
+#endif
+
+private:
+
+    PList(const Int& _size, const DefaultArray<T>& data):
+        _size(_size),
+        data(data)
+    { }
 };
 
 template<typename T>

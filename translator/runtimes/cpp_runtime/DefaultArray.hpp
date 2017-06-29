@@ -5,6 +5,11 @@ using namespace std;
 
 namespace RUNTIME_NAMESPACE {
 
+static 
+size_t next_pow_of_2(size_t x) {
+    return pow(2, ceil(log(x)/log(2)));
+}
+
 template<typename T>
 class DefaultArray 
 {
@@ -90,6 +95,37 @@ public:
 #endif
     }
 
+#ifdef USE_VALUE_SUMMARY
+public:
+    class Builder {
+        typename T::Builder** data;
+        size_t capacity;
+    public:
+        inline Builder& addValue(const Bdd& pred, DefaultArray<T>&& rhs) {
+            if(capacity < rhs.capacity) {
+                size_t old_capacity = capacity;
+                capacity = rhs.capacity;
+                data = (typename T::Builder**)realloc(data, sizeof(typename T::Builder*) * capacity);
+                for(int i = old_capacity; i < capacity; i++) {
+                    data[i] = new Builder();
+                }
+            }
+            for(int i = 0; i < capacity; i++) {
+                data[i].addValue(pred, std::move(rhs.data[i]));
+            }
+            return *this;
+        }
+
+        inline DefaultArray<T> build() {
+            T** data = malloc(sizeof(T*) * capacity);
+            for(int i = 0; i < capacity; i++) {
+                data[i] = new T(this->data[i].build());
+            }
+            return DefaultArray<T>(data, capacity);
+        }
+    };
+#endif
+
 private:
 
     T** data;
@@ -98,11 +134,16 @@ private:
         DefaultArray* self = const_cast<DefaultArray<T>*>(this);
         if(index + 1 >= capacity) {
             size_t old_capacity = capacity;
-            self->capacity *= 2;
+            self->capacity = next_pow_of_2(index + 1);
             self->data = (T**)realloc(data, sizeof(T*) * self->capacity);
-            memset(self->data + old_capacity, 0, sizeof(T*) * (capacity - old_capacity));
+            memset(self->data + old_capacity, 0, sizeof(T*) * (self->capacity - old_capacity));
         }
     }
+
+    DefaultArray(T** data, size_t capacity):
+        data(data),
+        capacity(capacity) 
+    { }
 
     std::function<T(void)> allocator;
 };

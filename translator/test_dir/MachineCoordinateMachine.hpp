@@ -6,7 +6,7 @@ public:
     MachineCoordinateMachine(ExecutionEngine& engine):PMachine(engine) { }
 
     inline void start(const PAny& payload) override {
-        InitEntry(payload);
+        InitEntry(this, payload);
     }
 
 private:
@@ -17,18 +17,18 @@ private:
     };
 
     /* region Entry Methods */
-    inline void InitEntry(const PAny& payload) {
-        states.setTop(Init);
-        InitEntryImpl();
+    static inline void InitEntry(MachineCoordinateMachine* self, const PAny& payload) {
+        self->states.setTop(Init);
+        self->InitEntryImpl();
     }
 
-    inline void WaitForRequestEntry(const PAny& payload) {
-        states.setTop(WaitForRequest);
+    static inline void WaitForRequestEntry(MachineCoordinateMachine* self, const PAny& payload) {
+        self->states.setTop(WaitForRequest);
     }
 
-    inline void TransactionStateEntry(const PAny& payload) {
-        states.setTop(TransactionState);
-        TransactionStateEntryImpl();
+    static inline void TransactionStateEntry(MachineCoordinateMachine* self, const PAny& payload) {
+        self->states.setTop(TransactionState);
+        self->TransactionStateEntryImpl();
     }
     /* end Entry Methods */
 
