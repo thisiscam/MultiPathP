@@ -38,7 +38,7 @@ private:
     /* region Function Implementations */
     inline VOID_FUNCTION_DECL(InitEntryImpl, ()) {
         participant = create<MachineParticipantMachine>(self());
-        raise(eUnit); retcode = RAISED_EVENT; RETURN();
+        raise(eUnit); retcode = RAISED_EVENT; RETURN_VOID();
     }
     END_VOID_FUNCTION()
 

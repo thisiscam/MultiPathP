@@ -38,7 +38,7 @@ private:
 
     inline VOID_FUNCTION_DECL(Pong_SendPongEntryImpl, (Ptr<PMachine> payload)) {
         send(payload, Pong);
-        raise(Success); retcode = RAISED_EVENT; RETURN();
+        raise(Success); retcode = RAISED_EVENT; RETURN_VOID();
     }
     END_VOID_FUNCTION()
     /* end Function Implementations */

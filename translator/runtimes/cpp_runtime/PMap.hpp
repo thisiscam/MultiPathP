@@ -70,7 +70,7 @@ public:
             IF(k == data.get(i).v0()) 
             THEN() {
                 data.set(v, i, PTupleIndexer::V0(), head, rest...);
-                RETURN();
+                RETURN_VOID();
             }
             ENDIF()
         })
@@ -84,7 +84,7 @@ public:
             IF(k == data.get(i).v0()) 
             THEN() {
                 data.set(v, i, PTupleIndexer::V1());
-                RETURN();
+                RETURN_VOID();
             }
             ENDIF()
         })
@@ -137,9 +137,11 @@ public:
 public:
     class Builder {
         typename PList<PTuple<K, V>>::Builder data; 
-        
-        inline Builder& addValue(const Bdd& pred, PMap<K, V>&& map) {
-            data.addValue(pred, std::move(map.data));
+    
+    public:
+    
+        inline Builder& addValue(const Bdd& pred, const PMap<K, V>& map) {
+            data.addValue(pred, map.data);
             return *this;
         }
 

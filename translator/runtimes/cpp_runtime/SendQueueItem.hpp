@@ -28,10 +28,10 @@ public:
 	    Int::Builder e;
 	    PAny::Builder payload;
 	public:
-	    Builder& addValue(const Bdd& pred, SendQueueItem&& rhs) {
-	    	target.addValue(pred, std::move(rhs.target));
-	    	e.addValue(pred, std::move(rhs.e));
-	    	payload.addValue(pred, std::move(rhs.payload));
+	    Builder& addValue(const Bdd& pred, const SendQueueItem& rhs) {
+	    	target.addValue(pred, rhs.target);
+	    	e.addValue(pred, rhs.e);
+	    	payload.addValue(pred, rhs.payload);
 	    	return *this;
 	    }
 

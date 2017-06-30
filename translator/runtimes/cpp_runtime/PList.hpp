@@ -149,14 +149,14 @@ public:
         typename DefaultArray<T>::Builder data;
 
     public:
-        inline Builder& addValue(const Bdd& pred, PList&& list) {
-            _size.addValue(pred, std::move(list._size));
-            data.addValue(pred, std::move(list.data));
+        inline Builder& addValue(const Bdd& pred, const PList& list) {
+            _size.addValue(pred, list._size);
+            data.addValue(pred, list.data);
             return *this;
         }
 
         inline PList<T> build() {
-            return PList<T>(_size, data);
+            return PList<T>(_size.build(), data.build());
         }
     };
 #endif
@@ -189,7 +189,7 @@ void operator<<(std::ostream& os, const PList<T>& list) {
     os << "]";
     PathConstraint::pc() = oldPc;
 #else
-    for(int i = 0; i < list.size(); ++i, {
+    for(int i = 0; i < list.size(); ++i) {
         if(i != 0) {
             os << ",";
         }

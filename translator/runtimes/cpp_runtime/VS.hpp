@@ -108,13 +108,13 @@ public:
 
     class Builder {
     public:
-        void addValue(const Bdd& pred, T value) {
+        void addValue(const Bdd& pred, const T& value) {
             values[value] |= pred;
         }
 
-        void addValue(const Bdd& pred, ValueSummary<T>&& rhs) {
+        void addValue(const Bdd& pred, const ValueSummary<T>& rhs) {
             for(const auto& v : rhs.values) {
-                addValue(v.second, std::move(v.first));
+                addValue(v.second, v.first);
             }
         }
 

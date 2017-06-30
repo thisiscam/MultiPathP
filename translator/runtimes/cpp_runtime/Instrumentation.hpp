@@ -1,10 +1,7 @@
 #ifndef INTRUMENTATION_HPP
 #define INTRUMENTATION_HPP
 
-
-/* WARNING: the following macro is not portable */
-#define GET_MACRO(_0, _1, NAME, ...) NAME
-#define RETURN(...) GET_MACRO(_0, ##__VA_ARGS__, RETURN1, RETURN0)(__VA_ARGS__)
+#define ESC(...) __VA_ARGS__
 
 #ifdef USE_VALUE_SUMMARY
 
@@ -42,7 +39,7 @@ void functionName args {                                        \
 
 #define IF(_condition...)                                       \
     {                                                           \
-        Bool&& condition = (_condition);                        \
+        const Bool& condition = (_condition);                   \
         Bdd&& falseBranch = PathConstraint::pc() & condition.F; \
         Bdd mergePointPc = falseBranch;
 
@@ -76,7 +73,7 @@ void functionName args {                                        \
     {                                                           \
         Bdd loopMergePointPc;                                   \
         while(true) {                                           \
-            Bool&& condition = (_condition);                    \
+            const Bool& condition = (_condition);               \
             loopMergePointPc |= condition.F;                    \
             if(condition.T.isZero()) {                          \
                 break;                                          \
@@ -132,15 +129,15 @@ void functionName args {                                        \
         break;                                                  \
     }
 
-#define RETURN0()                                               \
+#define RETURN_VOID()                                           \
     {                                                           \
         PathConstraint::pc() = Bdd::bddZero();                  \
         break;                                                  \
     }
 
-#define RETURN1(val)                                            \
+#define RETURN(val...)                                          \
     {                                                           \
-        __ret.addValue(PathConstraint::pc(), std::move(val));   \
+        __ret.addValue(PathConstraint::pc(), val);              \
         PathConstraint::pc() = Bdd::bddZero();                  \
         break;                                                  \
     }
@@ -188,9 +185,10 @@ void functionName args {
 #define ENDWHILE_NC()                                           \
     }
 
-#define FOR(initializer, condition, increment)                  \
+#define FOR(initializer, condition, increment, block...)        \
     for(initializer; condition; increment)  {                   \
-
+        block
+        
 #define ENDFOR()                                                \
     }
 
@@ -199,9 +197,9 @@ void functionName args {
 
 #define BREAK() break;
 
-#define RETURN0() return;
+#define RETURN_VOID() return;
 
-#define RETURN1(val) return val;
+#define RETURN(val...) return val;
 
 #endif
 #endif

@@ -41,6 +41,8 @@ public class BasicCppTranslator extends TranslatorBase {
     @Override
     public void translate(String outDir) throws IOException {
         Set<PType> usedTypes = program.accept(new PTypeCollector());
+        usedTypes.remove(PType.VOID);
+        usedTypes.remove(PType.ANY);
         STGroupFile headerTemplateGroup = getSTGroupFile("header.stg");
         ST headerTemplate = headerTemplateGroup.getInstanceOf("HeaderFile");
         headerTemplate.add("projectName", projectName);

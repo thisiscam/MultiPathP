@@ -16,7 +16,7 @@ class ValueSummary<int> final {
 public:
 
     ValueSummary():
-        ValueSummary(0)
+        ValueSummary(0) 
     { }
 
     ValueSummary(int i):values(std::unordered_map<int, Bdd>({{i, PathConstraint::pc()}}))
@@ -185,10 +185,10 @@ public:
             values[value] |= pred;
         }
 
-        void addValue(const Bdd& pred, ValueSummary<int>&& rhs) {
-            for(const auto& v : rhs.values) {
-                addValue(v.second, std::move(v.first));
-            }
+        void addValue(const Bdd& pred, const ValueSummary<int>& rhs) {
+          for(const auto& v : rhs.values) {
+                addValue(v.second, v.first);
+            }        
         }
 
         ValueSummary<int> build() {

@@ -45,7 +45,6 @@ struct IsCastable<Container<A, As...>, Container<B, Bs...>> {
     static constexpr bool value = IsCastable<A, B>::value && IsCastable<List<As...>, List<Bs...>>::value;
 };
 
-
 class PAny final {
 
 #ifdef USE_VALUE_SUMMARY
@@ -100,6 +99,24 @@ public:
         type(&typeid(Ptr<PMachine>)),
         m(v)
     { }
+
+#ifdef USE_VALUE_SUMMARY
+    /* Following is required since C++ can't handle direct conversion from int/bool */
+    PAny(int v):
+        type(&typeid(Int)), 
+        i(v) 
+    { }
+
+    PAny(bool v):
+        type(&typeid(Bool)),
+        b(v) 
+    { }
+
+    PAny(PMachine* v):
+        type(&typeid(Ptr<PMachine>)),
+        m(v)
+    { }
+#endif
 
     inline operator const Int&() const {
         IF_ONLY(type == &typeid(Int)) {
@@ -206,12 +223,12 @@ public:
         Ptr<PMachine>::Builder m;
         AnyDataPointer::Builder ptr;
     public:
-        inline Builder& addValue(const Bdd& pred, PAny&& other) {
-            type.addValue(pred, std::move(other.type));
-            i.addValue(pred, std::move(other.i));
-            b.addValue(pred, std::move(other.b));
-            m.addValue(pred, std::move(other.m));
-            ptr.addValue(pred, std::move(other.ptr));
+        inline Builder& addValue(const Bdd& pred, const PAny& other) {
+            type.addValue(pred, other.type);
+            i.addValue(pred, other.i);
+            b.addValue(pred, other.b);
+            m.addValue(pred, other.m);
+            ptr.addValue(pred, other.ptr);
             return *this;
         }
 

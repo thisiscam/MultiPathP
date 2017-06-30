@@ -18,6 +18,23 @@ public abstract class PProgram extends PASTNode {
     public abstract Map<String, PFunction> getGlobalFunctionDecls();
     public abstract Map<String, PType> getTypedefs();
 
+    public Map<PEvent, List<PMachine>> getObserveMap() {
+        Map<PEvent, List<PMachine>> ret = new HashMap<>();
+        for(PEvent e : getEventDecls()) {
+            for(PMachine m : getMachines()) {
+                if(m.getObservedEvents().containsKey(e.getName())) {
+                    ret.putIfAbsent(e, new ArrayList<>());
+                    ret.get(e).add(m);
+                }
+            }
+        }
+        return ret;
+    }
+
+    public List<PMachine> getObserveMachines() {
+        return getMachines().stream().filter(PMachine::isSpec).collect(Collectors.toList());
+    }
+
     public Optional<PEvent> getEventByName(String eventName) {
         return getEventDecls().stream().filter(e -> e.getName().equals(eventName)).findFirst();
     }

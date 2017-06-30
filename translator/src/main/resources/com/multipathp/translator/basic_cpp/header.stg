@@ -6,12 +6,35 @@ BuiltInEvents ::= [
 	default: key
 ]
 
+AnnounceHandlerName(event) ::= "Announce<event.name>Handler"
+
+AnnounceHandlerTable() ::= <<
+{
+    <program.eventDecls: {e | <if(program.observeMap.(e))><AnnounceHandlerName(e)><else>announceEmpty<endif>}; separator=",">
+}
+>>
+
+AnnounceMachineName(machine) ::= "<machineName(machine)>Instance"
+
+AnnounceMachineGetter(machine) ::= <<
+    static inline machineName<machine>& get<AnnounceMachineName(machine)>() {
+        static machineName<machine> _m;
+        return _m;
+    }
+>>
+
+AnnounceHandlerImplementation(e) ::= <<
+static inline void <AnnounceHandlerName(e)>(const PAny& payload) {
+    <program.observeMap.(e):{m | get<AnnounceMachineName(m)>.serveEvent(<e.name>, payload);}; separator="\n">
+}
+>>
+
 HeaderFile(declTypes, projectName, program) ::= <<
 #ifndef <projectName>_H
 #define <projectName>_H
 
 #define DECL_TYPES List\<<declTypes:type(); separator=", ">\>
-#include "basic_cpp_runtime.h"
+#include "PCppRuntime.h"
 
 using namespace RUNTIME_NAMESPACE;
 
@@ -22,25 +45,34 @@ namespace <projectName> {
 
 <program.machines:{m | class <machineName(m)>;}; separator="\n">
 
-};
-
-<program.machines:{m | #include "<MachineImplementationFileName(m)>"}; separator="\n">
-
-namespace <projectName> {
-
 class Controller {
+using AnnounceHandlerPtr = void (*)(const PAny&);
 public:
 	
 	static inline Ptr\<PMachine> createMainMachine(ExecutionEngine& engine) {
-		return new <machineName(program.mainMachine)>(engine);
+		return PMachine::alloc\<<machineName(program.mainMachine)>\>(engine);
 	}
+
+    static inline void announceEmpty(const PAny& payload) { }
+
+    /* region Announce Handler Implementations */
+    <program.observeMap:AnnounceHandlerImplementation()>
+    /* end Announce Handler Implemntatons */
 
 	static inline void announce(const Int& event, const PAny& payload) {
-
+        static AnnounceHandlerPtr _handlers[<length(program.eventDecls)>] =
+        <AnnounceHandlerTable()>;
+        auto&& ptr = getIndex1D(_handlers, event);
+        return INVOKE_PTR(ptr, void, (payload));
 	}
+
+private:
+    <program.observeMachines:AnnounceMachineGetter(); separator="\n">
 };
 
 }
+
+<program.machines:{m | #include "<MachineImplementationFileName(m)>"}; separator="\n">
 
 #endif
 >>

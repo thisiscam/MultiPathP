@@ -7,6 +7,8 @@ namespace RUNTIME_NAMESPACE {
 
 template<typename> class Allocator;
 
+#ifdef USE_VALUE_SUMMARY
+
 template<typename T>
 class Allocator {
 
@@ -100,7 +102,56 @@ private:
 	Int count;
 };
 
+#else
 
+template<typename T>
+class Allocator {
+
+public:
+	inline static Allocator* create(std::function<T*(int)> allocFunction) {
+		return new Allocator(allocFunction);
+	}
+
+	T* allocate() {
+		allocated.push_back(allocFunction(allocated.size()));
+		return allocated[allocated.size() - 1];
+	}
+
+private:
+	std::function<T*(int)> allocFunction;
+
+	vector<T*> allocated;
+
+	Allocator(std::function<T*(int)> allocFunction):
+		allocFunction(allocFunction)
+	{ }
+};
+
+template<>
+class Allocator<bool> {
+
+public:
+	inline static Allocator* create(const std::string& id) {
+		return new Allocator(id);
+	}
+
+	bool allocate() {
+		allocated.push_back(rand() % 2);
+		return allocated[allocated.size() - 1];
+	}
+
+private:
+
+	const std::string id;
+
+	vector<bool> allocated;
+
+	Allocator(const std::string& id):
+		id(id)
+	{ }
+};
+
+#endif
 };
 
 #endif

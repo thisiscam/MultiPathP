@@ -57,7 +57,7 @@ public:
 
     inline FUNCTION_DECL(Int, canServeEvent, (Int e)) {
         FOR(Int i = states.size() - 1, i >= 0, --i, {
-            Int state = states.get(i);
+            const Int& state = states.get(i);
             IF(isDefered(state, e))
             THEN() {
                 RETURN(-1);
@@ -77,7 +77,7 @@ public:
     END_FUNCTION()
 
     inline VOID_FUNCTION_DECL(step, (Int stateIndex, Int e, const PAny& payload = PAny())) {
-        Int state = states.get(stateIndex);
+        const Int& state = states.get(stateIndex);
         IF(isGotoTransition(state, e))
         THEN() {
             FOR(Int i = states.size() - 1, i > stateIndex, --i, {
@@ -87,10 +87,34 @@ public:
         }
         ENDIF()
         retcode = EXECUTE_FINISHED;
-        TransitionFunctionPtr transitionFn = getTransition(state, e);
+        TransitionFunctionPtr&& transitionFn = getTransition(state, e);
         INVOKE_PTR(transitionFn, void, (this, payload));
-        EntryFunctionPtr entryFn = getTransitionEntry(state, e);
+        EntryFunctionPtr&& entryFn = getTransitionEntry(state, e);
         INVOKE_PTR(entryFn, void, (this, payload));
+    }
+    END_VOID_FUNCTION()
+
+    inline VOID_FUNCTION_DECL(ServeEvent, (const Int& e, const PAny& payload)) {
+        FOR(Int i = 0, i < states.size(), ++i, {
+            const Int& state = states.get(i);
+            IF(!isDefered(state, e) & (getTransition(state, e) != nullptr)) 
+            THEN() {
+                IF(isGotoTransition(state, e))
+                THEN() {
+                    states.removeRange(0, i);
+                }
+                ENDIF()
+                retcode = EXECUTE_FINISHED;
+                TransitionFunctionPtr transition_fn = getTransition(state, e);
+                INVOKE_PTR(transition_fn, void, (this, payload));
+                EntryFunctionPtr entryFn = getTransitionEntry(state, e);
+                INVOKE_PTR(entryFn, void, (this, payload));
+                RETURN_VOID();
+            }
+            ENDIF()
+        })
+        ENDFOR()
+        throw runtime_error("Unhandled event");
     }
     END_VOID_FUNCTION()
 
@@ -106,21 +130,21 @@ protected:
 
     template<typename M>
     Ptr<PMachine> create(const PAny& payload = PAny()) {
-        Ptr<PMachine> machine = PMachine::alloc<M>(engine);
+        Ptr<PMachine>&& machine = PMachine::alloc<M>(engine);
         sendQueue.add(SendQueueItem(machine, EVENT_NEW_MACHINE, payload));
         return machine;
     }
 
     inline VOID_FUNCTION_DECL(raise, (Int e, const PAny& payload = PAny())) {
         FOR(Int i = states.size() - 1, i >= 0, --i, {
-            Int state = states.get(i);
-            TransitionFunctionPtr f = getTransition(state, e);
+            const Int& state = states.get(i);
+            TransitionFunctionPtr&& f = getTransition(state, e);
             IF(f != nullptr)
             THEN() {
                 INVOKE_PTR(f, void, (this, payload));
-                EntryFunctionPtr entryFn = getTransitionEntry(state, e);
+                EntryFunctionPtr&& entryFn = getTransitionEntry(state, e);
                 INVOKE_PTR(entryFn, void, (this, payload));
-                RETURN();
+                RETURN_VOID();
             }
             ELSE() {
                 popState();
@@ -128,16 +152,15 @@ protected:
             ENDIF()
         })
         ENDFOR()
-        PathConstraint::printDot("pc");
         throw runtime_error("Unhandled event");
     }
     END_VOID_FUNCTION()
 
     inline VOID_FUNCTION_DECL(popState, ()) {
-        Int last = states.size() - 1;
-        Int current_state = states.get(last);
+        const Int& last = states.size() - 1;
+        const Int& current_state = states.get(last);
         states.removeRange(last);
-        ExitFunctionPtr eF = getExitFunction(current_state);
+        ExitFunctionPtr&& eF = getExitFunction(current_state);
         IF(eF != nullptr) 
         THEN() {
             INVOKE_PTR(eF, void, (this));
@@ -148,7 +171,7 @@ protected:
 
     inline Bool randomBool(const std::string&);
 
-    inline void passert(Bool cond, const string& message) {
+    inline void passert(const Bool& cond, const string& message) {
         IF_ONLY(!cond) {
             throw runtime_error(message);
         }

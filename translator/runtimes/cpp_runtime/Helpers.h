@@ -27,6 +27,16 @@ struct ExtractVSParam<const ValueSummary<T>&> {
     using type = T;
 };
 
+template<typename T>
+struct ExtractVSParam<const ValueSummary<T>&&> {
+    using type = T;
+};
+
+template<typename T>
+struct ExtractVSParam<ValueSummary<T>&&> {
+    using type = T;
+};
+
 #define INVOKE(ptr, t, method, args) 										         \
     unaryOp<t>((ptr), [&](typename ExtractVSParam<decltype(ptr)>::type p) {	 \
     	if(p == NULL) {														         \
@@ -41,7 +51,7 @@ struct ExtractVSParam<const ValueSummary<T>&> {
     })
 
 template<typename T, size_t d1>
-ValueSummary<typename std::remove_const<T>::type> getIndex1D(T (&array)[d1], Int i1) {
+ValueSummary<typename std::remove_const<T>::type> getIndex1D(T (&array)[d1], const Int& i1) {
     return unaryOp<ValueSummary<typename std::remove_const<T>::type>>(i1, [&](int i1) { 
         return array[i1]; 
     });
@@ -64,12 +74,12 @@ getIndex2D(T (&array)[d1][d2], Int i1, Int i2) {
     ((*fPtr) args)
 
 template<typename T, size_t d1>
-typename std::remove_const<T>::type getIndex1D(T (&array)[d1], Int i1) {
+typename std::remove_const<T>::type getIndex1D(T (&array)[d1], const Int& i1) {
 	return array[i1];
 }
 
 template<typename T, size_t d1, size_t d2>
-typename std::remove_const<T>::type getIndex2D(T (&array)[d1][d2], Int i1, Int i2) {
+typename std::remove_const<T>::type getIndex2D(T (&array)[d1][d2], const Int& i1, const Int& i2) {
     return array[i1][i2];
 }
 

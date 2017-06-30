@@ -3,6 +3,8 @@ typeMap ::= [
     "$bool$": "Bool",
     "$null$": "PAny",
     "$event$": "Int",
+    "$void$": "void",
+    "$any$": "PAny",
     "$machine$": "Ptr<PMachine>",
     "$seq$": {PList\<<type(t.indexedInnerType)>>},
     "$map$": {PMap\<<type(t.keyType)>, <type(t.valueType)>>},
@@ -53,7 +55,7 @@ EndFunctionDeclMacro(function) ::= <<
 >>
 
 FunctionImplementation(function) ::= <<
-inline <FunctionDeclMacro(function)>(<if(!function.retType.isVoid)><type(function.retType)>, <endif><function.name>, (<FunctionParams(function.params)>)) {
+inline <FunctionDeclMacro(function)>(<if(!function.retType.isVoid)>ESC(<type(function.retType)>), <endif><function.name>, (<FunctionParams(function.params)>)) {
     <Render(function.stmtBlock)>
 }
 <EndFunctionDeclMacro(function)>()
@@ -98,12 +100,23 @@ ENDIF()
 >>
 
 ExpStmt(node) ::= <<
-<Render(node.expression)>;<//>
-<if(node.expression.canRaiseEvent)>if(retcode == RAISED_EVENT) { RETURN(<if(function.retType)> <typeDefaultValue(function.retType)><endif>); }<endif>
+<Render(node.expression)>;<\\>
+<if(node.expression.canRaiseEvent)>
+IF(retcode == RAISED_EVENT) 
+THEN() { 
+    <if(!function.retType.isVoid)>RETURN(<typeDefaultValue(function.retType)>)<else>RETURN_VOID()<endif>;
+}
+ENDIF()
+<endif>
 >>
 
 InsertStmt(node) ::= <<
 <Render(node.target)>.insert(<Render(node.expression)>);
+>>
+
+PopStmt(node) ::= <<
+popState();
+retcode = RAISED_EVENT; <if(!function.retType.isVoid)>RETURN(<typeDefaultValue(function.retType)>)<else>RETURN_VOID()<endif>;
 >>
 
 PrintStmt(node) ::= <<
@@ -111,7 +124,7 @@ print("<node.string>");
 >>
 
 RaiseStmt(node) ::= <<
-raise(<EventPayloadArguments()>); retcode = RAISED_EVENT; RETURN();
+raise(<EventPayloadArguments()>); retcode = RAISED_EVENT; <if(!function.retType.isVoid)>RETURN(<typeDefaultValue(function.retType)>)<else>RETURN_VOID()<endif>;
 >>
 
 RemoveStmt(node) ::= <<
@@ -119,7 +132,7 @@ RemoveStmt(node) ::= <<
 >>
 
 ReturnStmt(node) ::= <<
-RETURN(<if(node.expression)> <Render(node.expression)><endif>);
+<if(node.expression)>RETURN(<Render(node.expression)>)<else>RETURN_VOID()<endif>;
 >>
 
 SendStmt(node) ::= <<
@@ -226,7 +239,7 @@ GetItemExpLValueTop(node, rhs) ::= <<
 >>
 
 GetItemExpLValueIndex(node) ::= <<
-<LValueIndex(node.targetExpression)>, Render(node.indexerExpression)
+<LValueIndex(node.targetExpression)>, <Render(node.indexerExpression)>
 >>
 
 GetItemExpLValueId(node) ::= <<
@@ -268,11 +281,11 @@ KeysExp(node) ::= <<
 >>
 
 MinusExp(node) ::= <<
--<Render(node.expression)>;
+-<Render(node.expression)>
 >>
 
 NamedTupleExp(node) ::= <<
-<TupleExp(node)>
+<type(node.expressionType)>(<node.arguments:Render(); separator=", ">)
 >>
 
 NewExp(node) ::= <<

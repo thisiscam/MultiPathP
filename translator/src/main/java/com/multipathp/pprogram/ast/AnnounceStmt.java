@@ -15,7 +15,7 @@ public abstract class AnnounceStmt extends Stmt {
 
     @Override
     public int getChildrenCount() {
-        return getPayloadExpression() == null ? 1 : 0;
+        return getPayloadExpression() == null ? 1 : 2;
     }
 
     @Override

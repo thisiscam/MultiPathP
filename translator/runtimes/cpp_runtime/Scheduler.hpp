@@ -22,15 +22,16 @@ public:
     Int queueIdx;
     Int stateIdx;
 
+#ifdef USE_VALUE_SUMMARY
     class Builder {
         Ptr<PMachine>::Builder machine;
         Int::Builder queueIdx;
         Int::Builder stateIdx;
     public:
-        inline Builder& addValue(const Bdd& pred, SchedulerChoice&& rhs) {
-            machine.addValue(pred, std::move(rhs.machine));
-            queueIdx.addValue(pred, std::move(rhs.queueIdx));
-            stateIdx.addValue(pred, std::move(rhs.stateIdx));
+        inline Builder& addValue(const Bdd& pred, const SchedulerChoice& rhs) {
+            machine.addValue(pred, rhs.machine);
+            queueIdx.addValue(pred, rhs.queueIdx);
+            stateIdx.addValue(pred, rhs.stateIdx);
             return *this;
         }
 
@@ -38,6 +39,7 @@ public:
             return SchedulerChoice(machine.build(), queueIdx.build(), stateIdx.build());
         }
     };
+#endif
 };
 
 class Scheduler {

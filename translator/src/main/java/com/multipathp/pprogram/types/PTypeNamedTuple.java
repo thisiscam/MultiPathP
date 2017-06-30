@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class PTypeNamedTuple extends PType implements IPTypeGetIndexable {
-    private LinkedHashMap<String, PType> namedTypes;
+    private LinkedHashMap<String, PType> namedTypes = new LinkedHashMap<>();
 
     public PTypeNamedTuple(LinkedHashMap<String, PType> namedTypes) {
         super("$namedtuple$", true);

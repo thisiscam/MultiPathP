@@ -1,6 +1,6 @@
 #include <iostream>
 #define DECL_TYPES List<int, PAny, PTuple<int, int>, PList<PTuple<int, int>> >
-#include "basic_cpp_runtime.h"
+#include "PCppRuntime.h"
 
 using namespace RUNTIME_NAMESPACE;
 

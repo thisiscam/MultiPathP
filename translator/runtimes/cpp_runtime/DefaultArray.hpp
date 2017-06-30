@@ -1,6 +1,8 @@
 #ifndef DEFAULT_ARRAY_HPP
 #define DEFAULT_ARRAY_HPP
 
+#include <math.h>
+
 using namespace std;
 
 namespace RUNTIME_NAMESPACE {
@@ -98,30 +100,42 @@ public:
 #ifdef USE_VALUE_SUMMARY
 public:
     class Builder {
-        typename T::Builder** data;
-        size_t capacity;
+        typename T::Builder** data = nullptr;
+        size_t capacity = 0;
     public:
-        inline Builder& addValue(const Bdd& pred, DefaultArray<T>&& rhs) {
+        inline Builder& addValue(const Bdd& pred, const DefaultArray<T>& rhs) {
             if(capacity < rhs.capacity) {
                 size_t old_capacity = capacity;
                 capacity = rhs.capacity;
                 data = (typename T::Builder**)realloc(data, sizeof(typename T::Builder*) * capacity);
-                for(int i = old_capacity; i < capacity; i++) {
-                    data[i] = new Builder();
-                }
+                memset(data + old_capacity, 0, sizeof(typename T::Builder*) * (capacity - old_capacity));
             }
             for(int i = 0; i < capacity; i++) {
-                data[i].addValue(pred, std::move(rhs.data[i]));
+                if(data[i] == NULL) {
+                    if(rhs.data[i] != NULL) {
+                        auto builder = new typename T::Builder();
+                        builder->addValue(pred, *rhs.data[i]);
+                        data[i] = builder;
+                    }
+                } else { 
+                    if(rhs.data[i] != NULL) {
+                        data[i]->addValue(pred, *rhs.data[i]);
+                    }
+                }
             }
-            return *this;
+            return *this;        
         }
 
         inline DefaultArray<T> build() {
-            T** data = malloc(sizeof(T*) * capacity);
+            T** arrayData = (T**)malloc(sizeof(T*) * capacity);
             for(int i = 0; i < capacity; i++) {
-                data[i] = new T(this->data[i].build());
+                if(data[i] != NULL) {
+                    arrayData[i] = new T(data[i]->build());
+                } else {
+                    arrayData[i] = NULL;
+                }
             }
-            return DefaultArray<T>(data, capacity);
+            return DefaultArray<T>(arrayData, capacity);
         }
     };
 #endif

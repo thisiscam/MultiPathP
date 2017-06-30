@@ -10,9 +10,9 @@ class ValueSummary<bool> final {
     
 public:
     Bdd T, F;
+    
     ValueSummary():
-        T(Bdd::bddZero()), 
-        F(PathConstraint::pc()) 
+        ValueSummary(false)
     { }
 
     ValueSummary(const ValueSummary<bool>& other):
@@ -80,7 +80,7 @@ public:
             return *this;
         }
 
-        inline Builder& addValue(const Bdd& pred, ValueSummary<bool>&& rhs) {
+        inline Builder& addValue(const Bdd& pred, const ValueSummary<bool>& rhs) {
             return addValue(rhs.T, true).addValue(rhs.F, false);
         }
 

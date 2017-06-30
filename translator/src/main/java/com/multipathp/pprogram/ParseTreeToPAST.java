@@ -157,7 +157,7 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
 
     @Override
     public Void visitRet_type_or_none(pParser.Ret_type_or_noneContext ctx) {
-        function.setRetType(ctx.ptype() != null ? ctx.ptype().accept(typeConverter) : null);
+        function.setRetType(ctx.ptype() != null ? ctx.ptype().accept(typeConverter) : PType.VOID);
         return null;
     }
 
@@ -193,6 +193,14 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
     public Void visitPayload_var_decl_or_none(pParser.Payload_var_decl_or_noneContext ctx) {
         if (ctx.ID() != null) {
            function.addParams(ctx.ID().getText(), ctx.ptype().accept(typeConverter));
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitPayload_var_decl_or_none_ref(pParser.Payload_var_decl_or_none_refContext ctx) {
+        if (ctx.ID() != null) {
+            function.addParams(ctx.ID().getText(), ctx.ptype().accept(typeConverter));
         }
         return null;
     }

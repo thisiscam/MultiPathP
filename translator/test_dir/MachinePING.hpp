@@ -43,13 +43,13 @@ private:
     /* region Function Implementations */
     inline VOID_FUNCTION_DECL(Ping_InitEntryImpl, ()) {
         pongId = create<MachinePONG>();
-        raise(Success); retcode = RAISED_EVENT; RETURN();
+        raise(Success); retcode = RAISED_EVENT; RETURN_VOID();
     }
     END_VOID_FUNCTION()
 
     inline VOID_FUNCTION_DECL(Ping_SendPingEntryImpl, ()) {
         send(pongId, Ping, self());
-        raise(Success); retcode = RAISED_EVENT; RETURN();
+        raise(Success); retcode = RAISED_EVENT; RETURN_VOID();
     }
     END_VOID_FUNCTION()
     /* end Function Implementations */
