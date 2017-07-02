@@ -179,7 +179,7 @@ protected:
 
     static inline void emptyTransition(PMachine* self, const PAny& payload) { }
 
-    static inline void transitionPushState(PMachine* self, const PAny& payload) {
+    static inline void pushTransition(PMachine* self, const PAny& payload) {
         ++self->states._size;
     }
 

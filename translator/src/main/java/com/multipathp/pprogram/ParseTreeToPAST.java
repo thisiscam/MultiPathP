@@ -536,6 +536,9 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
 
         @Override
         public Optional<Stmt> visitStmt_call_with_arguments(pParser.Stmt_call_with_argumentsContext ctx) {
+            if(ctx.ID().getText().equals("BroadCastAcceptors")) {
+                int x = 1;
+            }
             return Optional.of(
                     new ExpStmt.Builder()
                             .setExpression(
@@ -776,7 +779,10 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
                     @Override
                     public Void visitNmd_expr_arg_list(pParser.Nmd_expr_arg_listContext ctx) {
                         builder.addNamedPair(ctx.ID().getText(), ctx.exp().accept(ExpVisitor.this));
-                        return super.visitNmd_expr_arg_list(ctx);
+                        if(ctx.nmd_expr_arg_list() != null) {
+                            ctx.nmd_expr_arg_list().accept(this);
+                        }
+                        return null;
                     }
                 });
                 return builder.build();

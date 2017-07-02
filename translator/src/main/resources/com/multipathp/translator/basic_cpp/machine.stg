@@ -38,7 +38,7 @@ JumpTable(functionNameTemplate) ::= <<
 >>
 
 TransitionJumpTableInner() ::= <<
-<if(state.transitionsMap.(e).isPush)>pushTransition<elseif(state.transitionsMap.(e).functionName)><TransitionFunctionWrapperSuffix(state.transitionsMap.(e).functionName)><else>emptyTransition<endif>
+<if(state.transitionsMap.(e).push)>pushTransition<elseif(state.transitionsMap.(e).functionName)><TransitionFunctionWrapperSuffix(state.transitionsMap.(e).functionName)><else>emptyTransition<endif>
 >>
 
 EntryJumpTableInner() ::= <<

@@ -175,7 +175,7 @@ BoolLiteralExpKindMap ::= [
 BoolLiteralExp(node) ::= "<BoolLiteralExpKindMap.(node.kind)>"
 
 CallExp(node) ::= <<
-<node.functionName>(<node.arguments:Render(); separator=",">)
+<node.functionName>(<node.arguments:Render(); separator=", ">)
 >>
 
 CastExp(node) ::= <<

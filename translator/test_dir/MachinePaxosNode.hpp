@@ -158,11 +158,11 @@ private:
     inline VOID_FUNCTION_DECL(preparefun, (PTuple<Ptr<PMachine>, Int, PTuple<Int, Int>> receivedMess_2)) {
         IF(!(acceptorSlots.containsKey(receivedMess_2.v1()))) 
         THEN() {
-            send(receivedMess_2.v0(), agree, PTuple<Int, PTuple<Int, Int>, Int, Int>(receivedMess_2.v1(), PTuple<Int, Int>(-1, -1), -1, -1));
+            send(receivedMess_2.v0(), agree, PTuple<Int, PTuple<Int, Int>, Int>(receivedMess_2.v1(), PTuple<Int, Int>(-1, -1), -1));
             acceptorSlots.set(PTuple<PTuple<Int, Int>, Int>(receivedMess_2.v2(), -1), receivedMess_2.v1());
         }
         ENDIF()
-        returnVal = lessThan(receivedMess_2.v2(),acceptorSlots.get(receivedMess_2.v1()).v0());
+        returnVal = lessThan(receivedMess_2.v2(), acceptorSlots.get(receivedMess_2.v1()).v0());
         IF(returnVal) 
         THEN() {
             send(receivedMess_2.v0(), reject, PTuple<Int, PTuple<Int, Int>>(receivedMess_2.v1(), acceptorSlots.get(receivedMess_2.v1()).v0()));
@@ -178,7 +178,7 @@ private:
     inline VOID_FUNCTION_DECL(acceptfun, (PTuple<Ptr<PMachine>, Int, PTuple<Int, Int>, Int> receivedMess_2)) {
         IF(acceptorSlots.containsKey(receivedMess_2.v1())) 
         THEN() {
-            returnVal = equal(receivedMess_2.v2(),acceptorSlots.get(receivedMess_2.v1()).v0());
+            returnVal = equal(receivedMess_2.v2(), acceptorSlots.get(receivedMess_2.v1()).v0());
             IF(!returnVal) 
             THEN() {
                 send(receivedMess_2.v0(), reject, PTuple<Int, PTuple<Int, Int>>(receivedMess_2.v1(), acceptorSlots.get(receivedMess_2.v1()).v0()));
@@ -250,7 +250,7 @@ private:
         countAgree = 0;
         nextProposal = GetNextProposal(maxRound);
         receivedAgree = PTuple<PTuple<Int, Int>, Int>(PTuple<Int, Int>(-1, -1), -1);
-        BroadCastAcceptors(prepare,PTuple<Ptr<PMachine>, Int, PTuple<Int, Int>, Int>(self(), nextSlotForProposer, PTuple<Int, Int>(nextProposal.v0(), myRank), myRank));
+        BroadCastAcceptors(prepare, PTuple<Ptr<PMachine>, Int, PTuple<Int, Int>>(self(), nextSlotForProposer, PTuple<Int, Int>(nextProposal.v0(), myRank)));
         Controller::announce(announce_proposer_sent, proposeVal);
     }
     END_VOID_FUNCTION()
@@ -259,7 +259,7 @@ private:
         IF(receivedMess.v0() == nextSlotForProposer) 
         THEN() {
             countAgree = countAgree + 1;
-            returnVal = lessThan(receivedAgree.v0(),receivedMess.v1());
+            returnVal = lessThan(receivedAgree.v0(), receivedMess.v1());
             IF(returnVal) 
             THEN() {
                 receivedAgree.set(receivedMess.v1(), PTupleIndexer::V0());
@@ -293,7 +293,7 @@ private:
     inline VOID_FUNCTION_DECL(CountAccepted, (PTuple<Int, PTuple<Int, Int>, Int> receivedMess_1)) {
         IF(receivedMess_1.v0() == nextSlotForProposer) 
         THEN() {
-            returnVal = equal(receivedMess_1.v1(),nextProposal);
+            returnVal = equal(receivedMess_1.v1(), nextProposal);
             IF(returnVal) 
             THEN() {
                 countAccept = countAccept + 1;
@@ -329,7 +329,7 @@ private:
         proposeVal = getHighestProposedValue();
         Controller::announce(announce_valueProposed, PTuple<Ptr<PMachine>, Int, PTuple<Int, Int>, Int>(self(), nextSlotForProposer, nextProposal, proposeVal));
         Controller::announce(announce_proposer_sent, proposeVal);
-        BroadCastAcceptors(accept,PTuple<Ptr<PMachine>, Int, PTuple<Int, Int>, Int>(self(), nextSlotForProposer, nextProposal, proposeVal));
+        BroadCastAcceptors(accept, PTuple<Ptr<PMachine>, Int, PTuple<Int, Int>, Int>(self(), nextSlotForProposer, nextProposal, proposeVal));
     }
     END_VOID_FUNCTION()
 
@@ -446,7 +446,7 @@ private:
             {
                 {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},
                 {NULL,E(emptyTransition),NULL,NULL,NULL,NULL,NULL,E(emptyTransition),NULL,E(HandlerImpl0_Wrap),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},
-                {NULL,E(emptyTransition),E(HandlerImpl2_Wrap),E(HandlerImpl3_Wrap),E(emptyTransition),NULL,E(emptyTransition),NULL,NULL,NULL,E(HandlerImpl1_Wrap),E(HandlerImpl3_Wrap),E(HandlerImpl1_Wrap),NULL,NULL,NULL,NULL,NULL,E(HandlerImpl4_Wrap),E(HandlerImpl5_Wrap),E(emptyTransition),NULL,NULL,NULL,NULL},
+                {NULL,E(emptyTransition),E(HandlerImpl2_Wrap),E(HandlerImpl3_Wrap),E(emptyTransition),NULL,E(emptyTransition),NULL,NULL,NULL,E(pushTransition),E(pushTransition),E(HandlerImpl1_Wrap),NULL,NULL,NULL,NULL,NULL,E(HandlerImpl4_Wrap),E(HandlerImpl5_Wrap),E(emptyTransition),NULL,NULL,NULL,NULL},
                 {NULL,E(emptyTransition),NULL,NULL,E(HandlerImpl6_Wrap),E(AnonymousHandler_7_Wrap),E(emptyTransition),NULL,E(AnonymousHandler_8_Wrap),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,E(emptyTransition),NULL,NULL,NULL,NULL},
                 {NULL,E(emptyTransition),NULL,NULL,E(emptyTransition),E(AnonymousHandler_10_Wrap),E(HandlerImpl9_Wrap),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,E(emptyTransition),NULL,NULL,NULL,NULL},
                 {NULL,E(emptyTransition),E(emptyTransition),E(emptyTransition),E(emptyTransition),E(emptyTransition),E(emptyTransition),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,E(emptyTransition),NULL,NULL,NULL,NULL}

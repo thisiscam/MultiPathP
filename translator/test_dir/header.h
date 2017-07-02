@@ -1,7 +1,7 @@
 #ifndef pingpong_H
 #define pingpong_H
 
-#define DECL_TYPES List<PTuple<Int, PTuple<Int, Int>, Int, Int>, PTuple<Int, Int>, PList<Ptr<PMachine>>, PTuple<Int>, PMap<Int, PTuple<PTuple<Int, Int>, Int>>, Bool, PTuple<Int, PTuple<Int, Int>, Int>, PTuple<Int, PTuple<Int, Int>>, Ptr<PMachine>, PTuple<PTuple<Int, Int>, Int>, PTuple<Ptr<PMachine>, Int, PTuple<Int, Int>, Int>, PTuple<Ptr<PMachine>, Int, PTuple<Int, Int>>, Int, Int, PTuple<PList<Ptr<PMachine>>>, PTuple<PList<Ptr<PMachine>>, Ptr<PMachine>, Int>, PTuple<Int, Ptr<PMachine>>, PTuple<Ptr<PMachine>, Int>>
+#define DECL_TYPES List<PTuple<Int, Int>, PList<Ptr<PMachine>>, PTuple<Int>, PMap<Int, PTuple<PTuple<Int, Int>, Int>>, Bool, PTuple<Int, PTuple<Int, Int>, Int>, PTuple<Int, PTuple<Int, Int>>, Ptr<PMachine>, PTuple<PTuple<Int, Int>, Int>, PTuple<Ptr<PMachine>, Int, PTuple<Int, Int>, Int>, PTuple<Ptr<PMachine>, Int, PTuple<Int, Int>>, Int, Int, PTuple<PList<Ptr<PMachine>>>, PTuple<PList<Ptr<PMachine>>, Ptr<PMachine>, Int>, PTuple<Int, Ptr<PMachine>>, PTuple<Ptr<PMachine>, Int>>
 #include "PCppRuntime.h"
 
 using namespace RUNTIME_NAMESPACE;
