@@ -81,7 +81,7 @@ public:
         }
 
         inline Builder& addValue(const Bdd& pred, const ValueSummary<bool>& rhs) {
-            return addValue(rhs.T, true).addValue(rhs.F, false);
+            return addValue(pred & rhs.T, true).addValue(pred & rhs.F, false);
         }
 
         inline ValueSummary<bool> build() {

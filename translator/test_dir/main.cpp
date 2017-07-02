@@ -1,11 +1,11 @@
-// #define USE_VALUE_SUMMARY
+#define USE_VALUE_SUMMARY
 #include "header.h"
 
 using namespace pingpong;
 
 int main(int argc, char const *argv[])
 {
-    // PathConstraint::init();
+    PathConstraint::init();
     // for(int i = 0; i < 1000000; i++) {
 		ExecutionEngine engine = ExecutionEngine();
 	    RandomScheduler scheduler(engine);
@@ -13,7 +13,7 @@ int main(int argc, char const *argv[])
 	    engine.run(scheduler, mainMachine);
     // }
 
-    // PathConstraint::quit();
+    PathConstraint::quit();
  // PathConstraint::init();
  // Int x = 1;
  // std::cout << (x - 2) << std::endl;

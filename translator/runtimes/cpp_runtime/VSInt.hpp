@@ -187,8 +187,11 @@ public:
 
         void addValue(const Bdd& pred, const ValueSummary<int>& rhs) {
           for(const auto& v : rhs.values) {
-                addValue(v.second, v.first);
-            }        
+                Bdd&& constraintPred = pred & v.second;
+                if(!constraintPred.isZero()) {
+                    addValue(constraintPred, v.first);
+                }
+            }   
         }
 
         ValueSummary<int> build() {

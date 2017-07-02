@@ -35,7 +35,7 @@ private:
     /* region Function Implementations */
     inline VOID_FUNCTION_DECL(InitEntryImpl, (Ptr<PMachine> payload)) {
         coor = payload;
-        raise(eUnit); retcode = RAISED_EVENT; RETURN();
+        raise(eUnit); retcode = RAISED_EVENT; RETURN_VOID();
     }
     END_VOID_FUNCTION()
 
