@@ -10,16 +10,16 @@ inline FUNCTION_DECL(SchedulerChoice, RandomScheduler::chooseMachine, ()) {
     machines.foreach([&](PMachine* machine) {
         BEGIN_BLOCK()
         // Collect from send queue
-        PList<SendQueueItem>& sendQueue = getSendQueue(machine);
+        const PList<SendQueueItem>& sendQueue = getSendQueue(machine);
         FOR(Int j = 0, j < sendQueue.size(), ++j, {
-            SendQueueItem item = sendQueue.get(j);
+            SendQueueItem&& item = sendQueue.get(j);
             IF(item.e == EVENT_NEW_MACHINE) 
             THEN() {
                 choices.add(SchedulerChoice(machine, j, -1));
                 BREAK();
             }
             ELSE() {
-                Int stateIdx = INVOKE(item.target, Int, canServeEvent, (item.e));
+                Int&& stateIdx = INVOKE(item.target, Int, canServeEvent, (item.e));
                 IF(stateIdx >= 0)
                 THEN() {
                     choices.add(SchedulerChoice(machine, j, stateIdx));
@@ -31,7 +31,7 @@ inline FUNCTION_DECL(SchedulerChoice, RandomScheduler::chooseMachine, ()) {
         })
         ENDFOR()
         // Machine is state that can serve null event?
-        Int nullStateIdx = machine->canServeEvent(EVENT_NULL);
+        Int&& nullStateIdx = machine->canServeEvent(EVENT_NULL);
         IF(nullStateIdx >= 0) 
         THEN() {
             choices.add(SchedulerChoice(machine, -1, nullStateIdx));
@@ -45,7 +45,7 @@ inline FUNCTION_DECL(SchedulerChoice, RandomScheduler::chooseMachine, ()) {
     }
     ENDIF()
     // Choose one and remove from send queue
-    Int idx = engine.randomInt(choices.size());
+    Int&& idx = engine.randomInt(choices.size());
     RETURN(choices.get(idx));
 }
 END_FUNCTION()

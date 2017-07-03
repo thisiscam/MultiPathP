@@ -17,7 +17,7 @@ public:
 
     Bool randomBool(const std::string& id);
 
-    Int randomInt(Int max);
+    Int randomInt(const Int max);
     
 private:
     int maxIteration;

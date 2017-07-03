@@ -59,7 +59,7 @@ ValueSummary<typename std::remove_const<T>::type> getIndex1D(T (&array)[d1], con
 
 template<typename T, size_t d1, size_t d2>
 ValueSummary<typename std::remove_const<T>::type> 
-getIndex2D(T (&array)[d1][d2], Int i1, Int i2) {
+getIndex2D(T (&array)[d1][d2], const Int& i1, const Int& i2) {
     return binaryOp<ValueSummary<typename std::remove_const<T>::type>>(i1, i2, [&](int i1, int i2) { 
         return array[i1][i2]; 
     });

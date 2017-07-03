@@ -13,15 +13,15 @@ Scheduler::getSendQueue(PMachine* machine) {
 }
 
 inline SendQueueItem
-Scheduler::popSendQueueItem(const Ptr<PMachine>& machine, Int index) {
+Scheduler::popSendQueueItem(const Ptr<PMachine>& machine, const Int& index) {
 #ifdef USE_VALUE_SUMMARY
     return unaryOp<SendQueueItem>(machine, [&](PMachine* machine) {
-        SendQueueItem item = machine->sendQueue.get(index);
+        SendQueueItem&& item = machine->sendQueue.get(index);
         machine->sendQueue.removeAt(index);
         return item;
     });
 #else
-        SendQueueItem item = machine->sendQueue.get(index);
+        SendQueueItem&& item = machine->sendQueue.get(index);
         machine->sendQueue.removeAt(index);
         return item;
 #endif
@@ -40,7 +40,7 @@ inline FUNCTION_DECL(Bool, Scheduler::step, ()) {
             INVOKE(chosen.machine, void, step, (chosen.stateIdx, EVENT_NULL));
         }
         ELSE() {
-            SendQueueItem item = popSendQueueItem(chosen.machine, chosen.queueIdx);
+            SendQueueItem&& item = popSendQueueItem(chosen.machine, chosen.queueIdx);
             IF(item.e == EVENT_NEW_MACHINE)
             THEN() {
                 std::cout << chosen.machine << " creates " << item.target << std::endl;

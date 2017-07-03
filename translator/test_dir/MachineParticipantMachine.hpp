@@ -58,21 +58,21 @@ private:
 
     /* region Jump Tables */
     inline Bool isDefered(const Int& state, const Int& event) const override {
-        static const bool _isDefered[3][7] = 
+        static const bool _isDefered[3][8] = 
             {
-                { true, true, true, true, true, true, true} /* halt */,
-                { true,false,false,false,false,false,false} /* Init */,
-                { true,false,false,false,false,false,false} /* WaitForRequest */
+                { true, true, true, true, true, true, true, true} /* halt */,
+                { true,false,false,false,false,false,false,false} /* Init */,
+                { true,false,false,false,false,false,false,false} /* WaitForRequest */
             };
         return getIndex2D(_isDefered, state, event);
     }
 
     inline Bool isGotoTransition(const Int& state, const Int& event) const override {
-        static const bool _isGotoTransition[3][7] =
+        static const bool _isGotoTransition[3][8] =
             {
-                {false,false,false,false,false,false,false} /* halt */,
-                {false, true, true,false,false,false,false} /* Init */,
-                {false, true,false,false,false,false,false} /* WaitForRequest */
+                {false,false,false,false,false,false,false,false} /* halt */,
+                {false, true, true,false,false,false,false,false} /* Init */,
+                {false, true,false,false,false,false,false,false} /* WaitForRequest */
             };
         return getIndex2D(_isGotoTransition, state, event);
     }
@@ -86,11 +86,11 @@ private:
 
     inline TransitionFunctionPtr getTransition(const Int& state, const Int& event) const override {
         #define E(f) ((TransitionFunction)&MachineParticipantMachine::f)
-        static TransitionFunction _transitions[3][7] = 
+        static TransitionFunction _transitions[3][8] = 
             {
-                {NULL,NULL,NULL,NULL,NULL,NULL,NULL},
-                {NULL,E(emptyTransition),E(emptyTransition),NULL,NULL,NULL,NULL},
-                {NULL,E(emptyTransition),NULL,NULL,E(HandlerImpl0_Wrap),NULL,NULL}
+                {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},
+                {NULL,E(emptyTransition),E(emptyTransition),NULL,NULL,NULL,NULL,NULL},
+                {NULL,E(emptyTransition),NULL,NULL,E(HandlerImpl0_Wrap),E(HandlerImpl0_Wrap),NULL,NULL}
             };
         #undef E
         return getIndex2D(_transitions, state, event);
@@ -98,11 +98,11 @@ private:
 
     inline EntryFunctionPtr getTransitionEntry(const Int& state, const Int& event) const override {
         #define E(f) ((TransitionFunction)&MachineParticipantMachine::f)
-        static TransitionFunction _entries[3][7] = 
+        static TransitionFunction _entries[3][8] = 
             {
-                {NULL,NULL,NULL,NULL,NULL,NULL,NULL},
-                {NULL,E(haltEntry),E(WaitForRequestEntry),NULL,NULL,NULL,NULL},
-                {NULL,E(haltEntry),NULL,NULL,E(emptyEntry),NULL,NULL}
+                {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},
+                {NULL,E(haltEntry),E(WaitForRequestEntry),NULL,NULL,NULL,NULL,NULL},
+                {NULL,E(haltEntry),NULL,NULL,E(emptyEntry),E(emptyEntry),NULL,NULL}
             };
         #undef E
         return getIndex2D(_entries, state, event);

@@ -1,6 +1,7 @@
 #ifndef SET_HPP
 #define SET_HPP
 
+#include <unordered_map>
 #include <set>
 
 namespace RUNTIME_NAMESPACE {
@@ -61,7 +62,7 @@ public:
 	}
 
 private:
-	std::map<T, Bdd> values;
+	std::unordered_map<T, Bdd> values;
 
 };
 

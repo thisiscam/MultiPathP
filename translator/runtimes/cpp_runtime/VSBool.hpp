@@ -8,21 +8,30 @@ namespace RUNTIME_NAMESPACE {
 template<>
 class ValueSummary<bool> final {
     
+private:
+    struct unused { };
+    ValueSummary(unused _) noexcept { }
+
 public:
     Bdd T, F;
-    
-    ValueSummary():
+
+    static const ValueSummary<bool>& undefined() {
+        static ValueSummary<bool> _undefined = ValueSummary<bool>(unused());
+        return _undefined;
+    }
+
+    ValueSummary() noexcept:
         ValueSummary(false)
     { }
 
-    ValueSummary(const ValueSummary<bool>& other):
+    ValueSummary(const ValueSummary<bool>& other) noexcept:
         T(other.T & PathConstraint::pc()),
         F(other.F & PathConstraint::pc()) 
     { }
 
     ValueSummary(ValueSummary<bool>&& other) = default;
 
-    ValueSummary(bool b):
+    ValueSummary(bool b) noexcept:
         T( b ? PathConstraint::pc() : Bdd::bddZero()),
         F(!b ? PathConstraint::pc() : Bdd::bddZero())
     { }

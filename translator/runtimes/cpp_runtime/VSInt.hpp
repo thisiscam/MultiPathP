@@ -12,34 +12,45 @@ namespace RUNTIME_NAMESPACE {
 
 template<>
 class ValueSummary<int> final {
+    
+    friend class ExecutionEngine;
+
+private:
+    struct unused { };
+    ValueSummary(unused _) noexcept { }
 
 public:
+    static const ValueSummary<int>& undefined() {
+        static ValueSummary<int> _undefined = ValueSummary<int>(unused());
+        return _undefined;
+    }
 
-    ValueSummary():
+    ValueSummary() noexcept:
         ValueSummary(0) 
     { }
 
-    ValueSummary(int i):values(std::unordered_map<int, Bdd>({{i, PathConstraint::pc()}}))
+    ValueSummary(int i) noexcept:
+        values(std::unordered_map<int, Bdd>({{i, PathConstraint::pc()}}))
     { }
 
-    ValueSummary(const ValueSummary<int>& other)
+    ValueSummary(const ValueSummary<int>& other) noexcept
     {
         // TODO: better filter initialization
         for(const auto& gv : other.values) {
-            Bdd pred = PathConstraint::pc() & gv.second;
+            Bdd&& pred = PathConstraint::pc() & gv.second;
             if (!pred.isZero()) {
                 values.insert({gv.first, pred});
             }
         }
     }
 
-    ValueSummary(const ValueSummary<int>&& other):values(other.values) { }
+    ValueSummary(const ValueSummary<int>&& other) noexcept :values(other.values) { }
 
     ValueSummary(ValueSummary<int>&& other) = default;
 
     inline ValueSummary<int>& operator= (const ValueSummary<int>& rhs) {
         for(const auto& gvRhs : rhs.values) {
-            Bdd pred = PathConstraint::pc() & gvRhs.second;
+            Bdd&& pred = PathConstraint::pc() & gvRhs.second;
             if(!pred.isZero()) {
                 bool found = false;
                 for(auto gvLhs = begin(values); gvLhs != end(values); ) {
@@ -181,11 +192,11 @@ public:
 
     class Builder {
     public:
-        void addValue(const Bdd& pred, int value) {
+        inline void addValue(const Bdd& pred, int value) {
             values[value] |= pred;
         }
 
-        void addValue(const Bdd& pred, const ValueSummary<int>& rhs) {
+        inline void addValue(const Bdd& pred, const ValueSummary<int>& rhs) {
           for(const auto& v : rhs.values) {
                 Bdd&& constraintPred = pred & v.second;
                 if(!constraintPred.isZero()) {
@@ -195,7 +206,7 @@ public:
         }
 
         ValueSummary<int> build() {
-            return ValueSummary<int>(values);
+            return ValueSummary<int>(std::move(values));
         }
 
         std::unordered_map<int, Bdd> values;

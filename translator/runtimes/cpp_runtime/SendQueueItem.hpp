@@ -9,9 +9,11 @@ struct SendQueueItem {
 public:
     SendQueueItem() = default;
 
-    SendQueueItem(const Ptr<PMachine>& target, const Int& e, const PAny& payload):target(target),e(e),payload(payload) { }
+    SendQueueItem(const Ptr<PMachine>& target, const Int& e, const PAny& payload) noexcept:
+    	target(target),e(e),payload(payload) 
+    { }
 
-    SendQueueItem(Ptr<PMachine>&& target, Int&& e, PAny&& payload):
+    SendQueueItem(Ptr<PMachine>&& target, Int&& e, PAny&& payload) noexcept:
     	target(std::move(target)),
     	e(std::move(e)),
     	payload(std::move(payload)) 

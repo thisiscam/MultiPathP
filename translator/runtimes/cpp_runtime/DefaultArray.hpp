@@ -16,21 +16,19 @@ template<typename T>
 class DefaultArray 
 {
 public:
-    static const size_t INITIAL_SIZE = 8;
+    static const size_t INITIAL_SIZE = 4;
 
-    DefaultArray():
+    DefaultArray() noexcept:
         DefaultArray([]() { return T(); }) { }
 
-    ~DefaultArray() {
+    ~DefaultArray() noexcept {
         for(int i = 0; i < capacity; i++) {
-            if(data[i] != NULL) {
-                delete data[i];
-            }
+            delete data[i];
         }
         free(data);
     }
 
-    DefaultArray(const DefaultArray& other):
+    DefaultArray(const DefaultArray& other) noexcept:
         allocator(other.allocator),
         capacity(other.capacity),
         data((T**)calloc(other.capacity, sizeof(T*)))
@@ -42,7 +40,16 @@ public:
         }
     }
 
-    DefaultArray(std::function<T(void)> allocator):
+    DefaultArray(DefaultArray&& other) noexcept:
+        allocator(std::move(other.allocator)),
+        capacity(std::move(other.capacity)),
+        data(std::move(other.data)) 
+    {
+        other.capacity = 0;
+        other.data = nullptr;
+    }
+
+    DefaultArray(std::function<T(void)> allocator) noexcept:
         allocator(allocator),
         capacity(INITIAL_SIZE),
         data((T**)calloc(INITIAL_SIZE, sizeof(T*))) 
@@ -102,7 +109,15 @@ public:
     class Builder {
         typename T::Builder** data = nullptr;
         size_t capacity = 0;
+
     public:
+        ~Builder() noexcept {
+            for(int i = 0; i < capacity; i++) {
+                delete data[i];
+            }
+            free(data);
+        }
+
         inline Builder& addValue(const Bdd& pred, const DefaultArray<T>& rhs) {
             if(capacity < rhs.capacity) {
                 size_t old_capacity = capacity;
@@ -130,7 +145,7 @@ public:
             T** arrayData = (T**)malloc(sizeof(T*) * capacity);
             for(int i = 0; i < capacity; i++) {
                 if(data[i] != NULL) {
-                    arrayData[i] = new T(data[i]->build());
+                    arrayData[i] = new T(std::move(data[i]->build()));
                 } else {
                     arrayData[i] = NULL;
                 }

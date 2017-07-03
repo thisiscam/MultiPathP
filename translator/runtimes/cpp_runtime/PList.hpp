@@ -21,7 +21,7 @@ public:
 
     PList(PList&&) = default;
 
-    PList(const PList& other):_size(other.size()) {
+    PList(const PList& other) noexcept :_size(other.size()) {
         FOR(Int i = 0, i < other.size(), ++i, {
             data.set(other.data.get(i), i);
         })
@@ -32,7 +32,7 @@ public:
         return _size;
     }
 
-    inline const PList& operator=(const PList& other) {
+    inline const PList& operator=(const PList& other) noexcept {
         FOR(Int i = 0, i < other.size(), ++i, {
             data.set(other.data.get(i), i);
         })
@@ -42,7 +42,7 @@ public:
     }
 
     template<typename U>
-    operator PList<U>() const {
+    operator PList<U>() const noexcept {
         PList<U> ret;
         FOR(Int i = 0, i < size(), ++i, {
             ret.add(static_cast<U>(data.get(i)));
@@ -55,7 +55,7 @@ public:
         data.set(item, size());
         ++_size;
     }
-
+    
     inline void insert(const Int& idx, const T& item) {
         FOR(Int i = size(), i > idx, --i, {
             data.set(data.get(i - 1), i);

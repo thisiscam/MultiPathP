@@ -6,7 +6,7 @@ public:
     MachineNode(ExecutionEngine& engine):PMachine(engine) { }
 
     inline void start(const PAny& payload) override {
-        InitEntry(payload);
+        InitEntry(this, payload);
     }
 
 private:
@@ -15,9 +15,9 @@ private:
     };
 
     /* region Entry Methods */
-    inline void InitEntry(const PAny& payload) {
-        states.setTop(Init);
-        InitEntryImpl(payload);
+    static inline void InitEntry(MachineNode* self, const PAny& payload) {
+        self->states.setTop(Init);
+        self->InitEntryImpl(payload);
     }
     /* end Entry Methods */
 
@@ -25,9 +25,10 @@ private:
     /* end Transition Methods */
 
     /* region Function Implementations */
-    inline FUNCTION_DECL(void, InitEntryImpl, (PTuple<Ptr<PMachine>, Int> payload), {
+    inline VOID_FUNCTION_DECL(InitEntryImpl, (PTuple<Ptr<PMachine>, Int> payload)) {
         send(payload.v0(), eEchoBack, payload.v1());
-    })
+    }
+    END_VOID_FUNCTION()
     /* end Function Implementations */
 
     /* region Machine Fields */

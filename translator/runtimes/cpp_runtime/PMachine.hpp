@@ -55,7 +55,7 @@ public:
 
     virtual void start(const PAny& payload) = 0;
 
-    inline FUNCTION_DECL(Int, canServeEvent, (Int e)) {
+    inline FUNCTION_DECL(Int, canServeEvent, (const Int& e)) {
         FOR(Int i = states.size() - 1, i >= 0, --i, {
             const Int& state = states.get(i);
             IF(isDefered(state, e))
@@ -76,7 +76,7 @@ public:
     }
     END_FUNCTION()
 
-    inline VOID_FUNCTION_DECL(step, (Int stateIndex, Int e, const PAny& payload = PAny())) {
+    inline VOID_FUNCTION_DECL(step, (const Int& stateIndex, const Int& e, const PAny& payload = PAny::Null())) {
         const Int& state = states.get(stateIndex);
         IF(isGotoTransition(state, e))
         THEN() {
@@ -94,7 +94,7 @@ public:
     }
     END_VOID_FUNCTION()
 
-    inline VOID_FUNCTION_DECL(ServeEvent, (const Int& e, const PAny& payload)) {
+    inline VOID_FUNCTION_DECL(serveEvent, (const Int& e, const PAny& payload)) {
         FOR(Int i = 0, i < states.size(), ++i, {
             const Int& state = states.get(i);
             IF(!isDefered(state, e) & (getTransition(state, e) != nullptr)) 
@@ -124,18 +124,18 @@ protected:
         return this;
     }
 
-    inline void send(const Ptr<PMachine>& other, Int e, const PAny& payload = PAny()) {
+    inline void send(const Ptr<PMachine>& other, const Int& e, const PAny& payload = PAny::Null()) {
         sendQueue.add(SendQueueItem(other, e, payload));
     }
 
     template<typename M>
-    Ptr<PMachine> create(const PAny& payload = PAny()) {
+    Ptr<PMachine> create(const PAny& payload = PAny::Null()) {
         Ptr<PMachine>&& machine = PMachine::alloc<M>(engine);
         sendQueue.add(SendQueueItem(machine, EVENT_NEW_MACHINE, payload));
         return machine;
     }
 
-    inline VOID_FUNCTION_DECL(raise, (Int e, const PAny& payload = PAny())) {
+    inline VOID_FUNCTION_DECL(raise, (const Int& e, const PAny& payload = PAny::Null())) {
         FOR(Int i = states.size() - 1, i >= 0, --i, {
             const Int& state = states.get(i);
             TransitionFunctionPtr&& f = getTransition(state, e);

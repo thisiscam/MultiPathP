@@ -21,12 +21,12 @@ class PTuple<T0> final : public PTypePtr {
 public:
     PTuple() = default;
     
-    PTuple(const T0& _v0):_v0(_v0) { }
+    PTuple(const T0& _v0) noexcept:_v0(_v0) { }
 
-    PTuple(T0&& _v0):_v0(std::move(_v0)) { }
+    PTuple(T0&& _v0) noexcept:_v0(std::move(_v0)) { }
 
     template<typename T0p>
-    operator PTuple<T0p>() {
+    operator PTuple<T0p>() const {
         return PTuple<T0p>(static_cast<T0p>(_v0));
     }
 
@@ -68,12 +68,12 @@ class PTuple<T0, T1> final : public PTypePtr {
 public:
     PTuple() = default;
     
-    PTuple(const T0& _v0, const T1& _v1):_v0(_v0),_v1(_v1) { }
+    PTuple(const T0& _v0, const T1& _v1) noexcept:_v0(_v0),_v1(_v1) { }
 
-    PTuple(T0&& _v0, T1&& _v1):_v0(std::move(_v0)),_v1(std::move(_v1)) { }
+    PTuple(T0&& _v0, T1&& _v1) noexcept:_v0(std::move(_v0)),_v1(std::move(_v1)) { }
 
     template<typename T0p, typename T1p>
-    operator PTuple<T0p, T1p>() {
+    operator PTuple<T0p, T1p>() const {
         return PTuple<T0p, T1p>(static_cast<T0p>(_v0), static_cast<T1p>(_v1));
     }
 
@@ -122,12 +122,12 @@ class PTuple<T0, T1, T2> final : public PTypePtr {
 public:
     PTuple() = default;
 
-    PTuple(const T0& _v0, const T1& _v1, const T2& _v2):_v0(_v0),_v1(_v1),_v2(_v2) { }
+    PTuple(const T0& _v0, const T1& _v1, const T2& _v2) noexcept:_v0(_v0),_v1(_v1),_v2(_v2) { }
 
-    PTuple(T0&& _v0, T1&& _v1, T2&& _v2):_v0(std::move(_v0)),_v1(std::move(_v1)),_v2(std::move(_v2)) { }
+    PTuple(T0&& _v0, T1&& _v1, T2&& _v2) noexcept:_v0(std::move(_v0)),_v1(std::move(_v1)),_v2(std::move(_v2)) { }
 
     template<typename T0p, typename T1p, typename T2p>
-    operator PTuple<T0p, T1p, T2p>() {
+    operator PTuple<T0p, T1p, T2p>() const {
         return PTuple<T0p, T1p, T2p>(static_cast<T0p>(_v0), static_cast<T1p>(_v1), static_cast<T2p>(_v2));
     }
 
@@ -184,12 +184,12 @@ class PTuple<T0, T1, T2, T3> final : public PTypePtr {
 public:
     PTuple() = default;
 
-    PTuple(const T0& _v0, const T1& _v1, const T2& _v2, const T3& _v3):_v0(_v0),_v1(_v1),_v2(_v2),_v3(_v3) { }
+    PTuple(const T0& _v0, const T1& _v1, const T2& _v2, const T3& _v3) noexcept:_v0(_v0),_v1(_v1),_v2(_v2),_v3(_v3) { }
 
-    PTuple(T0&& _v0, T1&& _v1, T2&& _v2, T3&& _v3):_v0(std::move(_v0)),_v1(std::move(_v1)),_v2(std::move(_v2)),_v3(std::move(_v3)) { }
+    PTuple(T0&& _v0, T1&& _v1, T2&& _v2, T3&& _v3) noexcept:_v0(std::move(_v0)),_v1(std::move(_v1)),_v2(std::move(_v2)),_v3(std::move(_v3)) { }
 
     template<typename T0p, typename T1p, typename T2p, typename T3p>
-    operator PTuple<T0p, T1p, T2p, T3p>() {
+    operator PTuple<T0p, T1p, T2p, T3p>() const {
         return PTuple<T0p, T1p, T2p, T3p>(static_cast<T0p>(_v0), static_cast<T1p>(_v1), static_cast<T2p>(_v2), static_cast<T3p>(_v3));
     }
 

@@ -3,6 +3,8 @@
 
 #include <list>
 
+#include "BddUtils.h"
+
 namespace RUNTIME_NAMESPACE {
 
 template<typename> class Allocator;
@@ -66,7 +68,7 @@ public:
 	ValueSummary<bool> allocate() {
 		ValueSummary<bool>&& ret = unaryOp<ValueSummary<bool>>(count, [&](int count) {
 			if(count >= allocated.size()) {
-				allocated.push_back(newBoolVar());
+				allocated.push_back(newBoolVar(id + "_" + std::to_string(count)));
 			}
 			ValueSummary<bool>::Builder builder;
 			return builder.addValue(allocated[count], true).addValue(!allocated[count], false).build();
@@ -76,19 +78,6 @@ public:
 	}
 
 private:
-
-	static 
-	std::list<std::tuple<const std::string, Bdd>>& getAllocationList() {
-		static std::list<std::tuple<const std::string, Bdd>> allocatedBools;
-		return allocatedBools;
-	}
-
-	Bdd newBoolVar() {
-		auto& allocatedBools = getAllocationList();
-		Bdd&& T = Bdd::bddVar(allocatedBools.size());
-		allocatedBools.push_back(std::make_tuple(id, T));
-		return T;
-	}
 
 	const std::string id;
 

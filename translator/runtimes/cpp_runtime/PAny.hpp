@@ -69,7 +69,7 @@ private:
 
 public:
     
-    PAny():type(NULL) { };
+    PAny() noexcept:type(NULL) { };
 
     PAny(const PAny& other) = default;
 
@@ -80,39 +80,39 @@ public:
     PAny& operator=(PAny&& other) = default;
 
     template<template<typename ...> class Container, typename ...Ts>
-    PAny(const Container<Ts...>& v):
+    PAny(const Container<Ts...>& v) noexcept:
         type(&typeid(Container<Ts...>)), 
         ptr(shared_ptr<PTypePtr const>(new Container<Ts...>(v)))
     { }
 
-    PAny(const Int& v):
+    PAny(const Int& v) noexcept:
         type(&typeid(Int)), 
-        i(v) 
+        i(v)
     { }
 
-    PAny(const Bool& v):
+    PAny(const Bool& v) noexcept:
         type(&typeid(Bool)),
         b(v) 
     { }
 
-    PAny(Ptr<PMachine> const & v):
+    PAny(Ptr<PMachine> const & v) noexcept:
         type(&typeid(Ptr<PMachine>)),
         m(v)
     { }
 
 #ifdef USE_VALUE_SUMMARY
     /* Following is required since C++ can't handle direct conversion from int/bool */
-    PAny(int v):
+    PAny(int v) noexcept:
         type(&typeid(Int)), 
         i(v) 
     { }
 
-    PAny(bool v):
+    PAny(bool v) noexcept:
         type(&typeid(Bool)),
         b(v) 
     { }
 
-    PAny(PMachine* v):
+    PAny(PMachine* v) noexcept:
         type(&typeid(Ptr<PMachine>)),
         m(v)
     { }
@@ -210,10 +210,10 @@ public:
     }
 
     Ptr<const type_info> type;
-    Int i;
-    Bool b;
-    Ptr<PMachine> m;
-    AnyDataPointer ptr;
+    Int i = Int::undefined();
+    Bool b = Bool::undefined();
+    Ptr<PMachine> m = Ptr<PMachine>::undefined();
+    AnyDataPointer ptr = AnyDataPointer::undefined();
 
 #ifdef USE_VALUE_SUMMARY
     class Builder {
@@ -238,14 +238,20 @@ public:
     };
 #endif
 
+    static const PAny& Null() {
+        static const PAny _Null;
+        return _Null;
+    }
+
 private:
-    PAny(const Ptr<const type_info>& type, const Int& i, const Bool& b, const Ptr<PMachine>& m, const AnyDataPointer& ptr):
-        type(type),
-        i(i),
-        b(b),
-        m(m),
-        ptr(ptr)
+    PAny(Ptr<const type_info>&& type, Int&& i, Bool&& b, Ptr<PMachine>&& m, AnyDataPointer&& ptr):
+        type(std::move(type)),
+        i(std::move(i)),
+        b(std::move(b)),
+        m(std::move(m)),
+        ptr(std::move(ptr))
     { }
+
 };
 
 template<> 

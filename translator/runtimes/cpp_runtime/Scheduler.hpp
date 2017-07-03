@@ -9,10 +9,10 @@ struct SchedulerChoice {
 public:
     SchedulerChoice() = default;
 
-    SchedulerChoice(const Ptr<PMachine>& machine, const Int& queueIdx, const Int& stateIdx):
+    SchedulerChoice(const Ptr<PMachine>& machine, const Int& queueIdx, const Int& stateIdx) noexcept:
         machine(machine),queueIdx(queueIdx),stateIdx(stateIdx) { }
 
-    SchedulerChoice(Ptr<PMachine>&& machine, Int&& queueIdx, Int&& stateIdx):
+    SchedulerChoice(Ptr<PMachine>&& machine, Int&& queueIdx, Int&& stateIdx) noexcept:
         machine(std::move(machine)),
         queueIdx(std::move(queueIdx)),
         stateIdx(std::move(stateIdx)) 
@@ -55,12 +55,12 @@ protected:
 public:
     Scheduler(ExecutionEngine& engine):engine(engine) { }
 
-    virtual void startMachine(const Ptr<PMachine>& machine, const PAny& payload = PAny()) = 0;
+    virtual void startMachine(const Ptr<PMachine>& machine, const PAny& payload = PAny::Null()) = 0;
 
     inline Bool step();
 
 private:
-    SendQueueItem popSendQueueItem(const Ptr<PMachine>& machine, Int index);
+    SendQueueItem popSendQueueItem(const Ptr<PMachine>& machine, const Int& index);
 };
 
 };

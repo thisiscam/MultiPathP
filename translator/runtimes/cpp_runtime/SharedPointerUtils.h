@@ -10,7 +10,7 @@ FROM get(const std::shared_ptr<T>& ptr) {
 
 template<typename FROM, typename TO, typename T>
 TO getCast(const std::shared_ptr<T>& ptr) {
-    return static_cast<TO>(get<FROM>(ptr));
+    return std::forward<TO>(get<FROM>(ptr));
 }
 
 #ifdef USE_VALUE_SUMMARY
