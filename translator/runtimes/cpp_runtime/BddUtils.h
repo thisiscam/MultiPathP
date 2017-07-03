@@ -15,16 +15,9 @@ void printDot(const Bdd& bdd, const std::string& fname) {
     fclose(f);
 }
 
- 
-inline 
-std::list<std::tuple<const std::string, Bdd>>& bddAllocationList() {
-	static std::list<std::tuple<const std::string, Bdd>> allocatedBools;
-	return allocatedBools;
-}
-
 inline 
 Bdd newBoolVar(const std::string& name) {
-	auto& allocatedBools = bddAllocationList();
+	static std::list<std::tuple<const std::string, Bdd>> allocatedBools;
 	Bdd&& T = Bdd::bddVar(allocatedBools.size());
 	allocatedBools.push_back(std::make_tuple(name, T));
 	return T;

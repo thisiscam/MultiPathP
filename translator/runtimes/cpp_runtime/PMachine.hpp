@@ -53,7 +53,7 @@ public:
         states.add(STATE_HALT);
     }
 
-    virtual void start(const PAny& payload) = 0;
+    virtual void start(const PAny& payload = PAny::Null()) = 0;
 
     inline FUNCTION_DECL(Int, canServeEvent, (const Int& e)) {
         FOR(Int i = states.size() - 1, i >= 0, --i, {
@@ -105,9 +105,9 @@ public:
                 }
                 ENDIF()
                 retcode = EXECUTE_FINISHED;
-                TransitionFunctionPtr transition_fn = getTransition(state, e);
+                TransitionFunctionPtr&& transition_fn = getTransition(state, e);
                 INVOKE_PTR(transition_fn, void, (this, payload));
-                EntryFunctionPtr entryFn = getTransitionEntry(state, e);
+                EntryFunctionPtr&& entryFn = getTransitionEntry(state, e);
                 INVOKE_PTR(entryFn, void, (this, payload));
                 RETURN_VOID();
             }

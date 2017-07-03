@@ -7,7 +7,7 @@
 
 namespace RUNTIME_NAMESPACE {
 
-inline PList<SendQueueItem>&
+inline const PList<SendQueueItem>&
 Scheduler::getSendQueue(PMachine* machine) {
     return machine->sendQueue;
 }
@@ -43,11 +43,11 @@ inline FUNCTION_DECL(Bool, Scheduler::step, ()) {
             SendQueueItem&& item = popSendQueueItem(chosen.machine, chosen.queueIdx);
             IF(item.e == EVENT_NEW_MACHINE)
             THEN() {
-                std::cout << chosen.machine << " creates " << item.target << std::endl;
+                std::cout << Ptr<PMachine>(chosen.machine) << " creates " << Ptr<PMachine>(item.target) << std::endl;
                 startMachine(item.target, item.payload);
             }
             ELSE() {
-                std::cout << chosen.machine << " sends event " << item.e << " to " << item.target << std::endl;
+                std::cout << Ptr<PMachine>(chosen.machine) << " sends event " << Int(item.e) << " to " << Ptr<PMachine>(item.target) << std::endl;
                 INVOKE(item.target, void, step, (chosen.stateIdx, item.e, item.payload));
             }
             ENDIF()

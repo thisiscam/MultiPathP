@@ -5,7 +5,7 @@ namespace RUNTIME_NAMESPACE {
 
 class PMachine;
 
-struct SendQueueItem {
+struct SendQueueItem final {
 public:
     SendQueueItem() = default;
 
@@ -30,14 +30,14 @@ public:
 	    Int::Builder e;
 	    PAny::Builder payload;
 	public:
-	    Builder& addValue(const Bdd& pred, const SendQueueItem& rhs) {
+	    inline Builder& addValue(const Bdd& pred, const SendQueueItem& rhs) {
 	    	target.addValue(pred, rhs.target);
 	    	e.addValue(pred, rhs.e);
 	    	payload.addValue(pred, rhs.payload);
 	    	return *this;
 	    }
 
-	    SendQueueItem build() {
+	    inline SendQueueItem build() {
 	    	return SendQueueItem(target.build(), e.build(), payload.build());
 	    }
 	};

@@ -48,7 +48,7 @@ protected:
 
     virtual SchedulerChoice chooseMachine() = 0;
 
-    inline PList<SendQueueItem>& getSendQueue(PMachine* machine);
+    inline const PList<SendQueueItem>& getSendQueue(PMachine* machine);
     
     ExecutionEngine& engine;
 

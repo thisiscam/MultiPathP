@@ -86,14 +86,14 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
     @Override
     public Void visitMachine_name_decl_model(pParser.Machine_name_decl_modelContext ctx) {
         ErrorReporter.warn("keyword 'model' ignored", ctx, set);
-        machine.setName(ctx.ID().getText());
+        machine.setName(ctx.ID().getText()).setMain(false);
         return super.visitMachine_name_decl_model(ctx);
     }
 
     @Override
     public Void visitMachine_name_decl_spec(pParser.Machine_name_decl_specContext ctx) {
         machine.setName(ctx.ID().getText());
-        machine.setSpec(true);
+        machine.setSpec(true).setMain(false);
         ctx.observes_list().accept(this);
         return super.visitMachine_name_decl_spec(ctx);
     }

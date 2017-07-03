@@ -29,8 +29,7 @@ ExecutionEngine::randomBool(const std::string& id) {
 	if(allocators.count(id) == 0) {
 		allocators.insert({id, Allocator<bool>::create(id)});
 	}
-	Bool&& ret = allocators.at(id)->allocate();
-	return ret;
+	return allocators.at(id)->allocate();
 }
 
 static inline
