@@ -32,11 +32,9 @@ public:
         size_t max_cachesize = 1UL << max_cachesize_lg2;
 
         /* TODO: bump sylvan version when hwloc issue is resolved */
-        // sylvan_set_sizes(min_tablesize, max_tablesize, min_cachesize, max_cachesize);
+        sylvan_set_sizes(min_tablesize, max_tablesize, min_cachesize, max_cachesize);
 
-        // sylvan_init_package();
-
-        sylvan_init_package(min_tablesize, max_tablesize, min_cachesize, max_cachesize);
+        sylvan_init_package();
         sylvan_init_mtbdd();
 
         pc() = Bdd::bddOne();
