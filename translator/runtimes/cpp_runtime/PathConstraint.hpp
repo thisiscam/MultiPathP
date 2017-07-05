@@ -21,7 +21,7 @@ public:
                 size_t max_tablesize_lg2 = 27,
                 size_t min_cachesize_lg2 = 24, 
                 size_t max_cachesize_lg2 = 27,
-                size_t n_workers = 0) 
+                size_t n_workers = 1) 
     {
         lace_init(n_workers, 1000000UL);
         lace_startup(0, NULL, NULL);

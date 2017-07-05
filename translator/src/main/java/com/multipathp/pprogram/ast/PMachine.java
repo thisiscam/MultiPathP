@@ -1,5 +1,7 @@
 package com.multipathp.pprogram.ast;
 
+import com.google.common.base.Preconditions;
+import com.multipathp.pprogram.ErrorReporter;
 import com.multipathp.pprogram.PEvent;
 import com.multipathp.pprogram.types.PType;
 import org.inferred.freebuilder.FreeBuilder;
@@ -61,7 +63,9 @@ public abstract class PMachine extends PASTNode {
 
         @Override
         public PMachine build() {
-            getStateDecls().stream().filter(PMachineState::isStart).findFirst().ifPresent(this::setStartState);
+            Optional<PMachineState> startState = getStateDecls().stream().filter(PMachineState::isStart).findFirst();
+            Preconditions.checkArgument(startState.isPresent());
+            setStartState(startState.get());
             return super.build();
         }
     }

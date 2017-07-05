@@ -5,4 +5,7 @@ event a:int;
 main machine Main
 {
 	var v:int_type;
+	start state Init {
+
+	}
 }

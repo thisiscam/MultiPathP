@@ -60,5 +60,13 @@ public class BasicCppTranslator extends TranslatorBase {
             File machineImplementationFile = new File(outDir, fileName);
             FileUtils.writeStringToFile(machineImplementationFile, machineImplementationTemplate.render());
         }
+        ST cmakeTemplate = getSTGroupFile("cmake.stg").getInstanceOf("CMakeFile");
+        cmakeTemplate.add("projectName", projectName);
+        cmakeTemplate.add("program", program);
+        FileUtils.writeStringToFile(new File(outDir, "CMakeLists.txt"), cmakeTemplate.render());
+
+        ST mainFileTemplate = getSTGroupFile("main.stg").getInstanceOf("MainFile");
+        mainFileTemplate.add("projectName", projectName);
+        FileUtils.writeStringToFile(new File(outDir, "main.cpp"), mainFileTemplate.render());
     }
 }

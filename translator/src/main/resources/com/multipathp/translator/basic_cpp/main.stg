@@ -1,0 +1,33 @@
+MainFile(projectName) ::= <<
+#include "header.h"
+
+using namespace <projectName>;
+
+#ifdef USE_VALUE_SUMMARY
+
+int main(int argc, char const *argv[])
+{
+    PathConstraint::init();
+	ExecutionEngine engine = ExecutionEngine();
+    RandomScheduler scheduler(engine);
+    Ptr\<PMachine> mainMachine = Controller::createMainMachine(engine);
+    engine.run(scheduler, mainMachine);
+    PathConstraint::quit();
+ return 0;
+}
+
+#else
+
+int main(int argc, char const *argv[])
+{
+    for(int i = 0; i \< 1000000; i++) {
+		ExecutionEngine engine = ExecutionEngine();
+	    RandomScheduler scheduler(engine);
+	    Ptr\<PMachine> mainMachine = Controller::createMainMachine(engine);
+	    engine.run(scheduler, mainMachine);
+    }
+ return 0;
+}
+
+#endif
+>>

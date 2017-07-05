@@ -73,7 +73,7 @@ ExecutionEngine::randomInt(const Int numChoices) {
     }
     return builder.build();
 #else
-    return rand() % max;
+    return rand() % numChoices;
 #endif
 }
 

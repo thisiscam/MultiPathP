@@ -14,11 +14,11 @@ public class ParseTreeSetParserTest {
         String input = getClass().getResource("include/main.p").getFile();
         ParseTreeSetParser parser = new ParseTreeSetParser();
         ParseTreeSetParser.ParseTreeSet set = parser.parseFile(input);
-        assertEquals(set.getParsedFilePaths().size(), 3);
+        assertEquals(3, set.getParsedFilePaths().size());
         ParseTreeToPAST converter = new ParseTreeToPAST(set);
         PProgram program = converter.getProgram();
-        assertEquals(program.getEventDecls().size(), 2);
-        assertEquals(program.getTypedefs().size(), 1);
+        assertEquals(4, program.getEventDecls().size());
+        assertEquals(1, program.getTypedefs().size());
     }
 
     @Test
@@ -26,7 +26,7 @@ public class ParseTreeSetParserTest {
         String input = getClass().getResource("two-phase-commit.p").getFile();
         ParseTreeSetParser parser = new ParseTreeSetParser();
         ParseTreeSetParser.ParseTreeSet set = parser.parseFile(input);
-        assertEquals(set.getParsedFilePaths().size(), 1);
+        assertEquals(1, set.getParsedFilePaths().size());
         ParseTreeToPAST converter = new ParseTreeToPAST(set);
         PProgram program = converter.getProgram();
         BasicCppTranslator translator = new BasicCppTranslator("pingpong", program);

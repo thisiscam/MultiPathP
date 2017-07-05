@@ -1,0 +1,22 @@
+CMakeFile(projectName, program) ::= <<
+cmake_minimum_required(VERSION 3.0)
+
+find_package(PkgConfig REQUIRED)
+pkg_search_module(sylvan REQUIRED sylvan)
+
+find_path(CPP_RUNTIME_DIR PCppRuntime.h HINTS ENV P_CPP_RUNTIME)
+
+message(STATUS ${CPP_RUNTIME_DIR})
+
+add_executable(MultiPath_<projectName> main.cpp)
+target_compile_definitions(MultiPath_<projectName> PRIVATE USE_VALUE_SUMMARY)
+target_compile_features(MultiPath_<projectName> PRIVATE cxx_auto_type)
+target_include_directories(MultiPath_<projectName> PRIVATE ${CPP_RUNTIME_DIR})
+target_link_libraries(MultiPath_<projectName> ${sylvan_LIBRARIES})
+target_include_directories(MultiPath_<projectName> PUBLIC ${sylvan_INCLUDE_DIRS})
+target_compile_options(MultiPath_<projectName> PUBLIC ${sylvan_CFLAGS_OTHER})
+
+add_executable(RandTest_<projectName> main.cpp)
+target_compile_features(RandTest_<projectName> PRIVATE cxx_auto_type)
+target_include_directories(RandTest_<projectName> PRIVATE ${CPP_RUNTIME_DIR})
+>>

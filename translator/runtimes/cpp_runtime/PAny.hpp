@@ -231,10 +231,17 @@ public:
     }
 
     Ptr<const type_info> type;
+#ifdef USE_VALUE_SUMMARY
     Int i = Int::undefined();
     Bool b = Bool::undefined();
     Ptr<PMachine> m = Ptr<PMachine>::undefined();
     AnyDataPointer ptr = AnyDataPointer::undefined();
+#else
+    Int i;
+    Bool b;
+    Ptr<PMachine> m;
+    AnyDataPointer ptr;
+#endif
 
 #ifdef USE_VALUE_SUMMARY
     class Builder {

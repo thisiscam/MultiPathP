@@ -28,8 +28,6 @@ Scheduler::popSendQueueItem(const Ptr<PMachine>& machine, const Int& index) {
 }
 
 inline FUNCTION_DECL(Bool, Scheduler::step, ()) {
-    static int count = 0;
-    count ++;
     SchedulerChoice&& chosen = chooseMachine();
     IF(chosen.machine == NULL) 
     THEN() {
@@ -49,9 +47,6 @@ inline FUNCTION_DECL(Bool, Scheduler::step, ()) {
                 startMachine(item.target, item.payload);
             }
             ELSE() {
-                if(count == 11) {
-                    item.e.printDot("e");
-                }
                 std::cout << Ptr<PMachine>(chosen.machine) << " sends event " << Int(item.e) << " to " << Ptr<PMachine>(item.target) << std::endl;
                 INVOKE(item.target, void, step, (chosen.stateIdx, item.e, item.payload));
             }
