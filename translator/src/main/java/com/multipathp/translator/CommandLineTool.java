@@ -7,8 +7,7 @@ import com.beust.jcommander.ParameterException;
 import com.multipathp.pprogram.ParseTreeSetParser;
 import com.multipathp.pprogram.ParseTreeToPAST;
 import com.multipathp.pprogram.ast.PProgram;
-import com.multipathp.translator.basic_cpp.BasicCppTranslator;
-import org.apache.commons.io.FileUtils;
+import com.multipathp.translator.basic_cpp.CppTranslator;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
@@ -23,7 +22,7 @@ import java.util.List;
 public class CommandLineTool {
     static class CommandLineOptions {
         @Parameter(names = {"-t", "--translator"}, description = "translator to use")
-        String translator = BasicCppTranslator.class.getSimpleName();
+        String translator = CppTranslator.class.getSimpleName();
 
         @Parameter(names = {"-I", "--include"}, description = "include search directories")
         List<String> includeDirectories = new ArrayList<>();
@@ -58,7 +57,7 @@ public class CommandLineTool {
         if(options.projectName == null) {
             options.projectName = FilenameUtils.getBaseName(options.inputFile);
         }
-        Constructor translatorConstructor = Class.forName(BasicCppTranslator.class.getPackage().getName() + "." + options.translator).getConstructor(String.class, PProgram.class);
+        Constructor translatorConstructor = Class.forName(CppTranslator.class.getPackage().getName() + "." + options.translator).getConstructor(String.class, PProgram.class);
         ParseTreeSetParser.ParseTreeSet set = new ParseTreeSetParser(options.includeDirectories).parseFile(options.inputFile);
         PProgram program = new ParseTreeToPAST(set).getProgram();
         TranslatorBase translator = (TranslatorBase) translatorConstructor.newInstance(options.projectName, program);

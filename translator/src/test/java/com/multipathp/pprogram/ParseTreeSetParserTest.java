@@ -2,7 +2,7 @@ package com.multipathp.pprogram;
 import static org.junit.Assert.*;
 
 import com.multipathp.pprogram.ast.PProgram;
-import com.multipathp.translator.basic_cpp.BasicCppTranslator;
+import com.multipathp.translator.basic_cpp.CppTranslator;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class ParseTreeSetParserTest {
         assertEquals(1, set.getParsedFilePaths().size());
         ParseTreeToPAST converter = new ParseTreeToPAST(set);
         PProgram program = converter.getProgram();
-        BasicCppTranslator translator = new BasicCppTranslator("pingpong", program);
+        CppTranslator translator = new CppTranslator("pingpong", program);
         translator.translate("test_dir");
     }
 }

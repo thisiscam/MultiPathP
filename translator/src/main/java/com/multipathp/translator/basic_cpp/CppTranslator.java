@@ -16,7 +16,7 @@ import java.lang.reflect.Executable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BasicCppTranslator extends TranslatorBase {
+public class CppTranslator extends TranslatorBase {
 
     static class PTypeCollector extends PASTVisitor<Set<PType>> {
         private Set<PType> usedTypes = new HashSet<>();
@@ -34,7 +34,7 @@ public class BasicCppTranslator extends TranslatorBase {
         }
     }
 
-    public BasicCppTranslator(String projectName, PProgram program) {
+    public CppTranslator(String projectName, PProgram program) {
         super(projectName, program);
     }
 
