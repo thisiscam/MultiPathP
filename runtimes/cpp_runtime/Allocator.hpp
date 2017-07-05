@@ -1,8 +1,6 @@
 #ifndef ALLOCATOR_HPP
 #define ALLOCATOR_HPP
 
-#include <list>
-
 #include "BddUtils.h"
 
 namespace RUNTIME_NAMESPACE {
@@ -23,7 +21,7 @@ public:
 		return ret;
 	}
 
-	ValueSummary<T*> allocate() {
+	inline ValueSummary<T*> allocate() {
 		ValueSummary<T*>&& ret = unaryOp<ValueSummary<T*>>(count, [&](int count) {
 			if(count >= allocated.size()) {
 				// Set PC to true, and set back
@@ -65,7 +63,7 @@ public:
 		return ret;
 	}
 
-	ValueSummary<bool> allocate() {
+	inline ValueSummary<bool> allocate() {
 		ValueSummary<bool>&& ret = unaryOp<ValueSummary<bool>>(count, [&](int count) {
 			if(count >= allocated.size()) {
 				allocated.push_back(newBoolVar(id + "_" + std::to_string(count)));
@@ -101,7 +99,7 @@ public:
 		return new Allocator(allocFunction);
 	}
 
-	T* allocate() {
+	inline T* allocate() {
 		allocated.push_back(allocFunction(allocated.size()));
 		return allocated[allocated.size() - 1];
 	}
@@ -124,7 +122,7 @@ public:
 		return new Allocator(id);
 	}
 
-	bool allocate() {
+	inline bool allocate() {
 		allocated.push_back(rand() % 2);
 		return allocated[allocated.size() - 1];
 	}
