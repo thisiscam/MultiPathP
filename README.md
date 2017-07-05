@@ -17,14 +17,6 @@ $ git clone https://github.com/thisiscam/MultiPathP.git
 - sylvan
 
 To install sylvan, one may follow the instruction at [sylvan's documentation](https://trolando.github.io/sylvan/#building)
-Note that due to a [current limitation](https://github.com/trolando/sylvan/issues/3), we need an older version of sylvan. Please refer to the commit tag below:
-
-```
-$ git clone https://github.com/trolando/sylvan/tree/9858844672864e8453b581205c422568b3c448a4 sylvan
-$ cd sylvan; mkdir build; cd build;
-$ cmake -DCMAKE_BUILD_TYPE=Release ..
-$ make; make install
-```
 
 ### Installing
 
