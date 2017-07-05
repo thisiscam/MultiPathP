@@ -11,7 +11,9 @@ public:
 
     SendQueueItem(const Ptr<PMachine>& target, const Int& e, const PAny& payload) noexcept:
     	target(target),e(e),payload(payload) 
-    { }
+    {
+    	 
+    }
 
     SendQueueItem(Ptr<PMachine>&& target, Int&& e, PAny&& payload) noexcept:
     	target(std::move(target)),

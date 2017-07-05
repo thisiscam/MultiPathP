@@ -36,9 +36,9 @@ public:
         F(!b ? PathConstraint::pc() : Bdd::bddZero())
     { }
 
-    inline ValueSummary<bool>& operator=(const ValueSummary<bool>& other) { 
-        T |= other.T;
-        F |= other.F;
+    inline ValueSummary<bool>& operator=(ValueSummary<bool> other) { 
+        T = (T | other.T) & !other.F;
+        F = (F | other.F) & !other.T;
         return *this;
     }
 

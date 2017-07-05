@@ -85,6 +85,12 @@ public:
         ptr(shared_ptr<PTypePtr const>(new Container<Ts...>(v)))
     { }
 
+    template<template<typename ...> class Container, typename ...Ts>
+    PAny(Container<Ts...>&& v) noexcept:
+        type(&typeid(Container<Ts...>)), 
+        ptr(shared_ptr<PTypePtr const>(new Container<Ts...>(std::forward<Container<Ts...>>(v))))
+    { }
+
     PAny(const Int& v) noexcept:
         type(&typeid(Int)), 
         i(v)
@@ -98,6 +104,21 @@ public:
     PAny(Ptr<PMachine> const & v) noexcept:
         type(&typeid(Ptr<PMachine>)),
         m(v)
+    { }
+
+    PAny(Int&& v) noexcept:
+        type(&typeid(Int)), 
+        i(std::move(v))
+    { }
+
+    PAny(Bool&& v) noexcept:
+        type(&typeid(Bool)),
+        b(std::move(v)) 
+    { }
+
+    PAny(Ptr<PMachine>&& v) noexcept:
+        type(&typeid(Ptr<PMachine>)),
+        m(std::move(v))
     { }
 
 #ifdef USE_VALUE_SUMMARY

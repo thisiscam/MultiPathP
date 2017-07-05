@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <cassert>
 #include <climits>
+#include <stdexcept>
 
 #include "ValueSummaryOperations.h"
 
@@ -171,6 +172,16 @@ public:
     void printDot(const std::string& fname) const {
         for(const auto& gv : values) {
             RUNTIME_NAMESPACE::printDot(gv.second, fname + std::to_string(gv.first));
+        }
+    }
+
+    void checkDisjoint() const {
+        for (auto i = values.begin(); i != values.end(); ++i) {
+            for (auto j = i; ++j != values.end(); /**/) {
+                if(!(i->second & j->second).isZero()) {
+                    throw std::runtime_error("failed");
+                }
+            }
         }
     }
 

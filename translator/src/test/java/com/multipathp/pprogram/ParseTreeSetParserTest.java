@@ -23,7 +23,7 @@ public class ParseTreeSetParserTest {
 
     @Test
     public void testParsePingPong() throws IOException {
-        String input = getClass().getResource("demo.p").getFile();
+        String input = getClass().getResource("two-phase-commit.p").getFile();
         ParseTreeSetParser parser = new ParseTreeSetParser();
         ParseTreeSetParser.ParseTreeSet set = parser.parseFile(input);
         assertEquals(set.getParsedFilePaths().size(), 1);
