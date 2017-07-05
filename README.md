@@ -29,7 +29,7 @@ $ make; make install
 ### Installing
 
 ```
-$ cd MultiPathP/translator
+$ cd MultiPathP
 $ mvn package
 ```
 
@@ -65,7 +65,7 @@ The command above should generate a self contained folder named two_phase_commit
 To build the generated code
 
 ```
-$ export P_CPP_RUNTIME=/path/to/MultiPathP/translator/runtimes/cpp_runtime/ # tell the build system where to find cpp_runtime header library
+$ export P_CPP_RUNTIME=/path/to/MultiPathP/runtimes/cpp_runtime/ # tell the build system where to find cpp_runtime header library
 $ cd two_phase_commit; 
 $ cmake -DCMAKE_BUILD_TYPE=Release .. (or =Debug)
 $ ./MultiPath_two_phase_commit 
