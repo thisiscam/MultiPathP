@@ -77,11 +77,11 @@ public:
     }
 
     inline ValueSummary<bool> operator ==(const ValueSummary<T>& b) const {
-        return binaryOp<ValueSummary<bool>>(*this, b, [](T a, T b) { return a == b; });
+        return binaryOp<ValueSummary<bool>>(*this, b, [](const T& a, const T& b) { return a == b; });
     }
 
     inline ValueSummary<bool> operator !=(const ValueSummary<T>& b) const {
-        return binaryOp<ValueSummary<bool>>(*this, b, [](T a, T b) { return a != b; });
+        return binaryOp<ValueSummary<bool>>(*this, b, [](const T& a, const T& b) { return a != b; });
     }
 
     template<typename P>
