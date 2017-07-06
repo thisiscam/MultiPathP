@@ -60,7 +60,7 @@ public:
     T get(const Int& index) const
     {
 #ifdef USE_VALUE_SUMMARY
-        return unaryOp<T>(index, [&](int index) {
+        return unaryOp<T>(index, [&](int index) -> const T& {
 #endif
             checkIndex(index);
             if(data[index] == NULL) {

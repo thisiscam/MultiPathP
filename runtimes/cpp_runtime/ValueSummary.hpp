@@ -51,7 +51,6 @@ struct Guard {
 
 #include "VSBool.hpp"
 #include "VSInt.hpp"
-#include "VSPtr.hpp"
 #include "VS.hpp"
 
 #endif

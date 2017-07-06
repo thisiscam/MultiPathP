@@ -28,7 +28,6 @@ struct BinaryOpFunctor<void, A, B, BinOp> {
     }
 };
 
-
 template<typename ReturnType, typename A, typename B, typename BinOp>
 struct BinaryOpFunctor {
     static ReturnType

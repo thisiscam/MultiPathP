@@ -38,7 +38,8 @@ struct ExtractVSParam<ValueSummary<T>&&> {
 };
 
 #define INVOKE(ptr, t, method, args) 										         \
-    unaryOp<t>((ptr), [&](typename ExtractVSParam<decltype(ptr)>::type p) {	 \
+    unaryOp<t>((ptr), [&](typename ExtractVSParam<decltype(ptr)>::type p)            \
+    {	                                                                             \
     	if(p == NULL) {														         \
     		throw runtime_error("null pointer exception");					         \
     	}																	         \

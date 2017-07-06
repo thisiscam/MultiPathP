@@ -2,6 +2,8 @@
 #define PATH_CONSTRAINT_HPP
 
 #include <sylvan_obj.hpp>
+#include <iostream>
+#include <stdio.h>
 
 #include "BddUtils.h"
 

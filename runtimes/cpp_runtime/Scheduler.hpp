@@ -16,7 +16,9 @@ public:
         machine(std::move(machine)),
         queueIdx(std::move(queueIdx)),
         stateIdx(std::move(stateIdx)) 
-    { }
+    {
+         
+    }
 
     Ptr<PMachine> machine;
     Int queueIdx;
