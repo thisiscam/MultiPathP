@@ -142,22 +142,22 @@ public:
 
 template<typename P>
 inline ValueSummary<bool> operator==(const ValueSummary<P>& a, const P& b) {
-    return unaryOp<ValueSummary<bool>>(a, [=](const P& a) { return a == b; });
+    return unaryOp<ValueSummary<bool>>(a, [&](const P& a) { return a == b; });
 }
 
 template<typename P>
 inline ValueSummary<bool> operator==(const P& a, const ValueSummary<P>& b) {
-    return unaryOp<ValueSummary<bool>>(b, [=](const P& b) { return a == b; });
+    return unaryOp<ValueSummary<bool>>(b, [&](const P& b) { return a == b; });
 }
 
 template<typename P>
 inline ValueSummary<bool> operator!=(const ValueSummary<P>& a, const P& b) {
-    return unaryOp<ValueSummary<bool>>(a, [=](const P& a) { return a != b; });
+    return unaryOp<ValueSummary<bool>>(a, [&](const P& a) { return a != b; });
 }
 
 template<typename P>
 inline ValueSummary<bool> operator!=(const P& a, const ValueSummary<P>& b) {
-    return unaryOp<ValueSummary<bool>>(b, [=](const P& b) { return a != b; });
+    return unaryOp<ValueSummary<bool>>(b, [&](const P& b) { return a != b; });
 }
 
 template<typename T>
