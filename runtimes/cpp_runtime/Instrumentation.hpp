@@ -65,6 +65,7 @@ void functionName args {                                        \
         }                                                       \
     }
 
+
 #define IF_ONLY(condition...)                                   \
     if(__if_only(condition))
 
@@ -142,6 +143,14 @@ void functionName args {                                        \
         break;                                                  \
     }
 
+/* 
+*    IF_ONLY: 
+*       evaluate condition,
+*       if condition exist a true path, execute the true path assuming the branch does no need to merge
+*           (i.e. true branch throws exception, control flow interrupt)
+*       otherwise condition must be all false, don't change current PathConstraint::pc() 
+*       and continue execution to the false branch 
+*/
 static 
 inline bool __if_only(const RUNTIME_NAMESPACE::ValueSummary<bool>& condition) {
     Bdd&& pred = RUNTIME_NAMESPACE::PathConstraint::pc() & condition.T;
@@ -182,6 +191,7 @@ void functionName args {
 
 #define ENDIF()                                                 \
     }
+
 
 #define IF_ONLY(condition...)                                   \
     if(condition)          
