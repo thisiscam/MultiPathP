@@ -43,27 +43,27 @@ public:
     }
 
     inline ValueSummary<bool> operator&(const ValueSummary<bool>& b) const {
-        auto&& t = PathConstraint::pc() & T & b.T;
-        auto&& f = PathConstraint::pc() - t;
-        return ValueSummary<bool>(t, f);
+        Bdd&& t = PathConstraint::pc() & T & b.T;
+        Bdd&& f = PathConstraint::pc() - t;
+        return ValueSummary<bool>(std::forward<Bdd>(t), std::forward<Bdd>(f));
     }
 
     inline ValueSummary<bool> operator|(const ValueSummary<bool>& b) const {
-        auto&& f = PathConstraint::pc() & T & b.T;
-        auto&& t = PathConstraint::pc() - f;
-        return ValueSummary<bool>(t, f);
+        Bdd&& f = PathConstraint::pc() & T & b.T;
+        Bdd&& t = PathConstraint::pc() - f;
+        return ValueSummary<bool>(std::forward<Bdd>(t), std::forward<Bdd>(f));
     }
 
     inline ValueSummary<bool> operator==(const ValueSummary<bool>& b) const {
-        auto&& t = (PathConstraint::pc() & T & b.T) | (PathConstraint::pc() & F & b.F);
-        auto&& f = PathConstraint::pc() - t;
-        return ValueSummary<bool>(t, f);
+        Bdd&& t = (PathConstraint::pc() & T & b.T) | (PathConstraint::pc() & F & b.F);
+        Bdd&& f = PathConstraint::pc() - t;
+        return ValueSummary<bool>(std::forward<Bdd>(t), std::forward<Bdd>(f));
     }
 
     inline ValueSummary<bool> operator!=(const ValueSummary<bool>& b) const {
-        auto&& t = (PathConstraint::pc() & T & b.F) | (PathConstraint::pc() & T & b.F);
-        auto&& f = PathConstraint::pc() - t;
-        return ValueSummary<bool>(t, f);
+        Bdd&& t = (PathConstraint::pc() & T & b.F) | (PathConstraint::pc() & T & b.F);
+        Bdd&& f = PathConstraint::pc() - t;
+        return ValueSummary<bool>(std::forward<Bdd>(t), std::forward<Bdd>(f));
     }
 
     ValueSummary<bool> operator!() const {

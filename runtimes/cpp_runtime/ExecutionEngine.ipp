@@ -16,7 +16,9 @@ ExecutionEngine::run(Scheduler& scheduler, Ptr<PMachine> machine) {
     scheduler.startMachine(machine);
     for(int i = 0; i < maxIteration; ++i) {
     	std::cout << "======== BEGIN Step " << std::to_string(i) << "=======" << std::endl;
-        IF_ONLY(!scheduler.step()) {
+        IF_ONLY(scheduler.step()) {
+            continue;
+        } else {
             break;
         }
         std::cout << "======== END Step " << std::to_string(i) << "=======" << std::endl;

@@ -140,26 +140,26 @@ public:
 #endif
 
     inline operator const Int&() const {
-        IF_ONLY(type == &typeid(Int)) {
-            return i;
-        } else {
+        IF_ONLY(type != &typeid(Int)) {
             throw bad_cast();
+        } else {
+            return i;
         }
     }
 
     inline operator const Bool&() const {
-        IF_ONLY(type == &typeid(Bool)) {
-            return b;
-        } else {
+        IF_ONLY(type != &typeid(Bool)) {
             throw bad_cast();
+        } else {
+            return b;
         }
     }
 
     inline operator Ptr<PMachine> const &() const {
-        IF_ONLY(type == &typeid(Ptr<PMachine>)) {
-            return m;
-        } else {
+        IF_ONLY(type != &typeid(Ptr<PMachine>)) {
             throw bad_cast();
+        } else {
+            return m;
         }
     }
 

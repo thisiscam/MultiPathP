@@ -66,7 +66,7 @@ void functionName args {                                        \
     }
 
 #define IF_ONLY(condition...)                                   \
-    if(((PathConstraint::pc() & (condition).F).isZero()))       \
+    if(__if_only(condition))
 
 
 #define WHILE(_condition...)                                    \
@@ -142,6 +142,16 @@ void functionName args {                                        \
         break;                                                  \
     }
 
+static 
+inline bool __if_only(const RUNTIME_NAMESPACE::ValueSummary<bool>& condition) {
+    Bdd&& pred = RUNTIME_NAMESPACE::PathConstraint::pc() & condition.T;
+    if(!pred.isZero()) {
+        RUNTIME_NAMESPACE::PathConstraint::pc() = pred;
+        return true;
+    } else {
+        return false;
+    }
+}
 
 #else
 
