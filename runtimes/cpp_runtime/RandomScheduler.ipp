@@ -1,6 +1,3 @@
-#ifndef RANDOM_SCHEDULER_IPP
-#define RANDOM_SCHEDULER_IPP
-
 #include "PMachine.hpp"
 
 namespace RUNTIME_NAMESPACE {
@@ -57,5 +54,3 @@ RandomScheduler::startMachine(const Ptr<PMachine>& machine, const PAny& payload)
 }
 
 };
-
-#endif

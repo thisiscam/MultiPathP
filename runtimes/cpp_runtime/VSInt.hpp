@@ -92,6 +92,10 @@ public:
         return binaryOp<ValueSummary<int>>(*this, b, [](int a, int b) { return a / b; });
     }
 
+    inline ValueSummary<int> operator %(const ValueSummary<int>& b) const {
+        return binaryOp<ValueSummary<int>>(*this, b, [](int a, int b) { return a % b; });
+    }
+
     inline ValueSummary<bool> operator <(const ValueSummary<int>& b) const {
         return binaryOp<ValueSummary<bool>>(*this, b, [](int a, int b) { return a < b; });
     }

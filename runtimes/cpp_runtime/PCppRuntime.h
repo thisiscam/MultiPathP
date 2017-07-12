@@ -14,5 +14,6 @@
 #include "ExecutionEngine.hpp"
 
 #include "RandomScheduler.hpp"
+#include "DelayBoundedScheduler.hpp"
 
 #endif
