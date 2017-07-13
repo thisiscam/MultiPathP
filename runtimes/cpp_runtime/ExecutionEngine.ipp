@@ -36,7 +36,7 @@ ExecutionEngine::randomBool(const std::string& id) {
 
 #ifdef USE_VALUE_SUMMARY
 static inline
-std::vector<Bdd> buildTreePaths(const Bdd* vars, const int maxDecisions)
+std::vector<Bdd> buildTreePaths(const vector<Bdd>& vars, const int maxDecisions)
 {
     if (maxDecisions == 1) {
         return std::vector<Bdd>(1, Bdd::bddOne());
@@ -64,9 +64,9 @@ ExecutionEngine::randomInt(const Int numChoices) {
     static int decisionCount = 0;
 	int maxChoice = numChoices.maxValue();
     int numDecisionVars = (int)ceil(log2(maxChoice));    
-    Bdd allVars[numDecisionVars];
+    std::vector<Bdd> allVars;
     for(int i = 0; i < numDecisionVars; i++) {
-        allVars[i] = newBoolVar("decision_" + std::to_string(decisionCount++) + "_" + std::to_string(i));
+        allVars.push_back(newBoolVar("decision_" + std::to_string(decisionCount++) + "_" + std::to_string(i)));
     }
     Int::Builder builder;
     for(auto& gv : numChoices.values) {
