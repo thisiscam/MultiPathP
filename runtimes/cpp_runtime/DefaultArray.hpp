@@ -2,6 +2,7 @@
 #define DEFAULT_ARRAY_HPP
 
 #include <math.h>
+#include <cstring>
 
 using namespace std;
 

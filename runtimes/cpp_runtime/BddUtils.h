@@ -3,6 +3,7 @@
 
 #include <sylvan_obj.hpp>
 #include <list>
+#include <tuple>
 
 using namespace sylvan;
 
