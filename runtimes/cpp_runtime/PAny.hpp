@@ -6,6 +6,7 @@
 #include <typeinfo>
 #include <map>
 #include <iostream>
+#include <utility>
 
 #include "PTypePtr.h"
 #include "SharedPointerUtils.h"
@@ -189,7 +190,7 @@ public:
 
 
     using EqFunctionPointer = Bool (*)(const PAny&, const PAny&);
-    using EqTableKeyType = std::tuple<const type_info*, const type_info*>;
+    using EqTableKeyType = std::pair<const type_info*, const type_info*>;
     using EqTableType = std::map<EqTableKeyType, EqFunctionPointer>;
     template<typename> struct EqJumpTable;
     template<typename ...Pair>
@@ -219,10 +220,10 @@ public:
 #ifdef USE_VALUE_SUMMARY
         return binaryOp<Bool>(type, other.type, [&](const type_info* a, const type_info* b) {
             return EqJumpTable<product<List, DECL_TYPES, DECL_TYPES>::type>::table()
-                    .at(make_tuple(a, b))(*this, other);
+                    .at(make_pair(a, b))(*this, other);
         });
 #else
-        return EqJumpTable<product<List, DECL_TYPES, DECL_TYPES>::type>::table().at(make_tuple(type, other.type))(*this, other);
+        return EqJumpTable<product<List, DECL_TYPES, DECL_TYPES>::type>::table().at(make_pair(type, other.type))(*this, other);
 #endif
     }
 
