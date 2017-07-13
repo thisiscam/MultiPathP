@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include "ValueSummaryOperations.h"
+
 namespace RUNTIME_NAMESPACE {
 
 template<>
@@ -31,7 +33,7 @@ public:
 
     ValueSummary(ValueSummary<bool>&& other) = default;
 
-    ValueSummary(bool b) noexcept:
+    ValueSummary(const bool b) noexcept:
         T( b ? PathConstraint::pc() : Bdd::bddZero()),
         F(!b ? PathConstraint::pc() : Bdd::bddZero())
     { }
@@ -105,6 +107,69 @@ private:
     ValueSummary(const Bdd& t, const Bdd& f):T(t),F(f) { }
 };
 
+inline ValueSummary<bool> operator&(const ValueSummary<bool>& a, const bool b) {
+    if(b) {
+        return a;
+    } else {
+        return false;
+    }
+}
+
+inline ValueSummary<bool> operator&(const bool a, const ValueSummary<bool>& b) {
+    if(a) {
+        return b;
+    } else {
+        return false;
+    }
+}
+
+inline ValueSummary<bool> operator|(const ValueSummary<bool>& a, const bool b) {
+    if(b) {
+        return true;
+    } else {
+        return a;
+    }
+}
+
+inline ValueSummary<bool> operator|(const bool a, const ValueSummary<bool>& b) {
+    if(a) {
+        return true;
+    } else {
+        return b;
+    }
+}
+
+inline ValueSummary<bool> operator==(const ValueSummary<bool>& a, const bool b) {
+    if(b) {
+        return (PathConstraint::pc() & a.F).isZero();
+    } else {
+        return (PathConstraint::pc() & a.T).isZero();
+    }
+}
+
+inline ValueSummary<bool> operator==(const bool a, const ValueSummary<bool>& b) {
+    if(a) {
+        return (PathConstraint::pc() & b.F).isZero();
+    } else {
+        return (PathConstraint::pc() & b.T).isZero();
+    }
+}
+
+inline ValueSummary<bool> operator!=(const ValueSummary<bool>& a, const bool b) {
+    if(!b) {
+        return (PathConstraint::pc() & a.F).isZero();
+    } else {
+        return (PathConstraint::pc() & a.T).isZero();
+    }
+}
+
+inline ValueSummary<bool> operator!=(const bool a, const ValueSummary<bool>& b) {
+    if(!a) {
+        return (PathConstraint::pc() & b.F).isZero();
+    } else {
+        return (PathConstraint::pc() & b.T).isZero();
+    }
+}
 
 std::ostream& operator<<(std::ostream& os, const ValueSummary<bool>& v)  
 {  
