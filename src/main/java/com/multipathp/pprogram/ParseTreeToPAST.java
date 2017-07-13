@@ -116,6 +116,9 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
                     @Override
                     public Void visitVar_list(pParser.Var_listContext ctx) {
                         machine.putVarDecls(ctx.ID().getText(), type);
+                        if(ctx.var_list() != null) {
+                            ctx.var_list().accept(this);
+                        }
                         return null;
                     }
                 }
