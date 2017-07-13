@@ -1,6 +1,10 @@
 #ifndef VALUE_SUMMARY_HPP
 #define VALUE_SUMMARY_HPP
 
+#ifndef USE_VALUE_SUMMARY
+#error "This fine should only be included with value summary"
+#endif
+
 #include <sylvan_obj.hpp>
 
 namespace RUNTIME_NAMESPACE {

@@ -1,6 +1,10 @@
 #ifndef PATH_CONSTRAINT_HPP
 #define PATH_CONSTRAINT_HPP
 
+#ifndef USE_VALUE_SUMMARY
+#error "This fine should only be included with value summary"
+#endif
+
 #include <sylvan_obj.hpp>
 #include <iostream>
 #include <stdio.h>

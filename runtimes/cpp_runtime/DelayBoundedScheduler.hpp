@@ -2,7 +2,6 @@
 #define DELAY_BOUNDED_SCHEDULER
 
 #include "Scheduler.hpp"
-#include "Set.hpp"
 
 namespace RUNTIME_NAMESPACE {
 

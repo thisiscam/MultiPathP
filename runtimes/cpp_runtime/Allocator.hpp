@@ -1,7 +1,9 @@
 #ifndef ALLOCATOR_HPP
 #define ALLOCATOR_HPP
 
+#ifdef USE_VALUE_SUMMARY
 #include "BddUtils.h"
+#endif
 
 namespace RUNTIME_NAMESPACE {
 

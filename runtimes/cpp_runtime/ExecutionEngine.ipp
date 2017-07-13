@@ -34,6 +34,7 @@ ExecutionEngine::randomBool(const std::string& id) {
 	return allocators.at(id)->allocate();
 }
 
+#ifdef USE_VALUE_SUMMARY
 static inline
 std::vector<Bdd> buildTreePaths(const Bdd* vars, const int maxDecisions)
 {
@@ -55,6 +56,7 @@ std::vector<Bdd> buildTreePaths(const Bdd* vars, const int maxDecisions)
         return leftPaths;
     }
 }
+#endif
 
 inline Int
 ExecutionEngine::randomInt(const Int numChoices) {
