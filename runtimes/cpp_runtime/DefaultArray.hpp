@@ -17,7 +17,7 @@ template<typename T>
 class DefaultArray 
 {
 public:
-    static const size_t INITIAL_SIZE = 4;
+    static const size_t INITIAL_SIZE = 8;
 
     DefaultArray() noexcept:
         DefaultArray([]() { return T(); }) { }
@@ -139,14 +139,14 @@ public:
                     }
                 }
             }
-            return *this;        
+            return *this;
         }
 
         inline DefaultArray<T> build() {
             T** arrayData = (T**)malloc(sizeof(T*) * capacity);
             for(int i = 0; i < capacity; i++) {
                 if(data[i] != NULL) {
-                    arrayData[i] = new T(std::move(data[i]->build()));
+                    arrayData[i] = new T(data[i]->build());
                 } else {
                     arrayData[i] = NULL;
                 }

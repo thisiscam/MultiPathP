@@ -16,12 +16,26 @@ void printDot(const Bdd& bdd, const std::string& fname) {
     fclose(f);
 }
 
+static inline
+std::list<std::tuple<const std::string, Bdd>>& getAllocatedBools() {
+	static std::list<std::tuple<const std::string, Bdd>> allocatedBools;
+	return allocatedBools;
+}
+
 inline 
 Bdd newBoolVar(const std::string& name) {
-	static std::list<std::tuple<const std::string, Bdd>> allocatedBools;
-	Bdd&& T = Bdd::bddVar(allocatedBools.size());
-	allocatedBools.push_back(std::make_tuple(name, T));
+	Bdd&& T = Bdd::bddVar(getAllocatedBools().size());
+	getAllocatedBools().push_back(std::make_tuple(name, T));
 	return T;
+}
+
+inline
+void printBoolVars() {
+	int i = 0;
+	for(const auto& pair : getAllocatedBools()) {
+		std::cout << i << ": " << std::get<0>(pair) << std::endl;
+		i++;
+	}
 }
 
 }

@@ -17,11 +17,12 @@ ExecutionEngine::run(Scheduler& scheduler, Ptr<PMachine> machine) {
     for(int i = 0; i < maxIteration; ++i) {
     	std::cout << "======== BEGIN Step " << std::to_string(i) << "=======" << std::endl;
         IF_ONLY(scheduler.step()) {
+            std::cout << "======== END Step " << std::to_string(i) << "=======" << std::endl;
             continue;
         } else {
+            std::cout << "======== END Step " << std::to_string(i) << "=======" << std::endl;
             break;
         }
-        std::cout << "======== END Step " << std::to_string(i) << "=======" << std::endl;
     }
 }
 
@@ -66,8 +67,9 @@ ExecutionEngine::randomInt(const Int numChoices) {
     int numDecisionVars = (int)ceil(log2(maxChoice));    
     std::vector<Bdd> allVars;
     for(int i = 0; i < numDecisionVars; i++) {
-        allVars.push_back(newBoolVar("decision_" + std::to_string(decisionCount++) + "_" + std::to_string(i)));
+        allVars.push_back(newBoolVar("decision_" + std::to_string(decisionCount) + "_" + std::to_string(i)));
     }
+    decisionCount++;
     Int::Builder builder;
     for(auto& gv : numChoices.values) {
         std::vector<Bdd>&& allPaths = buildTreePaths(allVars, gv.first);

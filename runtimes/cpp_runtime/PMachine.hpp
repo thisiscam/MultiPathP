@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
+#include <iostream>
 
 #include "PList.hpp"
 #include "PAny.hpp"
@@ -49,7 +50,9 @@ protected:
 #endif
 
 public:
-    PMachine(ExecutionEngine& engine):engine(engine) { 
+    PMachine(ExecutionEngine& engine):
+        engine(engine)
+    {
         states.add(STATE_HALT);
     }
 
@@ -117,6 +120,8 @@ public:
         throw runtime_error("Unhandled event");
     }
     END_VOID_FUNCTION()
+
+    const int id = idCount()++;
 
 protected:
 
@@ -211,6 +216,11 @@ private:
         return allocators;
     }
 
+    static inline int& idCount() {
+        static int idCnt = 0;
+        return idCnt;
+    }
+
 public:
     template<typename M>
     static Ptr<PMachine> alloc(ExecutionEngine& engine) {
@@ -221,6 +231,10 @@ public:
         return allocators().at(&typeid(M))->allocate();
     }
 };
+
+void operator<<(std::ostream& os, const PMachine& m) {
+    os << typeid(m).name() << m.id;
+}
 
 };
 

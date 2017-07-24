@@ -50,6 +50,7 @@ public:
     ValueSummary(ValueSummary<T>&& other) = default;
 
     inline ValueSummary<T>& operator= (const ValueSummary<T>& rhs) {
+        std::unordered_map<T, Bdd> tmpRhsMap;
         for(const auto& gvRhs : rhs.values) {
             Bdd&& pred = PathConstraint::pc() & gvRhs.second;
             if(!pred.isZero()) {
@@ -69,10 +70,11 @@ public:
                     }
                 }
                 if(!found) {
-                    values.insert({gvRhs.first, pred});
+                    tmpRhsMap.insert({gvRhs.first, pred});
                 }
             }
         }
+        values.insert(tmpRhsMap.begin(), tmpRhsMap.end());
         return *this;
     }
 
@@ -111,7 +113,7 @@ public:
 
 private:
 
-    ValueSummary(const std::unordered_map<T, Bdd>& values):values(values) { }
+    ValueSummary(std::unordered_map<T, Bdd>&& values):values(std::move(values)) { }
 
     std::unordered_map<T, Bdd> values;
 
