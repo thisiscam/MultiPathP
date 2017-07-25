@@ -13,7 +13,7 @@ namespace RUNTIME_NAMESPACE {
 
 /* TODO: modeling map. */
 template<typename K, typename V>
-class PMap final : public PTypePtr
+class PMap final : public AbstractPTypePtr<PMap<K, V>>
 {
 
 public:

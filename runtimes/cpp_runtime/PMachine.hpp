@@ -178,7 +178,7 @@ protected:
 
     inline void passert(const Bool& cond, const string& message) {
         IF_ONLY(!cond) {
-            throw runtime_error(message);
+            throw runtime_error(std::string("passert: [") + message + "]");
         }
     }
 

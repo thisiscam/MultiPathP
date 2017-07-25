@@ -16,7 +16,7 @@ template<typename ...Ts>
 class PTuple;
 
 template <typename T0>
-class PTuple<T0> final : public PTypePtr {
+class PTuple<T0> final : public AbstractPTypePtr<PTuple<T0>> {
 
 public:
     PTuple() = default;
@@ -63,7 +63,7 @@ public:
 };
 
 template <typename T0, typename T1>
-class PTuple<T0, T1> final : public PTypePtr {
+class PTuple<T0, T1> final : public AbstractPTypePtr<PTuple<T0, T1>> {
 
 public:
     PTuple() = default;
@@ -117,7 +117,7 @@ public:
 };
 
 template <typename T0, typename T1, typename T2>
-class PTuple<T0, T1, T2> final : public PTypePtr {
+class PTuple<T0, T1, T2> final : public AbstractPTypePtr<PTuple<T0, T1, T2>> {
 
 public:
     PTuple() = default;
@@ -179,7 +179,7 @@ public:
 };
 
 template <typename T0, typename T1, typename T2, typename T3>
-class PTuple<T0, T1, T2, T3> final : public PTypePtr {
+class PTuple<T0, T1, T2, T3> final : public AbstractPTypePtr<PTuple<T0, T1, T2, T3>> {
 
 public:
     PTuple() = default;

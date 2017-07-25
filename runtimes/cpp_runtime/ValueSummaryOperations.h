@@ -50,11 +50,6 @@ struct BinaryOpFunctor {
     }
 };
 
-template<typename ReturnType, typename A, typename B, typename BinOp>
-inline ReturnType binaryOp(const ValueSummary<A>& a, const ValueSummary<B>& b, BinOp&& binOp) {
-    return BinaryOpFunctor<ReturnType, A, B, BinOp>::impl(a, b, std::forward<BinOp>(binOp));
-}
-
 template<typename ReturnType, typename A, typename UnaryOp>
 struct UnaryOpFunctor;
 
@@ -89,12 +84,6 @@ struct UnaryOpFunctor {
         return builder.build();
     }
 };
-
-
-template<typename ReturnType, typename A, typename UnaryOp>
-inline ReturnType unaryOp(const ValueSummary<A>& a, UnaryOp&& uOp) {
-    return UnaryOpFunctor<ReturnType, A, UnaryOp>::impl(a, std::forward<UnaryOp>(uOp));
-}
 
 };
 #endif

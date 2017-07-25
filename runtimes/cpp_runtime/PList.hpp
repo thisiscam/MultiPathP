@@ -12,7 +12,7 @@ using namespace std;
 namespace RUNTIME_NAMESPACE {
 
 template<typename T>
-class PList final : public PTypePtr
+class PList final : public AbstractPTypePtr<PList<T>>
 {
     friend class PMachine;
 public:
