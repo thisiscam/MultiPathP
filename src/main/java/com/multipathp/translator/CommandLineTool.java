@@ -27,8 +27,8 @@ public class CommandLineTool {
         @Parameter(names = {"-I", "--include"}, description = "include search directories")
         List<String> includeDirectories = new ArrayList<>();
 
-        @Parameter(names = {"-o", "--out-dir"}, description = "output directory")
-        String outDir = "";
+        @Parameter(names = {"-o", "--out-dir"}, description = "output directory, default to input file name")
+        String outDir = null;
 
         @Parameter(names = {"--name"}, description = "name of the project, default to input file name")
         String projectName = null;
@@ -56,6 +56,9 @@ public class CommandLineTool {
         }
         if(options.projectName == null) {
             options.projectName = FilenameUtils.getBaseName(options.inputFile);
+        }
+        if(options.outDir == null) {
+            options.outDir = FilenameUtils.getBaseName(options.inputFile);
         }
         Constructor translatorConstructor = Class.forName(CppTranslator.class.getPackage().getName() + "." + options.translator).getConstructor(String.class, PProgram.class);
         ParseTreeSetParser.ParseTreeSet set = new ParseTreeSetParser(options.includeDirectories).parseFile(options.inputFile);
