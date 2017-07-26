@@ -18,6 +18,10 @@ struct PTypeBoxed : public AbstractPTypePtr<PTypeBoxed<T>> {
 		value(value)
 	{ }
 
+	PTypeBoxed(T&& value):
+		value(std::move(value))
+	{ }
+
 	explicit inline operator T() const {
 		return value;
 	}

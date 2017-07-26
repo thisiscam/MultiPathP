@@ -155,7 +155,23 @@ struct MapBoxed<Container<Head, Rest...>> {
         >::type;
 };
 
-using ProcessedDeclTypes = typename MapBoxed<DECL_TYPES>::type;
+
+template<typename> struct RemovePAny;
+
+template<template <typename ...Ts> class Container>
+struct RemovePAny<Container<>> {
+    using type = Container<>;
+};
+
+template<template <typename ...Ts> class Container, typename Head, typename ...Rest>
+struct RemovePAny<Container<Head, Rest...>> {
+    using type = 
+        typename Merge<typename std::conditional<!std::is_same<Head, PAny>::value, Container<Head>, Container<>>::type,
+            typename RemovePAny<Container<Rest...>>::type
+        >::type;
+};
+
+using ProcessedDeclTypes = typename RemovePAny<typename MapBoxed<DECL_TYPES>::type>::type;
 
 class PAny final {
 
