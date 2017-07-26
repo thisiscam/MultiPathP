@@ -171,20 +171,7 @@ public:
 
     PAny() = default;
 
-#ifdef USE_VALUE_SUMMARY
-    PAny(const PAny& other) noexcept {
-        Bdd oldPc = PathConstraint::pc();
-        for(const auto& gvRhs : other.ptr) {
-            PathConstraint::pc() = oldPc & gvRhs.second.second;
-            if(PathConstraint::isNotZero()) {
-                ptr.insert({gvRhs.first, {std::shared_ptr<PTypePtr>(gvRhs.second.first->clone()), PathConstraint::pc()}});
-            }
-        }
-        PathConstraint::pc() = oldPc;
-    }
-#else
-    PAny(const PAny&) = default;
-#endif
+    PAny(const PAny&) = default; //TODO: why doesn't this require filtering?
 
     PAny(PAny&& other) = default;
 
@@ -199,6 +186,9 @@ public:
                 for(auto gvLhs = begin(ptr); gvLhs != end(ptr); ) {
                     if(gvLhs->first == gvRhs.first) {
                         gvLhs->second.second |= PathConstraint::pc();
+                        if(gvLhs->second.first.use_count() > 1) {
+                            gvLhs->second.first = std::shared_ptr<PTypePtr>(gvRhs.second.first->clone());
+                        }
                         gvLhs->second.first->assign(*gvRhs.second.first.get());
                         found = true;
                         ++gvLhs;
@@ -388,6 +378,9 @@ public:
             Bdd oldPc = PathConstraint::pc();
             PathConstraint::pc() = pred;
             if(entry.first) {
+                if(entry.first.use_count() > 1) {
+                    entry.first = std::shared_ptr<PTypePtr>(_value->clone());
+                }
                 entry.first->assign(*_value);
             } else {
                 entry.first = std::shared_ptr<PTypePtr>(value->clone());
