@@ -69,6 +69,12 @@ public:
         insert(item.v0(), item.v1());
     }
 
+#ifdef REMOVE_AT_OPTIMIAZATION
+    inline void removeAt(const Int& idx) {
+        data.removeAt(idx, size());
+        --_size;
+    }
+#else
     inline void removeAt(const Int& idx) {
         FOR(Int i = idx + 1, i < size(), ++i, {
             data.set(data.get(i), i - 1);
@@ -76,7 +82,8 @@ public:
         ENDFOR_NC()
         --_size;
     }
-
+#endif
+    
     inline void removeRange(const Int& start, const Int& count) {
         FOR(Int i = start + count, i < size(), ++i, {
             data.set(data.get(i), i - count);

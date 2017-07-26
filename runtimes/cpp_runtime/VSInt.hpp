@@ -15,6 +15,9 @@ template<>
 class ValueSummary<int> final {
     
     friend class ExecutionEngine;
+    
+    template<typename>
+    friend class DefaultArray;
 
 private:
     struct unused { };

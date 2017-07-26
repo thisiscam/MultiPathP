@@ -105,6 +105,49 @@ public:
 #endif
     }
 
+#ifdef REMOVE_AT_OPTIMIAZATION
+#ifdef USE_VALUE_SUMMARY
+    void removeAt(const Int& idx, const Int& end) {
+        int minIdx = INT_MAX; 
+        int maxIdx = INT_MIN;
+        for(const auto& gvIdx : idx.values) {
+            minIdx = std::min(gvIdx.first, minIdx);
+            maxIdx = std::max(gvIdx.first, maxIdx);
+        }
+        int minEnd = INT_MAX; 
+        int maxEnd = INT_MIN;
+        for(const auto& gvEnd : end.values) {
+            minEnd = std::min(gvEnd.first, minEnd);
+            maxEnd = std::max(gvEnd.first, maxEnd);
+        }
+        Bdd oldPc = PathConstraint::pc();
+        for(int i = minIdx; i < maxEnd - 1; i++) {
+            auto entryIdx = idx.values.find(i);
+            if(entryIdx != idx.values.end()) {
+                Bdd doCopyPc = oldPc & entryIdx->second;
+                PathConstraint::pc() |= doCopyPc;
+            }
+            auto entryEnd = end.values.find(i);
+            if(entryEnd != end.values.end()) {
+                Bdd endPc = oldPc & entryEnd->second;
+                PathConstraint::pc() &= !endPc;
+            }
+            if(PathConstraint::isNotZero()) {
+                *data[i] = *data[i + 1];
+            }
+        }
+        PathConstraint::pc() = oldPc;
+    }
+#else
+    void removeAt(const Int& idx, const Int& end) {
+        FOR(Int i = idx + 1, i < end, ++i, {
+            set(get(i), i - 1);
+        })
+        ENDFOR_NC()
+    }
+#endif
+#endif
+
 #ifdef USE_VALUE_SUMMARY
 public:
     class Builder {
