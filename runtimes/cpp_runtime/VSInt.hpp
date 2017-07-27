@@ -76,8 +76,8 @@ public:
                     tmpRhsMap.insert({gvRhs.first, pred});
                 }
             }
-            values.insert(tmpRhsMap.begin(), tmpRhsMap.end());
         }
+        values.insert(tmpRhsMap.begin(), tmpRhsMap.end());
         return *this;
     }
 

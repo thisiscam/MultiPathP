@@ -14,18 +14,12 @@ Scheduler::getSendQueue(PMachine* machine) {
 
 inline SendQueueItem
 Scheduler::popSendQueueItem(const Ptr<PMachine>& machine, const Int& index) {
-#ifdef USE_VALUE_SUMMARY
     return unaryOp<SendQueueItem>(machine, [&](PMachine* machine) {
         Int i = index;
         SendQueueItem&& item = machine->sendQueue.get(i);
         machine->sendQueue.removeAt(i);
         return item;
     });
-#else
-        SendQueueItem&& item = machine->sendQueue.get(index);
-        machine->sendQueue.removeAt(index);
-        return item;
-#endif
 }
 
 inline FUNCTION_DECL(Bool, Scheduler::step, ()) {
