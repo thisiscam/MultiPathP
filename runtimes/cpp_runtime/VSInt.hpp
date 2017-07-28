@@ -53,7 +53,7 @@ public:
     ValueSummary(ValueSummary<int>&& other) = default;
 
     inline ValueSummary<int>& operator= (const ValueSummary<int>& rhs) {
-        if(values.size() > 5) {
+        if(values.size() > 10) {
             std::unordered_map<int, std::pair<Bdd, Bdd>> tmpMap;
             std::vector<int> tmpOrder;
             Bdd before = Bdd::bddOne();
@@ -89,6 +89,23 @@ public:
             for(const auto& gvTmp : tmpMap) {
                 values.insert({gvTmp.first, gvTmp.second.first});
             }
+        } else if (rhs.values.size() > 10) {
+            ValueSummary<int> rhsTmp = rhs;
+            for(auto gvLhs = begin(values); gvLhs != end(values); ) {
+                gvLhs->second &= !PathConstraint::pc();
+                const auto& entry = rhsTmp.values.find(gvLhs->first);
+                if(gvLhs->second.isZero()) {
+                    gvLhs = values.erase(gvLhs);
+                    continue;
+                } else {
+                    if(entry != rhsTmp.values.end()) {
+                        gvLhs->second |= entry->second;
+                        rhsTmp.values.erase(entry);
+                    }
+                    ++gvLhs;
+                }
+            }
+            values.insert(rhsTmp.values.begin(), rhsTmp.values.end());
         } else {
             std::unordered_map<int, Bdd> tmpRhsMap;
             for(const auto& gvRhs : rhs.values) {
