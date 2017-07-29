@@ -6,6 +6,7 @@
 #include <string>
 #include <typeinfo>
 #include <iostream>
+#include <unordered_map>
 
 #include "PList.hpp"
 #include "PAny.hpp"
@@ -16,16 +17,27 @@
 
 using namespace std;
 
+struct pairhash {
+public:
+    template <typename T, typename U>
+    std::size_t operator()(const std::pair<T, U> &x) const {
+        return std::hash<T>()(x.first) ^ std::hash<U>()(x.second);
+    }
+};
+
 namespace RUNTIME_NAMESPACE {
+
+#define DECL_EVENT(e) inline const char* e () { static const char *_v = #e ; return _v; }
+#define DECL_STATE(s) inline const char* s () { static const char *_v = #s ; return _v; }
 
 const int EXECUTE_FINISHED = 0;
 const int RAISED_EVENT = 1;
 
-const int EVENT_NEW_MACHINE = -1;
-const int EVENT_NULL = 0;
-const int EVENT_HALT = 1;
+DECL_EVENT(EVENT_NEW_MACHINE);
+DECL_EVENT(EVENT_NULL);
+DECL_EVENT(EVENT_HALT);
 
-const int STATE_HALT = 0;
+DECL_STATE(STATE_HALT);
 
 class ExecutionEngine;
 
@@ -49,6 +61,13 @@ protected:
     using ExitFunctionPtr = ExitFunction;
 #endif
 
+    using StateEventPair = std::pair<const char*, const char*>;
+    using IsDeferedMapType = std::unordered_map<StateEventPair, bool, pairhash>;
+    using IsGotoTransitionMapType = std::unordered_map<StateEventPair, bool, pairhash>;
+    using GetExitFunctionMapType = std::unordered_map<const char*, ExitFunction>;
+    using GetTransitionMapType = std::unordered_map<StateEventPair, TransitionFunction, pairhash>;
+    using GetTransitionEntryMapType = std::unordered_map<StateEventPair, EntryFunction, pairhash>;
+
 public:
     PMachine(ExecutionEngine& engine):
         engine(engine)
@@ -60,7 +79,7 @@ public:
 
     inline FUNCTION_DECL(Int, canServeEvent, (const Int& e)) {
         FOR(Int i = states.size() - 1, i >= 0, --i, {
-            const Int& state = states.get(i);
+            const PState& state = states.get(i);
             IF(isDefered(state, e))
             THEN() {
                 RETURN(-1);
@@ -79,8 +98,8 @@ public:
     }
     END_FUNCTION()
 
-    inline VOID_FUNCTION_DECL(step, (const Int& stateIndex, const Int& e, const PAny& payload = PAny::Null())) {
-        const Int& state = states.get(stateIndex);
+    inline VOID_FUNCTION_DECL(step, (const PState& stateIndex, const PEvent& e, const PAny& payload = PAny::Null())) {
+        const PState& state = states.get(stateIndex);
         IF(isGotoTransition(state, e))
         THEN() {
             FOR(Int i = states.size() - 1, i > stateIndex, --i, {
@@ -97,9 +116,9 @@ public:
     }
     END_VOID_FUNCTION()
 
-    inline VOID_FUNCTION_DECL(serveEvent, (const Int& e, const PAny& payload)) {
+    inline VOID_FUNCTION_DECL(serveEvent, (const PEvent& e, const PAny& payload)) {
         FOR(Int i = 0, i < states.size(), ++i, {
-            const Int& state = states.get(i);
+            const PState& state = states.get(i);
             IF(!isDefered(state, e) & (getTransition(state, e) != nullptr)) 
             THEN() {
                 IF(isGotoTransition(state, e))
@@ -129,7 +148,7 @@ protected:
         return this;
     }
 
-    inline void send(const Ptr<PMachine>& other, const Int& e, const PAny& payload = PAny::Null()) {
+    inline void send(const Ptr<PMachine>& other, const PEvent& e, const PAny& payload = PAny::Null()) {
         sendQueue.add(SendQueueItem(other, e, payload));
     }
 
@@ -140,9 +159,9 @@ protected:
         return machine;
     }
 
-    inline VOID_FUNCTION_DECL(raise, (const Int& e, const PAny& payload = PAny::Null())) {
+    inline VOID_FUNCTION_DECL(raise, (const PEvent& e, const PAny& payload = PAny::Null())) {
         FOR(Int i = states.size() - 1, i >= 0, --i, {
-            const Int& state = states.get(i);
+            const PState& state = states.get(i);
             TransitionFunctionPtr&& f = getTransition(state, e);
             IF(f != nullptr)
             THEN() {
@@ -205,11 +224,41 @@ protected:
 private:
     ExecutionEngine& engine;
 
-    virtual Bool isDefered(const Int& state, const Int& event) const = 0;
-    virtual Bool isGotoTransition(const Int& state, const Int& event) const = 0;
-    virtual ExitFunctionPtr getExitFunction(const Int& state) const = 0;
-    virtual TransitionFunctionPtr getTransition(const Int& state, const Int& event) const = 0;
-    virtual EntryFunctionPtr getTransitionEntry(const Int& state, const Int& event) const = 0;
+    inline Bool isDefered(const PState& state, const PEvent& event) const {
+        return binaryOp<Bool>(state, event, [&](const char* s, const char* e) { 
+            return isDeferedMap()[{s, e}];
+        });
+    }
+
+    inline Bool isGotoTransition(const PState& state, const PEvent& event) const {
+        return binaryOp<Bool>(state, event, [&](const char* s, const char* e) { 
+            return isGotoTransitionMap()[{s, e}];
+        });
+    }
+
+    ExitFunctionPtr getExitFunction(const PState& state) const {
+        return unaryOp<ExitFunctionPtr>(state, [&](const char* s, const char* e) {
+            return getExitFunctionMap()[{s, e}];
+        });
+    }
+
+    TransitionFunctionPtr getTransition(const PState& state, const PEvent& event) const {
+        return binaryOp<Bool>(state, event, [&](const char* s, const char* e) { 
+            return getTransitionMap()[{s, e}];
+        });
+    }
+
+    EntryFunctionPtr getTransitionEntry(const PState& state, const PEvent& event) const {
+        return binaryOp<Bool>(state, event, [&](const char* s, const char* e) { 
+            return getTransitionEntryMap()[{s, e}];
+        });
+    }
+
+    virtual IsDeferedMapType isDeferedMap(const PState& state, const PEvent& event) const = 0;
+    virtual IsGotoTransitionMapType isGotoTransitionMap(const PState& state, const PEvent& event) const = 0;
+    virtual GetExitFunctionMapType getExitFunctionMap(const PState& state) const = 0;
+    virtual GetTransitionMapType getTransitionMap(const PState& state, const PEvent& event) const = 0;
+    virtual GetTransitionEntryMapType getTransitionEntryMap(const PState& state, const PEvent& event) const = 0;
 
     static std::map<const type_info*, Allocator<PMachine>*>& allocators() { 
         static std::map<const type_info*, Allocator<PMachine>*> allocators;

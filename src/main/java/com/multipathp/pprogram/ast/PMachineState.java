@@ -19,7 +19,6 @@ public abstract class PMachineState extends PASTNode {
     public abstract List<PTransition> getTransitions();
     public abstract Map<PEvent, PTransition> getTransitionsMap();
 
-    public static PMachineState HALT_STATE = new PMachineHaltState();
     @Nullable
     private PFunction entryFunction;
     public PFunction getEntryFunction() {
@@ -70,12 +69,6 @@ public abstract class PMachineState extends PASTNode {
 
     public static class Builder extends PMachineState_Builder {
         private Map<PEvent, PTransition.Builder> transitionBuilderMap;
-
-        public Builder() {
-            super();
-            addTransitions(PTransition.HALT_TRANSITION);
-            putTransitionsMap(PEvent.EVENT_HALT, PTransition.HALT_TRANSITION);
-        }
 
         public void addTransition(String functionName, Collection<PEvent> eventList, String toStateName, boolean isPush) {
             for(PEvent e : eventList) {

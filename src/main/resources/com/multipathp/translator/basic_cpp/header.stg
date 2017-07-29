@@ -45,7 +45,7 @@ using namespace RUNTIME_NAMESPACE;
 
 namespace <projectName> {
 
-<program.eventDecls:{e | <if(BuiltInEvents.(e.name))>const int <e.name> = <i0>;
+<program.eventDecls:{e | <if(BuiltInEvents.(e.name))>DECL_EVENT(<e.name>);
 <endif>}><\\>
 
 <program.machines:{m | class <machineName(m)>;}; separator="\n">

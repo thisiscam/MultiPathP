@@ -54,7 +54,6 @@ public abstract class PMachine extends PASTNode {
         public Builder() {
             super();
             setSpec(false);
-            addStateDecls(PMachineState.HALT_STATE);
         }
 
         public Builder putFunDecls(PFunction function) {

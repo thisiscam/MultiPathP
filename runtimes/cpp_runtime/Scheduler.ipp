@@ -4,6 +4,7 @@
 #include <typeinfo>
 #include "PMachine.hpp"
 #include "Helpers.h"
+#include <valgrind/callgrind.h>
 
 namespace RUNTIME_NAMESPACE {
 
@@ -24,7 +25,7 @@ Scheduler::popSendQueueItem(const Ptr<PMachine>& machine, const Int& index) {
 
 inline FUNCTION_DECL(Bool, Scheduler::step, ()) {
     SchedulerChoice&& chosen = chooseMachine();
-    IF(chosen.machine == NULL) 
+    IF(chosen.machine == NULL)
     THEN() {
         RETURN(false);
     }

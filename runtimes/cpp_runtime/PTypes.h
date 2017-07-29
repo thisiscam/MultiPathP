@@ -26,6 +26,9 @@ using Int = int;
 using Bool = bool;
 #endif
 
+typedef Ptr<const char> PEvent;
+typedef Ptr<const char> PState;
+
 };
 
 #ifndef DECL_TYPES

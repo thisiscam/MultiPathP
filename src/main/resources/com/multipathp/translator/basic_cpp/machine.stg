@@ -58,9 +58,7 @@ public:
     }
 
 private:
-    enum {
-        <rest(machine.stateDecls):{state | <state.name> = <i>}; separator=",\n">
-    };
+    <rest(machine.stateDecls):{state | DECL_STATE(<state.name>);}; separator=",\n">
 
     /* region Entry Methods */
     <rest(machine.stateDecls):EntryFunction(); separator="\n\n">
@@ -79,17 +77,15 @@ private:
     /* end Machine Fields  */
 
     /* region Jump Tables */
-    inline Bool isDefered(const Int& state, const Int& event) const override {
-        static const bool _isDefered[<length(machine.stateDecls)>][<length(program.eventDecls)>] = 
+    inline IsDeferedMapType isDeferedMap() const override {
+        static const IsDeferedMapType _isDefered = 
             {
-                <machine.stateDecls:
-                {state | {<program.eventDecls: 
-                    {e | <if(state.deferedEvents.(e.name))> true<else>false<endif>}; separator=",">\} /* <state.name> */}; separator=",\n">
+                <machine.stateDecls: {state | <program.eventDecls: {e | <if(state.deferedEvents.(e.name))>{<state.name>, <e.name>\}<endif>}>}>
             };
-        return getIndex2D(_isDefered, state, event);
+        return _isDefered;
     }
 
-    inline Bool isGotoTransition(const Int& state, const Int& event) const override {
+    inline isGotoTransitionType isGotoTransitionMap() const override {
         static const bool _isGotoTransition[<length(machine.stateDecls)>][<length(program.eventDecls)>] =
             {
                 <machine.stateDecls:
@@ -97,30 +93,30 @@ private:
                     {e | <if(state.transitionsMap.(e).toStateName)> true<else>false<endif>}; separator=",">\} /* <state.name> */};
                     separator=",\n">
             };
-        return getIndex2D(_isGotoTransition, state, event);
+        return _isGotoTransition;
     }
 
-    inline ExitFunctionPtr getExitFunction(const Int& state) const override {
+    inline GetExitFunctionMapType getExitFunctionMap() const override {
         #define E(f) ((ExitFunction)&<machineName(machine)>::f)
         static ExitFunction _exitFunctions[] = {<machine.stateDecls: {state | &<machineName(machine)>::<if(state.exitFunction)>E(<state.exitFunction>)<else>emptyExit<endif>}; separator=",">};
         #undef E
-        return getIndex1D(_exitFunctions, state);
+        return _exitFunctions;
     }
 
-    inline TransitionFunctionPtr getTransition(const Int& state, const Int& event) const override {
+    inline GetTransitionMapType getTransitionMap() const override {
         #define E(f) ((TransitionFunction)&<machineName(machine)>::f)
         static TransitionFunction _transitions[<length(machine.stateDecls)>][<length(program.eventDecls)>] = 
             <JumpTable("TransitionJumpTableInner")>;
         #undef E
-        return getIndex2D(_transitions, state, event);
+        return _transitions;
     }
 
-    inline EntryFunctionPtr getTransitionEntry(const Int& state, const Int& event) const override {
+    inline GetTransitionEntryMapType getTransitionEntryMap() const override {
         #define E(f) ((TransitionFunction)&<machineName(machine)>::f)
         static TransitionFunction _entries[<length(machine.stateDecls)>][<length(program.eventDecls)>] = 
             <JumpTable("EntryJumpTableInner")>;
         #undef E
-        return getIndex2D(_entries, state, event);
+        return _entries;
     }
     /* end Jump Tables */
 };

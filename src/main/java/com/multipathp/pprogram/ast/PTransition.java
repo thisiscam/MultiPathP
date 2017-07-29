@@ -16,11 +16,6 @@ public abstract class PTransition extends PASTNode {
     public abstract String getToStateName();
     public abstract boolean isPush();
 
-    public static PTransition HALT_TRANSITION = new PTransition.Builder()
-            .setPush(false)
-            .setOnE(PEvent.EVENT_HALT)
-            .setToStateName(PMachineState.HALT_STATE.getName()).build();
-
     @Nullable
     PFunction function;
     public PFunction getFunction() {
