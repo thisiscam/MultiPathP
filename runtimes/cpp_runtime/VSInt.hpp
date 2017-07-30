@@ -53,60 +53,60 @@ public:
     ValueSummary(ValueSummary<int>&& other) = default;
 
     inline ValueSummary<int>& operator= (const ValueSummary<int>& rhs) {
-        if(values.size() > 10) {
-            std::unordered_map<int, std::pair<Bdd, Bdd>> tmpMap;
-            std::vector<int> tmpOrder;
-            Bdd before = Bdd::bddOne();
-            for(const auto& gvRhs : rhs.values) {
-                Bdd pred = gvRhs.second & PathConstraint::pc();
-                if(!pred.isZero()) {
-                    tmpMap.insert({gvRhs.first, {pred, before}});
-                    tmpOrder.push_back(gvRhs.first);
-                    before &= !pred;
-                }
-            }
-            Bdd after = Bdd::bddOne();
-            for(auto i = tmpOrder.rbegin(); i != tmpOrder.rend(); ++i) {
-                auto& entry = tmpMap.at(*i);
-                entry.second &= after;
-                after &= !entry.first;
-            }
-            for(auto gvLhs = begin(values); gvLhs != end(values); /**/) {
-                const auto& entry = tmpMap.find(gvLhs->first);
-                if(entry != tmpMap.end()) {
-                    tmpMap.erase(entry);
-                    gvLhs->second = (gvLhs->second & entry->second.second) | entry->second.first;
-                    ++gvLhs;
-                } else {
-                    gvLhs->second &= before;
-                    if(gvLhs->second.isZero()) {
-                        gvLhs = values.erase(gvLhs);
-                    } else {
-                        ++gvLhs;
-                    }
-                }
-            }
-            for(const auto& gvTmp : tmpMap) {
-                values.insert({gvTmp.first, gvTmp.second.first});
-            }
-        } else if (rhs.values.size() > 10) {
-            ValueSummary<int> rhsTmp = rhs;
-            for(auto gvLhs = begin(values); gvLhs != end(values); ) {
-                gvLhs->second &= !PathConstraint::pc();
-                const auto& entry = rhsTmp.values.find(gvLhs->first);
-                if(gvLhs->second.isZero()) {
-                    gvLhs = values.erase(gvLhs);
-                    continue;
-                } else {
-                    if(entry != rhsTmp.values.end()) {
-                        gvLhs->second |= entry->second;
-                        rhsTmp.values.erase(entry);
-                    }
-                    ++gvLhs;
-                }
-            }
-            values.insert(rhsTmp.values.begin(), rhsTmp.values.end());
-        } else {
+        // if(values.size() > 10) {
+        //     std::unordered_map<int, std::pair<Bdd, Bdd>> tmpMap;
+        //     std::vector<int> tmpOrder;
+        //     Bdd before = Bdd::bddOne();
+        //     for(const auto& gvRhs : rhs.values) {
+        //         Bdd pred = gvRhs.second & PathConstraint::pc();
+        //         if(!pred.isZero()) {
+        //             tmpMap.insert({gvRhs.first, {pred, before}});
+        //             tmpOrder.push_back(gvRhs.first);
+        //             before &= !pred;
+        //         }
+        //     }
+        //     Bdd after = Bdd::bddOne();
+        //     for(auto i = tmpOrder.rbegin(); i != tmpOrder.rend(); ++i) {
+        //         auto& entry = tmpMap.at(*i);
+        //         entry.second &= after;
+        //         after &= !entry.first;
+        //     }
+        //     for(auto gvLhs = begin(values); gvLhs != end(values); /**/) {
+        //         const auto& entry = tmpMap.find(gvLhs->first);
+        //         if(entry != tmpMap.end()) {
+        //             tmpMap.erase(entry);
+        //             gvLhs->second = (gvLhs->second & entry->second.second) | entry->second.first;
+        //             ++gvLhs;
+        //         } else {
+        //             gvLhs->second &= before;
+        //             if(gvLhs->second.isZero()) {
+        //                 gvLhs = values.erase(gvLhs);
+        //             } else {
+        //                 ++gvLhs;
+        //             }
+        //         }
+        //     }
+        //     for(const auto& gvTmp : tmpMap) {
+        //         values.insert({gvTmp.first, gvTmp.second.first});
+        //     }
+        // } else if (rhs.values.size() > 10) {
+        //     ValueSummary<int> rhsTmp = rhs;
+        //     for(auto gvLhs = begin(values); gvLhs != end(values); ) {
+        //         gvLhs->second &= !PathConstraint::pc();
+        //         const auto& entry = rhsTmp.values.find(gvLhs->first);
+        //         if(gvLhs->second.isZero()) {
+        //             gvLhs = values.erase(gvLhs);
+        //             continue;
+        //         } else {
+        //             if(entry != rhsTmp.values.end()) {
+        //                 gvLhs->second |= entry->second;
+        //                 rhsTmp.values.erase(entry);
+        //             }
+        //             ++gvLhs;
+        //         }
+        //     }
+        //     values.insert(rhsTmp.values.begin(), rhsTmp.values.end());
+        // } else {
             std::unordered_map<int, Bdd> tmpRhsMap;
             for(const auto& gvRhs : rhs.values) {
                 Bdd&& pred = PathConstraint::pc() & gvRhs.second;
@@ -132,7 +132,7 @@ public:
                 }
             }
             values.insert(tmpRhsMap.begin(), tmpRhsMap.end());
-        }
+        // }
         return *this;
     }
 

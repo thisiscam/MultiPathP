@@ -9,27 +9,27 @@ struct SendQueueItem final {
 public:
     SendQueueItem() = default;
 
-    SendQueueItem(const Ptr<PMachine>& target, const Int& e, const PAny& payload) noexcept:
+    SendQueueItem(const Ptr<PMachine>& target, const PEvent& e, const PAny& payload) noexcept:
     	target(target),e(e),payload(payload) 
     {
     	 
     }
 
-    SendQueueItem(Ptr<PMachine>&& target, Int&& e, PAny&& payload) noexcept:
+    SendQueueItem(Ptr<PMachine>&& target, PEvent&& e, PAny&& payload) noexcept:
     	target(std::move(target)),
     	e(std::move(e)),
     	payload(std::move(payload)) 
     { }
 
     Ptr<PMachine> target;
-    Int e;
+    PEvent e;
     PAny payload;
 
 #ifdef USE_VALUE_SUMMARY
 public:
 	class Builder {
 		Ptr<PMachine>::Builder target;
-	    Int::Builder e;
+	    PEvent::Builder e;
 	    PAny::Builder payload;
 	public:
 	    inline Builder& addValue(const Bdd& pred, const SendQueueItem& rhs) {

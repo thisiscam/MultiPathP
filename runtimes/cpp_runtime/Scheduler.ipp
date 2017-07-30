@@ -43,7 +43,7 @@ inline FUNCTION_DECL(Bool, Scheduler::step, ()) {
                 startMachine(item.target, item.payload);
             }
             ELSE() {
-                std::cout << Ptr<PMachine>(chosen.machine) << " sends event " << Int(item.e) << " to " << Ptr<PMachine>(item.target) << std::endl;
+                std::cout << Ptr<PMachine>(chosen.machine) << " sends event " << PEvent(item.e) << " to " << Ptr<PMachine>(item.target) << std::endl;
                 INVOKE(item.target, void, step, (chosen.stateIdx, item.e, item.payload));
             }
             ENDIF()

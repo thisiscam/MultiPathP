@@ -9,7 +9,7 @@ InvokeAuxFunction(function) ::= <<
 
 EntryFunction(state) ::= <<
 static inline void <EntryFunctionName(state)>(<machineName(machine)>* self, const PAny& payload) {
-    self->states.setTop(<state.name>);
+    self->states.setTop(<stateId(state)>);
     <InvokeAuxFunction(state.entryFunction)>
 }
 >>
@@ -24,11 +24,11 @@ static inline void <TransitionFunctionWrapperName(function)>(<machineName(machin
 >>
 
 JumpTableRow(e) ::= <<
-<if(state.transitionsMap.(e))>E(<(functionNameTemplate)()>)<else>NULL<endif>
+{<eventId(e)>, <if(state.transitionsMap.(e))>E(<(functionNameTemplate)()>)<else>NULL<endif>}
 >>
 
 JumpTableRows(state) ::= <<
-{<program.eventDecls:JumpTableRow(); separator=",">}
+{<stateId(state)>, {<program.eventDecls:JumpTableRow(); separator=",">}}
 >>
 
 JumpTable(functionNameTemplate) ::= <<
@@ -58,10 +58,11 @@ public:
     }
 
 private:
-    <rest(machine.stateDecls):{state | DECL_STATE(<state.name>);}; separator=",\n">
+    <machine.stateDecls:{state | DECL_STATE(<state.name>);}; separator="\n">
+    <machine.stateDecls:{state | #define <state.name> _<state.name>()}; separator="\n">
 
     /* region Entry Methods */
-    <rest(machine.stateDecls):EntryFunction(); separator="\n\n">
+    <machine.stateDecls:EntryFunction(); separator="\n\n">
     /* end Entry Methods */
 
     /* region Transition Methods */
@@ -77,44 +78,49 @@ private:
     /* end Machine Fields  */
 
     /* region Jump Tables */
-    inline IsDeferedMapType isDeferedMap() const override {
+    inline const IsDeferedMapType& isDeferedMap() const override {
         static const IsDeferedMapType _isDefered = 
-            {
-                <machine.stateDecls: {state | <program.eventDecls: {e | <if(state.deferedEvents.(e.name))>{<state.name>, <e.name>\}<endif>}>}>
-            };
-        return _isDefered;
+        {
+            <machine.stateDecls:
+            {state | {<stateId(state)>, {<program.eventDecls: 
+                {e | {<eventId(e)>, <if(state.deferedEvents.(e.name))>true<else>false<endif>\}}; separator=",">\}\}}; separator=",\n">
+        };
+        return _isDefered; 
     }
 
-    inline isGotoTransitionType isGotoTransitionMap() const override {
-        static const bool _isGotoTransition[<length(machine.stateDecls)>][<length(program.eventDecls)>] =
-            {
-                <machine.stateDecls:
-                {state | {<program.eventDecls:
-                    {e | <if(state.transitionsMap.(e).toStateName)> true<else>false<endif>}; separator=",">\} /* <state.name> */};
-                    separator=",\n">
-            };
+    inline const IsGotoTransitionMapType& isGotoTransitionMap() const override {
+        static const IsGotoTransitionMapType _isGotoTransition =
+        {
+            <machine.stateDecls:
+            {state | {<stateId(state)>, {<program.eventDecls:
+                {e | {<eventId(e)>, <if(state.transitionsMap.(e).toStateName)>true<else>false<endif>\}}; separator=",">\}\}};
+                separator=",\n">
+        };
         return _isGotoTransition;
     }
 
-    inline GetExitFunctionMapType getExitFunctionMap() const override {
+    inline const GetExitFunctionMapType& getExitFunctionMap() const override {
         #define E(f) ((ExitFunction)&<machineName(machine)>::f)
-        static ExitFunction _exitFunctions[] = {<machine.stateDecls: {state | &<machineName(machine)>::<if(state.exitFunction)>E(<state.exitFunction>)<else>emptyExit<endif>}; separator=",">};
+        static const GetExitFunctionMapType _exitFunctions = 
+        {
+            <machine.stateDecls: {state | {<stateId(state)>, E(<if(state.exitFunction)><state.exitFunction><else>emptyExit<endif>)\}}; separator=",\n">
+        };
         #undef E
         return _exitFunctions;
     }
 
-    inline GetTransitionMapType getTransitionMap() const override {
+    inline const GetTransitionMapType& getTransitionMap() const override {
         #define E(f) ((TransitionFunction)&<machineName(machine)>::f)
-        static TransitionFunction _transitions[<length(machine.stateDecls)>][<length(program.eventDecls)>] = 
-            <JumpTable("TransitionJumpTableInner")>;
+        static const GetTransitionMapType _transitions = 
+        <JumpTable("TransitionJumpTableInner")>;
         #undef E
         return _transitions;
     }
 
-    inline GetTransitionEntryMapType getTransitionEntryMap() const override {
-        #define E(f) ((TransitionFunction)&<machineName(machine)>::f)
-        static TransitionFunction _entries[<length(machine.stateDecls)>][<length(program.eventDecls)>] = 
-            <JumpTable("EntryJumpTableInner")>;
+    inline const GetTransitionEntryMapType& getTransitionEntryMap() const override {
+        #define E(f) ((EntryFunction)&<machineName(machine)>::f)
+        static const GetTransitionEntryMapType _entries = 
+        <JumpTable("EntryJumpTableInner")>;
         #undef E
         return _entries;
     }

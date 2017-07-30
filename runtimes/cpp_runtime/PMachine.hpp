@@ -7,6 +7,7 @@
 #include <typeinfo>
 #include <iostream>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "PList.hpp"
 #include "PAny.hpp"
@@ -17,27 +18,23 @@
 
 using namespace std;
 
-struct pairhash {
-public:
-    template <typename T, typename U>
-    std::size_t operator()(const std::pair<T, U> &x) const {
-        return std::hash<T>()(x.first) ^ std::hash<U>()(x.second);
-    }
-};
-
 namespace RUNTIME_NAMESPACE {
 
-#define DECL_EVENT(e) inline const char* e () { static const char *_v = #e ; return _v; }
-#define DECL_STATE(s) inline const char* s () { static const char *_v = #s ; return _v; }
+#define DECL_EVENT(e) inline const char* _##e () { static const char *_v = #e ; return _v; }
+#define DECL_STATE(s) inline static const char* _##s () { static const char *_v = #s ; return _v; }
 
 const int EXECUTE_FINISHED = 0;
 const int RAISED_EVENT = 1;
 
 DECL_EVENT(EVENT_NEW_MACHINE);
+#define EVENT_NEW_MACHINE _EVENT_NEW_MACHINE()
 DECL_EVENT(EVENT_NULL);
+#define EVENT_NULL _EVENT_NULL()
 DECL_EVENT(EVENT_HALT);
+#define EVENT_HALT _EVENT_HALT()
 
-DECL_STATE(STATE_HALT);
+inline const char* _STATE_HALT() { static const char *_v = "STATE_HALT" ; return _v; }
+#define STATE_HALT _STATE_HALT()
 
 class ExecutionEngine;
 
@@ -61,12 +58,11 @@ protected:
     using ExitFunctionPtr = ExitFunction;
 #endif
 
-    using StateEventPair = std::pair<const char*, const char*>;
-    using IsDeferedMapType = std::unordered_map<StateEventPair, bool, pairhash>;
-    using IsGotoTransitionMapType = std::unordered_map<StateEventPair, bool, pairhash>;
+    using IsDeferedMapType = std::unordered_map<const char*, std::unordered_map<const char*, bool>>;
+    using IsGotoTransitionMapType = std::unordered_map<const char*, std::unordered_map<const char*, bool>>;
     using GetExitFunctionMapType = std::unordered_map<const char*, ExitFunction>;
-    using GetTransitionMapType = std::unordered_map<StateEventPair, TransitionFunction, pairhash>;
-    using GetTransitionEntryMapType = std::unordered_map<StateEventPair, EntryFunction, pairhash>;
+    using GetTransitionMapType = std::unordered_map<const char*, std::unordered_map<const char*, TransitionFunction>>;
+    using GetTransitionEntryMapType = std::unordered_map<const char*, std::unordered_map<const char*, EntryFunction>>;
 
 public:
     PMachine(ExecutionEngine& engine):
@@ -77,7 +73,7 @@ public:
 
     virtual void start(const PAny& payload = PAny::Null()) = 0;
 
-    inline FUNCTION_DECL(Int, canServeEvent, (const Int& e)) {
+    inline FUNCTION_DECL(Int, canServeEvent, (const PEvent& e)) {
         FOR(Int i = states.size() - 1, i >= 0, --i, {
             const PState& state = states.get(i);
             IF(isDefered(state, e))
@@ -98,7 +94,7 @@ public:
     }
     END_FUNCTION()
 
-    inline VOID_FUNCTION_DECL(step, (const PState& stateIndex, const PEvent& e, const PAny& payload = PAny::Null())) {
+    inline VOID_FUNCTION_DECL(step, (const Int& stateIndex, const PEvent& e, const PAny& payload = PAny::Null())) {
         const PState& state = states.get(stateIndex);
         IF(isGotoTransition(state, e))
         THEN() {
@@ -182,7 +178,7 @@ protected:
 
     inline VOID_FUNCTION_DECL(popState, ()) {
         const Int& last = states.size() - 1;
-        const Int& current_state = states.get(last);
+        const PState& current_state = states.get(last);
         states.removeRange(last);
         ExitFunctionPtr&& eF = getExitFunction(current_state);
         IF(eF != nullptr) 
@@ -210,55 +206,55 @@ protected:
     static inline void emptyEntry(PMachine* self, const PAny& payload) { }
 
     static inline void haltEntry(PMachine* self, const PAny& payload) {
-        self->states = PList<Int>();
+        self->states = PList<PState>();
         self->states.add(STATE_HALT);
     }
 
     static inline void emptyExit(PMachine* self) { }
 
     Int retcode;
-    PList<Int> states;
+    PList<PState> states;
 
     PList<SendQueueItem> sendQueue;
 
 private:
     ExecutionEngine& engine;
 
+    virtual const IsDeferedMapType& isDeferedMap() const = 0;
+    virtual const IsGotoTransitionMapType& isGotoTransitionMap() const = 0;
+    virtual const GetExitFunctionMapType& getExitFunctionMap() const = 0;
+    virtual const GetTransitionMapType& getTransitionMap() const = 0;
+    virtual const GetTransitionEntryMapType& getTransitionEntryMap() const = 0;
+
     inline Bool isDefered(const PState& state, const PEvent& event) const {
-        return binaryOp<Bool>(state, event, [&](const char* s, const char* e) { 
-            return isDeferedMap()[{s, e}];
+        return binaryOp<Bool>(state, event, [&](const char* state, const char* event) {
+            return isDeferedMap().at(state).at(event);
         });
     }
 
     inline Bool isGotoTransition(const PState& state, const PEvent& event) const {
-        return binaryOp<Bool>(state, event, [&](const char* s, const char* e) { 
-            return isGotoTransitionMap()[{s, e}];
+        return binaryOp<Bool>(state, event, [&](const char* state, const char* event) {
+            return isGotoTransitionMap().at(state).at(event);
         });
     }
 
-    ExitFunctionPtr getExitFunction(const PState& state) const {
-        return unaryOp<ExitFunctionPtr>(state, [&](const char* s, const char* e) {
-            return getExitFunctionMap()[{s, e}];
+    inline ExitFunctionPtr getExitFunction(const PState& state) const {
+        return unaryOp<ExitFunctionPtr>(state, [&](const char* state) {
+            return getExitFunctionMap().at(state);
         });
     }
 
-    TransitionFunctionPtr getTransition(const PState& state, const PEvent& event) const {
-        return binaryOp<Bool>(state, event, [&](const char* s, const char* e) { 
-            return getTransitionMap()[{s, e}];
+    inline TransitionFunctionPtr getTransition(const PState& state, const PEvent& event) const {
+        return binaryOp<TransitionFunctionPtr>(state, event, [&](const char* state, const char* event) {
+            return getTransitionMap().at(state).at(event);
         });
     }
 
-    EntryFunctionPtr getTransitionEntry(const PState& state, const PEvent& event) const {
-        return binaryOp<Bool>(state, event, [&](const char* s, const char* e) { 
-            return getTransitionEntryMap()[{s, e}];
+    inline EntryFunctionPtr getTransitionEntry(const PState& state, const PEvent& event) const {
+        return binaryOp<EntryFunctionPtr>(state, event, [&](const char* state, const char* event) {
+            return getTransitionEntryMap().at(state).at(event);
         });
     }
-
-    virtual IsDeferedMapType isDeferedMap(const PState& state, const PEvent& event) const = 0;
-    virtual IsGotoTransitionMapType isGotoTransitionMap(const PState& state, const PEvent& event) const = 0;
-    virtual GetExitFunctionMapType getExitFunctionMap(const PState& state) const = 0;
-    virtual GetTransitionMapType getTransitionMap(const PState& state, const PEvent& event) const = 0;
-    virtual GetTransitionEntryMapType getTransitionEntryMap(const PState& state, const PEvent& event) const = 0;
 
     static std::map<const type_info*, Allocator<PMachine>*>& allocators() { 
         static std::map<const type_info*, Allocator<PMachine>*> allocators;

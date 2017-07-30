@@ -16,4 +16,10 @@
 #include "RandomScheduler.hpp"
 #include "DelayBoundedScheduler.hpp"
 
+namespace RUNTIME_NAMESPACE {
+using AnnounceHandler = void (const PAny&);
+using AnnounceHandlerPtr = Ptr<AnnounceHandler>;
+using AnnounceHandlerMapType = std::unordered_map<const char*, AnnounceHandler*>;
+}
+
 #endif

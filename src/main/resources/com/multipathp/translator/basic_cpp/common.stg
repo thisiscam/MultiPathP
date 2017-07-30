@@ -26,8 +26,20 @@ typeDefaultValueMap ::= [
     "default": "NULL"
 ]
 
+eventsNameMap ::= [
+    "$EVENT_NULL$": "EVENT_NULL",
+    "$EVENT_HALT$": "EVENT_HALT",
+    default: key
+]
+
 type(t) ::= "<typeMap.(t.name)>"
 typeDefaultValue(t) ::= "<typeDefaultValueMap.(t.name)>"
+
+event(e) ::= "<eventsNameMap.(e.name)>"
+eventId(e) ::= "<event(e)>"
+
+stateId(s) ::= "<s.name>"
+
 prefixMachineName(name) ::= "Machine<name>"
 machineName(machine) ::= "<prefixMachineName(machine.name)>"
 cast(t, exp) ::= "static_cast\<<type(t)>>(<exp>)"

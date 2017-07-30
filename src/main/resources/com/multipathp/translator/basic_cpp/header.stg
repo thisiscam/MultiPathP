@@ -9,9 +9,7 @@ BuiltInEvents ::= [
 AnnounceHandlerName(event) ::= "Announce<event.name>Handler"
 
 AnnounceHandlerTable() ::= <<
-{
-    <program.eventDecls: {e | <if(program.observeMap.(e))><AnnounceHandlerName(e)><else>announceEmpty<endif>}; separator=",">
-}
+<program.eventDecls: {e | {<eventId(e)>, <if(program.observeMap.(e))><AnnounceHandlerName(e)><else>announceEmpty<endif>\}}; separator=",">
 >>
 
 AnnounceMachineName(machine) ::= "<machineName(machine)>Instance"
@@ -30,7 +28,7 @@ get<AnnounceMachineName(machine)>()->start();
 
 AnnounceHandlerImpl(e) ::= <<
 static inline void <AnnounceHandlerName(e)>(const PAny& payload) {
-    <program.observeMap.(e):{m | get<AnnounceMachineName(m)>()->serveEvent(<e.name>, payload);}; separator="\n">
+    <program.observeMap.(e):{m | get<AnnounceMachineName(m)>()->serveEvent(<eventId(e)>, payload);}; separator="\n">
 }
 >>
 
@@ -45,13 +43,12 @@ using namespace RUNTIME_NAMESPACE;
 
 namespace <projectName> {
 
-<program.eventDecls:{e | <if(BuiltInEvents.(e.name))>DECL_EVENT(<e.name>);
-<endif>}><\\>
+<program.eventDecls:{e | <if(BuiltInEvents.(e.name))>DECL_EVENT(<e.name>);<endif>}; separator="\n">
+<program.eventDecls:{e | <if(BuiltInEvents.(e.name))>#define <e.name> _<e.name>()<endif>}; separator="\n">
 
 <program.machines:{m | class <machineName(m)>;}; separator="\n">
 
 class Controller {
-using AnnounceHandlerPtr = void (*)(const PAny&);
 public:
 	
 	static inline Ptr\<PMachine> createMainMachine(ExecutionEngine&);
@@ -60,10 +57,14 @@ public:
 
     <program.observeMap:AnnounceHandlerImpl(); separator="\n">
 
-	static inline void announce(const Int& event, const PAny& payload) {
-        static AnnounceHandlerPtr _handlers[<length(program.eventDecls)>] =
-        <AnnounceHandlerTable()>;
-        auto&& ptr = getIndex1D(_handlers, event);
+	static inline void announce(const PEvent& event, const PAny& payload) {
+        static const AnnounceHandlerMapType _handlers = 
+        {
+            <AnnounceHandlerTable()>
+        };
+        auto&& ptr = unaryOp\<AnnounceHandlerPtr>(event, [&](const char* e) {
+            return _handlers.at(e);
+        });
         return INVOKE_PTR(ptr, void, (payload));
 	}
 
