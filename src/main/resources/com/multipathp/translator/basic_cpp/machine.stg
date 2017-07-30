@@ -57,6 +57,11 @@ public:
         <EntryFunctionName(machine.startState)>(this, payload);
     }
 
+    inline const string& getName() const override {
+        static const string _name = "<machineName(machine)>";
+        return _name;  
+    }
+
 private:
     <machine.stateDecls:{state | DECL_STATE(<state.name>);}; separator="\n">
     <machine.stateDecls:{state | #define <state.name> _<state.name>()}; separator="\n">

@@ -73,6 +73,8 @@ public:
 
     virtual void start(const PAny& payload = PAny::Null()) = 0;
 
+    virtual const string& getName() const = 0;
+
     inline FUNCTION_DECL(Int, canServeEvent, (const PEvent& e)) {
         FOR(Int i = states.size() - 1, i >= 0, --i, {
             const PState& state = states.get(i);
@@ -278,7 +280,7 @@ public:
 };
 
 void operator<<(std::ostream& os, const PMachine& m) {
-    os << typeid(m).name() << m.id;
+    os << m.getName() << m.id;
 }
 
 };

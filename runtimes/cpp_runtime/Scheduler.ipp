@@ -13,6 +13,27 @@ Scheduler::getSendQueue(PMachine* machine) {
     return machine->sendQueue;
 }
 
+#ifdef USE_VALUE_SUMMARY
+static std::ostream& operator<<(std::ostream& os, const Ptr<PMachine>& m) {
+    os << "VS[";
+    int count = 0;
+    unaryOp<void>(m, [&](PMachine* m) {
+        if(count > 0) {
+            os << ",";
+        }
+        os << *m;
+        count++;
+    });
+    os << "]";
+    return os;
+}
+#else
+static std::ostream& operator<<(std::ostream& os, const Ptr<PMachine>& m) {
+    os << *m;
+    return os;
+}
+#endif
+
 inline SendQueueItem
 Scheduler::popSendQueueItem(const Ptr<PMachine>& machine, const Int& index) {
     return unaryOp<SendQueueItem>(machine, [&](PMachine* machine) {
