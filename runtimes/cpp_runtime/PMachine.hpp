@@ -206,8 +206,8 @@ protected:
     static inline void emptyEntry(PMachine* self, const PAny& payload) { }
 
     static inline void haltEntry(PMachine* self, const PAny& payload) {
-        self->states = PList<PState>();
-        self->states.add(STATE_HALT);
+        self->states._size = 1;
+        self->states.set(STATE_HALT, 0);
     }
 
     static inline void emptyExit(PMachine* self) { }
