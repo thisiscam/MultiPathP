@@ -6,7 +6,11 @@ pkg_search_module(sylvan REQUIRED sylvan)
 
 find_path(CPP_RUNTIME_DIR PCppRuntime.h HINTS ENV P_CPP_RUNTIME)
 
-message(STATUS ${CPP_RUNTIME_DIR})
+option(ENABLE_GPROF "Enable Gprof profiling" OFF)
+
+if(${ENABLE_GPROF})
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lprofiler -Wl,-no_pie")
+endif()
 
 add_executable(MultiPath_<projectName> main.cpp)
 target_compile_definitions(MultiPath_<projectName> PRIVATE USE_VALUE_SUMMARY)

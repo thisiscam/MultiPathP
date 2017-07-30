@@ -56,14 +56,6 @@ struct ExtractVSParam<ValueSummary<T>&&> {
     })
 
 
-template<typename R, typename A, typename K1, typename K2>
-ValueSummary<R> 
-getIndex2D(A&& array, K1&& i1, K2&& i2) {
-    return binaryOp<ValueSummary<R>>(i1, i2, [&](int i1, int i2) { 
-        return array[i1][i2];
-    });
-}
-
 #else
 
 #define INVOKE(ptr, t, method, args) \
