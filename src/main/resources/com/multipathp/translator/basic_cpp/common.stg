@@ -234,7 +234,7 @@ GetIndexExpLValueTop(node, rhs) ::= <<
 <LValueId(node)>.set(<rhs><LValueIndex(node)>)
 >>
 
-GetIndexExpLValueTopIndex(node) ::= <<
+GetIndexExpLValueIndex(node) ::= <<
 <LValueIndex(node.targetExpression)>, PTupleIndexer::V<node.index>()
 >>
 
