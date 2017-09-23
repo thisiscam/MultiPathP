@@ -19,7 +19,7 @@ event MONITOR_WRITE:(idx:int, val:int);
 event MONITOR_READ_SUCCESS:(idx:int, val:int);
 event MONITOR_READ_UNAVAILABLE:int;
 
-model Timer {
+machine Timer {
 	var target: machine;
 	start state Init {
 		entry (payload : machine){
@@ -55,7 +55,7 @@ model Timer {
 
 machine Replica {
 	var coordinator: machine;
-    var data: map[int,int];
+  var _data: map[int,int];
 	var pendingWriteReq: (seqNum: int, idx: int, val: int);
 	var shouldCommit: bool;
 	var lastSeqNum: int;
@@ -91,7 +91,7 @@ machine Replica {
 		on GLOBAL_COMMIT do (payload:int) {
 			assert (pendingWriteReq.seqNum >= payload);
 			if (pendingWriteReq.seqNum == payload) {
-				data[pendingWriteReq.idx] = pendingWriteReq.val;
+				_data[pendingWriteReq.idx] = pendingWriteReq.val;
 				lastSeqNum = payload;
 			}
 		}
@@ -99,14 +99,14 @@ machine Replica {
 		on REQ_REPLICA do (payload :(seqNum:int, idx:int, val:int)) { HandleReqReplica(payload); }
 	}
 
-	model fun ShouldCommitWrite(): bool 
+	fun ShouldCommitWrite(): bool 
 	{
 		return $;
 	}
 }
 
 machine Coordinator {
-	var data: map[int,int];
+	var _data: map[int,int];
 	var replicas: seq[machine];
 	var numReplicas: int;
 	var i: int;
@@ -133,9 +133,9 @@ machine Coordinator {
 	}
 
 	fun DoRead(payload: (client:machine, idx:int)) {
-		if (payload.idx in data) {
-			announce MONITOR_READ_SUCCESS, (idx=payload.idx, val=data[payload.idx]);
-			send payload.client, READ_SUCCESS, data[payload.idx];
+		if (payload.idx in _data) {
+			announce MONITOR_READ_SUCCESS, (idx=payload.idx, val=_data[payload.idx]);
+			send payload.client, READ_SUCCESS, _data[payload.idx];
 		} else {
 			announce MONITOR_READ_UNAVAILABLE, payload.idx;
 			send payload.client, READ_UNAVAILABLE;
@@ -177,7 +177,7 @@ machine Coordinator {
 					send replicas[i], GLOBAL_COMMIT, currSeqNum;
 					i = i + 1;
 				}
-				data[pendingWriteReq.idx] = pendingWriteReq.val;
+				_data[pendingWriteReq.idx] = pendingWriteReq.val;
 				announce MONITOR_WRITE, (idx=pendingWriteReq.idx, val=pendingWriteReq.val);
 				send pendingWriteReq.client, WRITE_SUCCESS;
 				send timer, CancelTimer;
@@ -220,7 +220,7 @@ machine Coordinator {
 	}
 }
 
-model Client {
+machine Client {
     var coordinator: machine;
     start state Init {
 	    entry (payload : machine) {
@@ -251,7 +251,7 @@ model Client {
 
 	state End { 
 		entry {
-			assert(false);
+			//assert(false);
 		}
 	}
 
@@ -275,22 +275,22 @@ model Client {
 }
 
 spec M observes MONITOR_WRITE, MONITOR_READ_SUCCESS, MONITOR_READ_UNAVAILABLE {
-	var data: map[int,int];
+	var _data: map[int,int];
 
 	start state Init {
-		on MONITOR_WRITE do (payload: (idx:int, val:int)) { data[payload.idx] = payload.val; }
+		on MONITOR_WRITE do (payload: (idx:int, val:int)) { _data[payload.idx] = payload.val; }
 		on MONITOR_READ_SUCCESS do (payload : (idx:int, val:int)) { 
-			assert(payload.idx in data);
-			assert(data[payload.idx] == payload.val);
+			assert(payload.idx in _data);
+			assert(_data[payload.idx] == payload.val);
 		}
 		on MONITOR_READ_UNAVAILABLE do (payload: int) {
-			assert(!(payload in data));
+			assert(!(payload in _data));
 		}
 	}
 }
 
-main machine TwoPhaseCommit {
-    var coordinator: machine;
+main machine GodMachine {
+  var coordinator: machine;
 	var client: machine;
     start state Init {
 	    entry {

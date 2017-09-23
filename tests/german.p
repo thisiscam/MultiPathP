@@ -5,8 +5,8 @@ event req_excl assert 3 : machine;
 event need_invalidate assert 1;
 event invalidate_ack assert 3;
 event grant assert 1;
-event ask_share assume 1;
-event ask_excl assume 1;
+event ask_share;
+event ask_excl;
 event invalidate assert 1;
 event grant_excl assert 1;
 event grant_share assert 1;
@@ -16,7 +16,7 @@ event invalidate_sharers assert 1 : int;
 event sharer_id assert 3 : machine;
 
 //Host machine 
-main machine Host {
+main machine German {
     var curr_client : machine;
     var clients : (machine, machine, machine);
     var curr_cpu : machine;
@@ -231,7 +231,7 @@ machine Client {
 
 
 //Environment machine in the form of a CPU which makes request to the clients
-model CPU {
+machine CPU {
     var cache : (machine, machine, machine);
 
     start state init {
