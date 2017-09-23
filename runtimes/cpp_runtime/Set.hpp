@@ -26,6 +26,10 @@ public:
 		return values.size();
 	}
 
+	inline void clear() {
+		values.clear();
+	}
+	
 private:
 	std::set<T> values;
 
@@ -55,12 +59,14 @@ public:
     	}
 	}
 
-
 	inline int size() {
 		//TODO might want to return VS<int>
 		return values.size();
 	}
 
+	inline void clear() {
+		values.clear();
+	}
 private:
 	std::unordered_map<T, Bdd> values;
 

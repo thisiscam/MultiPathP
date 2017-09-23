@@ -10,19 +10,11 @@ inline FUNCTION_DECL(SchedulerChoice, RandomScheduler::chooseMachine, ()) {
         const PList<SendQueueItem>& sendQueue = getSendQueue(machine);
         FOR(Int j = 0, j < sendQueue.size(), ++j, {
             SendQueueItem&& item = sendQueue.get(j);
-            IF(item.e == EVENT_NEW_MACHINE) 
+            Int&& stateIdx = INVOKE(item.target, Int, canServeEvent, (item.e));
+            IF(stateIdx >= 0)
             THEN() {
-                choices.add(SchedulerChoice(machine, j, -1));
+                choices.add(SchedulerChoice(machine, j, stateIdx));
                 BREAK();
-            }
-            ELSE() {
-                Int&& stateIdx = INVOKE(item.target, Int, canServeEvent, (item.e));
-                IF(stateIdx >= 0)
-                THEN() {
-                    choices.add(SchedulerChoice(machine, j, stateIdx));
-                    BREAK();
-                }
-                ENDIF()
             }
             ENDIF()
         })
@@ -50,7 +42,6 @@ END_FUNCTION()
 inline void
 RandomScheduler::startMachine(const Ptr<PMachine>& machine, const PAny& payload) {
     machines.add(machine);
-    INVOKE(machine, void, start, (payload));
 }
 
 };

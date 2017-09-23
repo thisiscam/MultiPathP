@@ -25,19 +25,11 @@ inline FUNCTION_DECL(SchedulerChoice, DelayBoundedScheduler::chooseMachine, ()) 
         const Ptr<const PList<SendQueueItem>>& sendQueue = getSendQueuePtr(machine);
         FOR(Int j = 0, j < INVOKE(sendQueue, Int, size, ()), ++j, {
             const SendQueueItem& item = INVOKE(sendQueue, SendQueueItem, get, (j));
-            IF(item.e == EVENT_NEW_MACHINE) 
+            const Int& state_idx = INVOKE(item.target, Int, canServeEvent, (item.e));
+            IF(state_idx >= 0) 
             THEN() {
-                choices.add(SchedulerChoice(machine, j, -1));
+                choices.add(SchedulerChoice(machine, j, state_idx));
                 BREAK();
-            } 
-            ELSE() {
-                const Int& state_idx = INVOKE(item.target, Int, canServeEvent, (item.e));
-                IF(state_idx >= 0) 
-                THEN() {
-                    choices.add(SchedulerChoice(machine, j, state_idx));
-                    BREAK();
-                }
-                ENDIF()
             }
             ENDIF()
         })
@@ -72,7 +64,6 @@ END_FUNCTION()
 inline void
 DelayBoundedScheduler::startMachine(const Ptr<PMachine>& machine, const PAny& payload) {
     machines.add(machine);
-    INVOKE(machine, void, start, (payload));
 }
 
 };

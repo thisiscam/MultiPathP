@@ -99,6 +99,10 @@ public:
         _size = start;
     }
 
+    inline void clear() {
+        _size = 0;
+    }
+
     inline T get(const Int& idx) const {
         IF_ONLY(idx >= size()) {
             throw out_of_range("PList::get");

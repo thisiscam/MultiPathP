@@ -58,18 +58,11 @@ inline FUNCTION_DECL(Bool, Scheduler::step, ()) {
         }
         ELSE() {
             SendQueueItem&& item = popSendQueueItem(chosen.machine, chosen.queueIdx);
-            IF(item.e == EVENT_NEW_MACHINE)
-            THEN() {
-                std::cout << Ptr<PMachine>(chosen.machine) << " creates " << Ptr<PMachine>(item.target) << std::endl;
-                startMachine(item.target, item.payload);
-            }
-            ELSE() {
-                std::cout << Ptr<PMachine>(chosen.machine) << " sends event " << PEvent(item.e) << " to " << Ptr<PMachine>(item.target) << std::endl;
-                INVOKE(item.target, void, step, (chosen.stateIdx, item.e, item.payload));
-            }
-            ENDIF()
+            std::cout << Ptr<PMachine>(chosen.machine) << " sends event " << PEvent(item.e) << " to " << Ptr<PMachine>(item.target) << std::endl;
+            INVOKE(item.target, void, step, (chosen.stateIdx, item.e, item.payload));
         }
         ENDIF()
+        engine.transferNewMachines(*this);
         RETURN(true);
     }
     ENDIF()

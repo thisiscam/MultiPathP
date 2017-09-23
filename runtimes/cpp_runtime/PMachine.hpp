@@ -26,8 +26,6 @@ namespace RUNTIME_NAMESPACE {
 const int EXECUTE_FINISHED = 0;
 const int RAISED_EVENT = 1;
 
-DECL_EVENT(EVENT_NEW_MACHINE);
-#define EVENT_NEW_MACHINE _EVENT_NEW_MACHINE()
 DECL_EVENT(EVENT_NULL);
 #define EVENT_NULL _EVENT_NULL()
 DECL_EVENT(EVENT_HALT);
@@ -151,11 +149,7 @@ protected:
     }
 
     template<typename M>
-    Ptr<PMachine> create(const PAny& payload = PAny::Null()) {
-        Ptr<PMachine>&& machine = PMachine::alloc<M>(engine);
-        sendQueue.add(SendQueueItem(machine, EVENT_NEW_MACHINE, payload));
-        return machine;
-    }
+    Ptr<PMachine> create(const PAny& payload = PAny::Null());
 
     inline VOID_FUNCTION_DECL(raise, (const PEvent& e, const PAny& payload = PAny::Null())) {
         FOR(Int i = states.size() - 1, i >= 0, --i, {

@@ -14,6 +14,8 @@ namespace RUNTIME_NAMESPACE {
 inline void 
 ExecutionEngine::run(Scheduler& scheduler, Ptr<PMachine> machine) {
     scheduler.startMachine(machine);
+    INVOKE(machine, void, start, ());
+    transferNewMachines(scheduler);
     for(int i = 0; i < maxIteration; ++i) {
     	std::cout << "======== BEGIN Step " << std::to_string(i) << "=======" << std::endl;
         IF_ONLY(scheduler.step()) {
@@ -33,6 +35,14 @@ ExecutionEngine::randomBool(const std::string& id) {
 		allocators.insert({id, Allocator<bool>::create(id)});
 	}
 	return allocators.at(id)->allocate();
+}
+
+inline void 
+ExecutionEngine::transferNewMachines(Scheduler& scheduler) {
+    newMachinesBuffer.foreach([&](PMachine* machine) {
+        scheduler.startMachine(machine);
+    });
+    newMachinesBuffer.clear();
 }
 
 #ifdef USE_VALUE_SUMMARY

@@ -2,6 +2,7 @@
 #define EXECUTION_ENGINE_HPP
 
 #include <string>
+#include "Set.hpp"
 
 namespace RUNTIME_NAMESPACE {
 
@@ -19,8 +20,16 @@ public:
 
     Int randomInt(const Int max);
     
+    void createMachine(const Ptr<PMachine>& machine) {
+    	newMachinesBuffer.add(machine);
+    }
+
+    void transferNewMachines(Scheduler& scheduler);
+
 private:
     int maxIteration;
+
+    Set<PMachine*> newMachinesBuffer;
 };
 
 };
