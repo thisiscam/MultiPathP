@@ -40,7 +40,7 @@ inline FUNCTION_DECL(SchedulerChoice, RandomScheduler::chooseMachine, ()) {
 END_FUNCTION()
 
 inline void
-RandomScheduler::startMachine(const Ptr<PMachine>& machine, const PAny& payload) {
+RandomScheduler::addMachine(const Ptr<PMachine>& machine, const PAny& payload) {
     machines.add(machine);
 }
 

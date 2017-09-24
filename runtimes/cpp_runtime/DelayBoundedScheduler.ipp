@@ -62,7 +62,7 @@ inline FUNCTION_DECL(SchedulerChoice, DelayBoundedScheduler::chooseMachine, ()) 
 END_FUNCTION()
 
 inline void
-DelayBoundedScheduler::startMachine(const Ptr<PMachine>& machine, const PAny& payload) {
+DelayBoundedScheduler::addMachine(const Ptr<PMachine>& machine, const PAny& payload) {
     machines.add(machine);
 }
 

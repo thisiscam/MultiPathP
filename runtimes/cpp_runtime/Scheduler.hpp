@@ -57,7 +57,7 @@ protected:
 public:
     Scheduler(ExecutionEngine& engine):engine(engine) { }
 
-    virtual void startMachine(const Ptr<PMachine>& machine, const PAny& payload = PAny::Null()) = 0;
+    virtual void addMachine(const Ptr<PMachine>& machine, const PAny& payload = PAny::Null()) = 0;
 
     inline Bool step();
 

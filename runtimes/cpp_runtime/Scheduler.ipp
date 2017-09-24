@@ -62,7 +62,6 @@ inline FUNCTION_DECL(Bool, Scheduler::step, ()) {
             INVOKE(item.target, void, step, (chosen.stateIdx, item.e, item.payload));
         }
         ENDIF()
-        engine.transferNewMachines(*this);
         RETURN(true);
     }
     ENDIF()

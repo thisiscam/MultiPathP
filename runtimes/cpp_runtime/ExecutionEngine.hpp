@@ -20,16 +20,11 @@ public:
 
     Int randomInt(const Int max);
     
-    void createMachine(const Ptr<PMachine>& machine) {
-    	newMachinesBuffer.add(machine);
-    }
-
-    void transferNewMachines(Scheduler& scheduler);
+    void createMachine(const Ptr<PMachine>& machine);
 
 private:
     int maxIteration;
-
-    Set<PMachine*> newMachinesBuffer;
+    Scheduler* scheduler;
 };
 
 };

@@ -22,7 +22,7 @@ protected:
 
     inline SchedulerChoice chooseMachine() override;
 
-    inline void startMachine(const Ptr<PMachine>& machine, const PAny& payload) override;
+    inline void addMachine(const Ptr<PMachine>& machine, const PAny& payload) override;
 
 public:
     
