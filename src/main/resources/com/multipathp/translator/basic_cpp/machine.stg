@@ -130,6 +130,8 @@ private:
         return _entries;
     }
     /* end Jump Tables */
+
+    <machine.stateDecls:{state | #undef <state.name>}; separator="\n">
 };
 
 };
