@@ -66,6 +66,9 @@ public abstract class PMachine extends PASTNode {
             Optional<PMachineState> startState = getStateDecls().stream().filter(PMachineState::isStart).findFirst();
             Preconditions.checkArgument(startState.isPresent());
             setStartState(startState.get());
+            if(getName().equals("Main")) {
+                setMain(true);
+            }
             return super.build();
         }
     }
