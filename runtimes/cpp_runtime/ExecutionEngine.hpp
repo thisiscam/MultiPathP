@@ -22,9 +22,27 @@ public:
     
     void createMachine(const Ptr<PMachine>& machine);
 
+#ifdef USE_VALUE_SUMMARY
+    template<typename T>
+	void incrementTransitionCount(T&& v) {
+		transitionCount += v.values.size();
+	}
+#else
+	template<typename T>
+	void incrementTransitionCount(T && v) {
+		transitionCount += 1;
+	}
+#endif
+
+    inline int getTransitionCount() {
+    	return transitionCount;
+    }
+
 private:
     int maxIteration;
     Scheduler* scheduler;
+
+    int transitionCount;
 };
 
 };

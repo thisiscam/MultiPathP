@@ -19,10 +19,10 @@ ExecutionEngine::run(Scheduler& scheduler, Ptr<PMachine> machine) {
     for(int i = 0; i < maxIteration; ++i) {
     	std::cout << "======== BEGIN Step " << std::to_string(i) << "=======" << std::endl;
         IF_ONLY(scheduler.step()) {
-            std::cout << "======== END Step " << std::to_string(i) << "=======" << std::endl;
+            std::cout << "======== END Step " << std::to_string(i) << " transitions: " << getTransitionCount() << "=======" << std::endl;
             continue;
         } else {
-            std::cout << "======== END Step " << std::to_string(i) << "=======" << std::endl;
+            std::cout << "======== END Step " << std::to_string(i) << " transitions: " << getTransitionCount() << "=======" << std::endl;
             break;
         }
     }

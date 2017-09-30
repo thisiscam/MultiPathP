@@ -14,6 +14,8 @@ namespace RUNTIME_NAMESPACE {
 template<typename T>
 class ValueSummary final {
 
+friend class ExecutionEngine;
+
 private:
     struct unused { };
     ValueSummary(unused _) noexcept { }

@@ -94,23 +94,7 @@ public:
     }
     END_FUNCTION()
 
-    inline VOID_FUNCTION_DECL(step, (const Int& stateIndex, const PEvent& e, const PAny& payload = PAny::Null())) {
-        const PState& state = states.get(stateIndex);
-        IF(isGotoTransition(state, e))
-        THEN() {
-            FOR(Int i = states.size() - 1, i > stateIndex, --i, {
-                popState();
-            })
-            ENDFOR_NC()
-        }
-        ENDIF()
-        retcode = EXECUTE_FINISHED;
-        TransitionFunctionPtr&& transitionFn = getTransition(state, e);
-        INVOKE_PTR(transitionFn, void, (this, payload));
-        EntryFunctionPtr&& entryFn = getTransitionEntry(state, e);
-        INVOKE_PTR(entryFn, void, (this, payload));
-    }
-    END_VOID_FUNCTION()
+    inline void step(const Int& stateIndex, const PEvent& e, const PAny& payload = PAny::Null());
 
     inline VOID_FUNCTION_DECL(serveEvent, (const PEvent& e, const PAny& payload)) {
         FOR(Int i = 0, i < states.size(), ++i, {
