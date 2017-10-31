@@ -27,7 +27,7 @@ public:
 
     template<typename T0p>
     operator PTuple<T0p>() const {
-        return PTuple<T0p>(static_cast<T0p>(_v0));
+        return PTuple<T0p>(_v0);
     }
 
     inline Bool operator == (const PTuple<T0>& other) const {
@@ -74,7 +74,7 @@ public:
 
     template<typename T0p, typename T1p>
     operator PTuple<T0p, T1p>() const {
-        return PTuple<T0p, T1p>(static_cast<T0p>(_v0), static_cast<T1p>(_v1));
+        return PTuple<T0p, T1p>(_v0, _v1);
     }
 
     inline Bool operator == (const PTuple<T0, T1>& other) const {
@@ -128,7 +128,7 @@ public:
 
     template<typename T0p, typename T1p, typename T2p>
     operator PTuple<T0p, T1p, T2p>() const {
-        return PTuple<T0p, T1p, T2p>(static_cast<T0p>(_v0), static_cast<T1p>(_v1), static_cast<T2p>(_v2));
+        return PTuple<T0p, T1p, T2p>(_v0, _v1, _v2);
     }
 
     inline Bool operator == (const PTuple<T0, T1, T2>& other) const {
@@ -190,7 +190,7 @@ public:
 
     template<typename T0p, typename T1p, typename T2p, typename T3p>
     operator PTuple<T0p, T1p, T2p, T3p>() const {
-        return PTuple<T0p, T1p, T2p, T3p>(static_cast<T0p>(_v0), static_cast<T1p>(_v1), static_cast<T2p>(_v2), static_cast<T3p>(_v3));
+        return PTuple<T0p, T1p, T2p, T3p>(_v0, _v1, _v2, _v3);
     }
 
     inline Bool operator == (const PTuple<T0, T1, T2, T3>& other) const {

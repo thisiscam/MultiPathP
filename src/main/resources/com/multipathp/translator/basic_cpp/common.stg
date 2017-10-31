@@ -313,7 +313,7 @@ NotExp(node) ::= <<
 >>
 
 NullExp(node) ::= <<
-NULL
+PAny::Null()
 >>
 
 SizeofExp(node) ::= <<

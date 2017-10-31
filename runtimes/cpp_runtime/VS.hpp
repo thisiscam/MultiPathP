@@ -221,7 +221,7 @@ inline ValueSummary<bool> operator!=(const P& a, const ValueSummary<P>& b) {
 
 template<typename T>
 std::ostream& operator<<(std::ostream& os, const ValueSummary<T>& v)  
-{  
+{
     os << "VS[";
     int i = 0;
     for(const auto& gv : v.values) {
