@@ -59,7 +59,7 @@ static inline ReturnType binaryOp(const PAnyVSMapType& a, const PAnyVSMapType& b
 template<typename T>
 struct IsSimpleType
 {
-    static constexpr bool value = std::is_same<T, int>::value || std::is_same<T, bool>::value || std::is_same<T, PMachine*>::value;
+    static constexpr bool value = std::is_same<T, int>::value || std::is_same<T, bool>::value || std::is_same<T, PMachine*>::value || std::is_same<T, char const *>::value;
 };
 
 template <template <typename...> class, template<typename...> class> 
@@ -69,13 +69,13 @@ template <template <typename...> class T>
 struct is_same_template<T,T> : std::true_type{};
 
 template<typename>
-struct IsContrainerType
+struct IsContainerType
 {
     static constexpr bool value = false;
 };
 
 template<template<typename ...Ts> class Container, typename ...Ts>
-struct IsContrainerType<Container<Ts...>>
+struct IsContainerType<Container<Ts...>>
 {
     static constexpr bool value = 
         is_same_template<Container, PList>::value
@@ -245,6 +245,10 @@ public:
         ptr({{&typeid(PTypeBoxed<Ptr<PMachine>>), {std::make_shared<PTypeBoxed<Ptr<PMachine>>>(m), PathConstraint::pc()}}})
     { }
 
+    PAny(const PEvent& m) noexcept:
+        ptr({{&typeid(PTypeBoxed<PEvent>), {std::make_shared<PTypeBoxed<PEvent>>(m), PathConstraint::pc()}}})
+    { }
+
     PAny(const int i) noexcept:
         PAny(Int(i))
     { }
@@ -257,9 +261,13 @@ public:
         PAny(Ptr<PMachine>(m))
     { }
 
+    PAny(const char* e) noexcept:
+        PAny(PEvent(e))
+    { }
+
     template<
         typename ContainerType, 
-        typename=typename std::enable_if<IsContrainerType<typename std::remove_reference<ContainerType>::type>::value>::type
+        typename=typename std::enable_if<IsContainerType<typename std::remove_cv<typename std::remove_reference<ContainerType>::type>::type>::value>::type
     >
     PAny(ContainerType&& v) noexcept:
         ptr(
@@ -267,7 +275,7 @@ public:
             &typeid(ContainerType), 
             {
                 std::make_shared<
-                    typename std::remove_reference<typename std::remove_cv<ContainerType>::type>::type
+                    typename std::remove_cv<typename std::remove_reference<ContainerType>::type>::type
                 >(std::forward<ContainerType>(v)),
                 PathConstraint::pc()
             }
@@ -275,9 +283,12 @@ public:
         )
     { }
 #else
-    template<typename FromType, typename=typename std::enable_if<!IsSimpleType<FromType>::value>::type>
-    PAny(FromType&& v) noexcept:
-        ptr(std::make_shared<typename std::remove_reference<typename std::remove_cv<FromType>::type>::type>(std::forward<FromType>(v)))
+    template<
+        typename ContainerType, 
+        typename=typename std::enable_if<IsContainerType<typename std::remove_cv<typename std::remove_reference<ContainerType>::type>::type>::value>::type
+    >
+    PAny(ContainerType&& v) noexcept:
+        ptr(std::make_shared<typename std::remove_cv<typename std::remove_reference<ContainerType>::type>::type>(std::forward<ContainerType>(v)))
     { }
 
     PAny(int i) noexcept:
@@ -291,6 +302,11 @@ public:
     PAny(Ptr<PMachine> m) noexcept:
         ptr(std::make_shared<PTypeBoxed<Ptr<PMachine>>>(m))
     { }
+
+    PAny(PEvent m) noexcept:
+        ptr(std::make_shared<PTypeBoxed<PEvent>>(m))
+    { }
+
 #endif
 
     template<typename TO>
@@ -331,10 +347,14 @@ public:
     operator Ptr<PMachine>() const {
         return unaryOp<Ptr<PMachine>>(ptr, [&](const std::shared_ptr<PTypePtr>& ptr) {
             const PTypePtr* _ptr = ptr.get();
-            const auto& xxx = dynamic_cast<const PTypeBoxed<Ptr<PMachine>>*>(_ptr);
-            const auto& t = &typeid(*_ptr);
-            auto&& x = CastJumpTable<ProcessedDeclTypes, PTypeBoxed<Ptr<PMachine>>>::table().at(&typeid(*_ptr))(ptr).value;
-            return x;
+            return CastJumpTable<ProcessedDeclTypes, PTypeBoxed<Ptr<PMachine>>>::table().at(&typeid(*_ptr))(ptr).value;
+        });
+    }
+
+    operator PEvent() const {
+        return unaryOp<PEvent>(ptr, [&](const std::shared_ptr<PTypePtr>& ptr) {
+            const PTypePtr* _ptr = ptr.get();
+            return CastJumpTable<ProcessedDeclTypes, PTypeBoxed<PEvent>>::table().at(&typeid(*_ptr))(ptr).value;
         });
     }
 

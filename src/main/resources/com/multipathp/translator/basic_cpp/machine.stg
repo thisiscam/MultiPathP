@@ -3,6 +3,10 @@ import "common.stg"
 PrefixEntryFunctionName(stateName) ::= "<stateName>Entry"
 EntryFunctionName(state) ::= "<PrefixEntryFunctionName(state.name)>"
 
+
+PrefixExitFunctionName(stateName) ::= "<stateName>Exit"
+ExitFunctionName(state) ::= "<PrefixExitFunctionName(state.name)>"
+
 InvokeAuxFunction(function) ::= <<
 <if(function.name)>self-><function.name>(<if(function.params)>payload<endif>);<endif>
 >>
@@ -11,6 +15,12 @@ EntryFunction(state) ::= <<
 static inline void <EntryFunctionName(state)>(<machineName(machine)>* self, const PAny& payload) {
     self->states.setTop(<stateId(state)>);
     <InvokeAuxFunction(state.entryFunction)>
+}
+>>
+
+ExitFunction(state) ::= <<
+static inline void <ExitFunctionName(state)>(<machineName(machine)>* self) {
+    <InvokeAuxFunction(state.exitFunction)>
 }
 >>
 
@@ -45,6 +55,7 @@ EntryJumpTableInner() ::= <<
 <if(state.transitionsMap.(e).toStateName)><PrefixEntryFunctionName(state.transitionsMap.(e).toStateName)><else>emptyEntry<endif>
 >>
 
+
 MachineImplementationFile(projectName, program, machine) ::= <<
 namespace <projectName> {
 
@@ -69,6 +80,10 @@ private:
     /* region Entry Methods */
     <machine.stateDecls:EntryFunction(); separator="\n\n">
     /* end Entry Methods */
+
+    /* region Exit Methods */
+    <machine.stateDecls:ExitFunction(); separator="\n\n">
+    /* end Exit Methods */
 
     /* region Transition Methods */
     <machine.uniqueTransitions:TransitionFunction(); separator="\n\n">
@@ -108,7 +123,7 @@ private:
         #define E(f) ((ExitFunction)&<machineName(machine)>::f)
         static const GetExitFunctionMapType _exitFunctions = 
         {
-            <machine.stateDecls: {state | {<stateId(state)>, E(<if(state.exitFunction)><state.exitFunction><else>emptyExit<endif>)\}}; separator=",\n">
+            <machine.stateDecls: {state | {<stateId(state)>, E(<if(state.exitFunction)><PrefixExitFunctionName(state.name)><else>emptyExit<endif>)\}}; separator=",\n">
         };
         #undef E
         return _exitFunctions;
