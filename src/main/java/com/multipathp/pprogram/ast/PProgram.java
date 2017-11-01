@@ -68,6 +68,10 @@ public abstract class PProgram extends PASTNode {
             addEventDecls(PEvent.EVENT_NULL, PEvent.EVENT_HALT);
         }
 
+        public Builder putGlobalFunctionDecls(PFunction function) {
+            return putGlobalFunctionDecls(function.getName(), function);
+        }
+
         @Override
         public PProgram build() {
             getMachines().stream().filter(PMachine::isMain).findFirst().ifPresent(this::setMainMachine);

@@ -3,8 +3,12 @@ We implemented the basic paxos protocol as described
 in the "Paxos Made Simple" paper by Leslie Lamport
 ****************************************/
 
-include "TimerHeader.p"
+include "Timer.p"
 include "PaxosHeader.p"
+
+event eUnit;
+event eUnit1;
+event eUnit2;
 
 machine Main {
   start state Init {
@@ -73,8 +77,10 @@ machine AcceptorMachine {
   start state Init {
     entry {
       lastRecvProposal = default(ProposalType);
-      goto WaitForRequests;
+      raise eUnit;
     }
+
+    on eUnit goto WaitForRequests;
   }
 
   state WaitForRequests {
@@ -124,8 +130,10 @@ machine ProposerMachine {
       nextProposalId = (serverid = serverid, round = 1);
       majority = GC_NumOfAccptNodes/2 + 1;
       timer = CreateTimer(this);
-      goto ProposerPhaseOne;
+      raise eUnit;
     }
+
+    on eUnit goto ProposerPhaseOne;
   }
 
   fun SendToAllAcceptors(e: event, v: any) {
@@ -160,9 +168,11 @@ machine ProposerMachine {
       {
         //cancel the timer and goto next phase
         CancelTimer(timer);
-        goto ProposerPhaseTwo;
+        raise eUnit2;
       }
     }
+
+    on eUnit2 goto ProposerPhaseTwo;
 
     on reject do (payload: ProposalIdType){
       if(nextProposalId.round <= payload.round)
@@ -170,8 +180,10 @@ machine ProposerMachine {
         nextProposalId.round = payload.round + 1;
       }
       CancelTimer(timer);
-      goto ProposerPhaseOne;
+      raise eUnit1;
     }
+
+    on eUnit1 goto ProposerPhaseOne;
 
     on TIMEOUT goto ProposerPhaseOne;
   }
@@ -203,8 +215,10 @@ machine ProposerMachine {
         nextProposalId.round = payload.round;
       }
       CancelTimer(timer);
-      goto ProposerPhaseOne;
+      raise eUnit;
     }
+
+    on eUnit goto ProposerPhaseOne;
     
     on accepted do (payload: ProposalType) {
       if(ProposalIdEqual(payload.pid, nextProposalId)){

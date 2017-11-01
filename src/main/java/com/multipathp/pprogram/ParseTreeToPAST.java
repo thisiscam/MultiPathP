@@ -67,6 +67,7 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
         machine = new PMachine.Builder();
         visitChildren(ctx);
         program.addMachines(machine.build());
+        machine = null;
         return null;
     }
 
@@ -133,7 +134,11 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
     public Void visitFun_decl(pParser.Fun_declContext ctx) {
         function = new PFunction.Builder();
         visitChildren(ctx);
-        machine.putFunDecls(function.build());
+        if(machine == null) {
+            program.putGlobalFunctionDecls(function.build());
+        } else {
+            machine.putFunDecls(function.build());
+        }
         return null;
     }
 
@@ -538,9 +543,6 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
 
         @Override
         public Optional<Stmt> visitStmt_call_with_arguments(pParser.Stmt_call_with_argumentsContext ctx) {
-            if(ctx.ID().getText().equals("BroadCastAcceptors")) {
-                int x = 1;
-            }
             return Optional.of(
                     new ExpStmt.Builder()
                             .setExpression(
@@ -602,7 +604,7 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
                 System.out.print(ctx.getText());
                 ErrorReporter.error("qualifier not supported", ctx, set);
             }
-            return null;
+            return Optional.empty();
         }
 
         @Override
@@ -622,6 +624,12 @@ public class ParseTreeToPAST extends ParseTreeSetParser.ASTSetVisitorBase<Void> 
                     .setPayloadExpression(singleExpOrTuple(ctx.single_expr_arg_list()))
                     .build()
             );
+        }
+
+        @Override
+        public Optional<Stmt> visitStmt_recieve(pParser.Stmt_recieveContext ctx) {
+            ErrorReporter.error("receive not supported", ctx, set);
+            return null;
         }
 
         class ExpVisitor extends ParseTreeSetParser.ASTSetVisitorBase<Exp> {

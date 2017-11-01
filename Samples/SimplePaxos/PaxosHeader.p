@@ -11,11 +11,6 @@ event accepted assume 3: ProposalType;
 
 
 //Global constants
-enum GlobalContants {
-  GC_NumOfAccptNodes = 3,
-  GC_NumOfProposerNodes = 2,
-  GC_Default_Value = 0
-}
-
-
-
+event GC_NumOfAccptNodes;
+event GC_NumOfProposerNodes;
+event GC_Default_Value;

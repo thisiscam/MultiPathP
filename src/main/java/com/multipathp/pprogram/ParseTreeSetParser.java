@@ -78,6 +78,7 @@ public class ParseTreeSetParser {
             includeFilePath = includeFilePath.substring(1, includeFilePath.length() - 1); // remove double quotes
             ArrayList<String> allSearchPaths = new ArrayList<String>(includeSearchPaths);
             allSearchPaths.add(Paths.get(filePath).getParent().toString());
+            boolean found = false;
             for (String includeSearchPath : allSearchPaths) {
                 Path potentialPath = Paths.get(includeSearchPath, includeFilePath);
                 if (Files.exists(potentialPath)) {
@@ -86,10 +87,16 @@ public class ParseTreeSetParser {
                         return;
                     }
                     pParser.ProgramContext parsedTree = parseFileHelper(potentialPath.toUri().getPath(), set, parsedPaths, includeDecl);
-                    return;
+                    if(parsedTree == null) {
+                        ErrorReporter.error("Error parsing " + potentialPath.toString());
+                    }
+                    found = true;
+                    break;
                 }
             }
-            ErrorReporter.error("include file not found", includeDecl, set);
+            if(!found) {
+                ErrorReporter.error("include file not found", includeDecl, set);
+            }
         }
     }
 
