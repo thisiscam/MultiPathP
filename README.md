@@ -1,6 +1,7 @@
 # Project Title
 
-TODO 
+Symbolic execution engine for P programming language using Value Summaries.
+We apply the [MultiSE](https://people.eecs.berkeley.edu/~ksen/papers/multise.pdf) approach to perform efficient symbolic exploration of concurrent P programs with state-merging. 
 
 ## Getting Started
 
